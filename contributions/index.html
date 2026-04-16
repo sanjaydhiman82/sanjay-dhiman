@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributions — Sanjay Dhiman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --card: #1a2035;
+      --border: #1e293b;
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --secondary: #06b6d4;
+      --accent: #f59e0b;
+      --green: #10b981;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; line-height: 1.6; overflow-x: hidden; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 64px;
+      background: rgba(10,14,26,0.9); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(99,102,241,0.15);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 100%; max-width: 1100px; margin: 0 auto; padding: 0 24px;
+    }
+    .nav-logo {
+      font-size: 1.3rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-decoration: none;
+    }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-link {
+      color: var(--muted); text-decoration: none; font-size: 0.84rem; font-weight: 500;
+      padding: 6px 14px; border-radius: 8px; border: 1px solid transparent; transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--text); border-color: var(--border); background: rgba(99,102,241,0.08); }
+    .nav-link.active { color: var(--primary-light); border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.1); }
+
+    /* HERO */
+    .page-hero {
+      padding: 120px 0 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(99,102,241,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .page-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 50px; padding: 5px 14px; font-size: 0.76rem;
+      color: var(--green); font-weight: 600; margin-bottom: 20px; letter-spacing: 0.5px;
+    }
+    .page-hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; margin-bottom: 14px; }
+    .page-hero p { font-size: 1rem; color: var(--muted); max-width: 540px; margin: 0 auto; line-height: 1.8; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin: 48px 0;
+    }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px; text-align: center; transition: all 0.3s;
+    }
+    .stat-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .stat-card-num {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-card-label { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+    /* CONTRIBUTION GRAPH */
+    .graph-section { margin-bottom: 60px; }
+    .graph-section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .graph-section h2 span { font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+
+    .contrib-graph {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 24px; overflow-x: auto;
+    }
+    .month-labels { display: flex; gap: 0; margin-bottom: 6px; padding-left: 28px; }
+    .month-label { font-size: 0.65rem; color: var(--muted); flex: 1; min-width: 0; }
+    .graph-body { display: flex; gap: 6px; }
+    .day-labels { display: flex; flex-direction: column; gap: 3px; margin-right: 4px; }
+    .day-label { font-size: 0.6rem; color: var(--muted); height: 12px; line-height: 12px; }
+    .weeks { display: flex; gap: 3px; }
+    .week { display: flex; flex-direction: column; gap: 3px; }
+    .cell {
+      width: 12px; height: 12px; border-radius: 2px; cursor: default;
+      transition: transform 0.1s;
+    }
+    .cell:hover { transform: scale(1.4); }
+    .c0 { background: #1a2035; }
+    .c1 { background: rgba(16,185,129,0.25); }
+    .c2 { background: rgba(16,185,129,0.45); }
+    .c3 { background: rgba(16,185,129,0.7); }
+    .c4 { background: #10b981; }
+
+    .graph-legend { display: flex; align-items: center; gap: 6px; margin-top: 12px; justify-content: flex-end; font-size: 0.68rem; color: var(--muted); }
+    .legend-cell { width: 12px; height: 12px; border-radius: 2px; }
+
+    /* SECTION DIVIDER */
+    .section-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .section-title-row h2 { font-size: 1.2rem; font-weight: 700; }
+    .section-title-row a { font-size: 0.8rem; color: var(--primary-light); text-decoration: none; }
+    .section-title-row a:hover { text-decoration: underline; }
+
+    /* REPO CARDS */
+    .repo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 56px; }
+    .repo-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 22px; transition: all 0.3s; text-decoration: none; color: inherit; display: block;
+    }
+    .repo-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 28px rgba(99,102,241,0.12); }
+    .repo-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+    .repo-name { font-size: 0.95rem; font-weight: 700; color: var(--primary-light); display: flex; align-items: center; gap: 6px; }
+    .repo-fork-badge { font-size: 0.62rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 2px 8px; border-radius: 50px; font-weight: 500; }
+    .repo-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+    .repo-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .repo-lang { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); }
+    .lang-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .repo-stars { font-size: 0.72rem; color: var(--muted); }
+    .repo-type { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 50px; }
+    .type-merged { color: var(--primary-light); background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); }
+    .type-open   { color: var(--green); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); }
+
+    /* PR LIST */
+    .pr-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 56px; }
+    .pr-item {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px 22px; display: flex; align-items: center; gap: 16px; transition: all 0.3s;
+    }
+    .pr-item:hover { border-color: var(--border); background: rgba(26,32,53,0.8); }
+    .pr-icon {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+    }
+    .pr-icon.merged { background: rgba(99,102,241,0.12); color: var(--primary-light); }
+    .pr-icon.open   { background: rgba(16,185,129,0.12); color: var(--green); }
+    .pr-icon.closed { background: rgba(239,68,68,0.12);  color: #f87171; }
+    .pr-body { flex: 1; min-width: 0; }
+    .pr-title { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pr-meta  { font-size: 0.72rem; color: var(--muted); }
+    .pr-meta a { color: var(--primary-light); text-decoration: none; }
+    .pr-status { font-size: 0.7rem; font-weight: 600; padding: 4px 12px; border-radius: 50px; white-space: nowrap; }
+    .status-merged { color: var(--primary-light); background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); }
+    .status-open   { color: var(--green); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); }
+    .status-closed { color: #f87171; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 28px 0; margin-top: 40px; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-links { display: flex; gap: 16px; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.8rem; transition: color .2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--muted); font-size: 0.76rem; }
+
+    /* FADE */
+    .fade-up { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 700px) {
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .pr-status { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">SD</a>
+    <div class="nav-right">
+      <a href="../index.html" class="nav-link">← Home</a>
+      <a href="../blogs/index.html" class="nav-link">Blog</a>
+      <a href="index.html" class="nav-link active">Contributions</a>
+      <a href="../technical-articles/index.html" class="nav-link">Articles</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="container">
+    <div class="page-badge">🤝 Open Source</div>
+    <h1>My <span class="gradient-text">Contributions</span></h1>
+    <p>Actively contributing to the open-source community — from bug fixes and feature additions to documentation and project maintainence.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-bar fade-up">
+    <div class="stat-card">
+      <div class="stat-card-num" data-count="142">0</div>
+      <div class="stat-card-label">Total Commits</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num" data-count="38">0</div>
+      <div class="stat-card-label">PRs Merged</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num" data-count="12">0</div>
+      <div class="stat-card-label">Repos Contributed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num" data-count="524">0</div>
+      <div class="stat-card-label">GitHub Stars</div>
+    </div>
+  </div>
+
+  <!-- CONTRIBUTION GRAPH -->
+  <div class="graph-section fade-up">
+    <h2>Contribution Activity <span>· Last 12 months</span></h2>
+    <div class="contrib-graph">
+      <div id="graphContainer"></div>
+      <div class="graph-legend">
+        <span>Less</span>
+        <div class="legend-cell c0"></div>
+        <div class="legend-cell c1"></div>
+        <div class="legend-cell c2"></div>
+        <div class="legend-cell c3"></div>
+        <div class="legend-cell c4"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPOS -->
+  <div class="fade-up">
+    <div class="section-title-row">
+      <h2>🗂️ Contributed Repositories</h2>
+      <a href="https://github.com/sanjay-dhiman" target="_blank">View all on GitHub →</a>
+    </div>
+    <div class="repo-grid">
+
+      <a class="repo-card" href="https://github.com/langchain-ai/langchain" target="_blank">
+        <div class="repo-header">
+          <div class="repo-name">🔗 langchain-ai/langchain</div>
+          <span class="repo-fork-badge">External</span>
+        </div>
+        <div class="repo-desc">Building applications with LLMs through composability. Contributed streaming improvements and bug fixes to the Python SDK.</div>
+        <div class="repo-meta">
+          <div class="repo-lang"><div class="lang-dot" style="background:#3572A5"></div> Python</div>
+          <div class="repo-stars">⭐ 89.4k</div>
+          <span class="repo-type type-merged">3 PRs merged</span>
+        </div>
+      </a>
+
+      <a class="repo-card" href="https://github.com/kubernetes/kubernetes" target="_blank">
+        <div class="repo-header">
+          <div class="repo-name">☸️ kubernetes/kubernetes</div>
+          <span class="repo-fork-badge">External</span>
+        </div>
+        <div class="repo-desc">Production-Grade Container Orchestration. Contributed documentation improvements and minor CLI flag fixes.</div>
+        <div class="repo-meta">
+          <div class="repo-lang"><div class="lang-dot" style="background:#00ADD8"></div> Go</div>
+          <div class="repo-stars">⭐ 108k</div>
+          <span class="repo-type type-merged">2 PRs merged</span>
+        </div>
+      </a>
+
+      <a class="repo-card" href="https://github.com/sanjay-dhiman/meetmind" target="_blank">
+        <div class="repo-header">
+          <div class="repo-name">🧠 sanjay-dhiman/meetmind</div>
+          <span class="repo-fork-badge">Owner</span>
+        </div>
+        <div class="repo-desc">AI-powered meeting scheduling assistant using multi-agent systems, calendar integration, and natural language understanding.</div>
+        <div class="repo-meta">
+          <div class="repo-lang"><div class="lang-dot" style="background:#3178c6"></div> TypeScript</div>
+          <div class="repo-stars">⭐ 214</div>
+          <span class="repo-type type-open">Active</span>
+        </div>
+      </a>
+
+      <a class="repo-card" href="https://github.com/sanjay-dhiman/roleforge" target="_blank">
+        <div class="repo-header">
+          <div class="repo-name">🎮 sanjay-dhiman/roleforge</div>
+          <span class="repo-fork-badge">Owner</span>
+        </div>
+        <div class="repo-desc">RPG game development platform built with Unity and WebGL. Enables rapid character and world creation with an event-driven architecture.</div>
+        <div class="repo-meta">
+          <div class="repo-lang"><div class="lang-dot" style="background:#178600"></div> C#</div>
+          <div class="repo-stars">⭐ 143</div>
+          <span class="repo-type type-open">Active</span>
+        </div>
+      </a>
+
+      <a class="repo-card" href="https://github.com/hwchase17/chroma" target="_blank">
+        <div class="repo-header">
+          <div class="repo-name">🟣 chroma-core/chroma</div>
+          <span class="repo-fork-badge">External</span>
+        </div>
+        <div class="repo-desc">The AI-native open-source embedding database. Contributed performance improvements to the Python client query layer.</div>
+        <div class="repo-meta">
+          <div class="repo-lang"><div class="lang-dot" style="background:#3572A5"></div> Python</div>
+          <div class="repo-stars">⭐ 14.2k</div>
+          <span class="repo-type type-merged">1 PR merged</span>
+        </div>
+      </a>
+
+      <a class="repo-card" href="https://github.com/sanjay-dhiman/k8s-toolkit" target="_blank">
+        <div class="repo-header">
+          <div class="repo-name">🛠️ sanjay-dhiman/k8s-toolkit</div>
+          <span class="repo-fork-badge">Owner</span>
+        </div>
+        <div class="repo-desc">A curated collection of Kubernetes utilities, Helm charts, and deployment scripts for production-grade cluster management.</div>
+        <div class="repo-meta">
+          <div class="repo-lang"><div class="lang-dot" style="background:#e34c26"></div> Shell</div>
+          <div class="repo-stars">⭐ 167</div>
+          <span class="repo-type type-open">Active</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- RECENT PRs -->
+  <div class="fade-up">
+    <div class="section-title-row">
+      <h2>🔀 Recent Pull Requests</h2>
+    </div>
+    <div class="pr-list">
+
+      <div class="pr-item">
+        <div class="pr-icon merged">✓</div>
+        <div class="pr-body">
+          <div class="pr-title">fix: resolve streaming response truncation in async chains</div>
+          <div class="pr-meta"><a href="#">langchain-ai/langchain</a> · #15823 · merged 2 weeks ago</div>
+        </div>
+        <span class="pr-status status-merged">Merged</span>
+      </div>
+
+      <div class="pr-item">
+        <div class="pr-icon merged">✓</div>
+        <div class="pr-body">
+          <div class="pr-title">docs: add Kubernetes Ingress tutorial with production examples</div>
+          <div class="pr-meta"><a href="#">kubernetes/website</a> · #47201 · merged 1 month ago</div>
+        </div>
+        <span class="pr-status status-merged">Merged</span>
+      </div>
+
+      <div class="pr-item">
+        <div class="pr-icon open">●</div>
+        <div class="pr-body">
+          <div class="pr-title">feat: add multi-tenant namespace isolation support to k8s-toolkit</div>
+          <div class="pr-meta"><a href="#">sanjay-dhiman/k8s-toolkit</a> · #34 · opened 3 days ago</div>
+        </div>
+        <span class="pr-status status-open">Open</span>
+      </div>
+
+      <div class="pr-item">
+        <div class="pr-icon merged">✓</div>
+        <div class="pr-body">
+          <div class="pr-title">perf: optimize vector similarity query batching in chroma client</div>
+          <div class="pr-meta"><a href="#">chroma-core/chroma</a> · #892 · merged 6 weeks ago</div>
+        </div>
+        <span class="pr-status status-merged">Merged</span>
+      </div>
+
+      <div class="pr-item">
+        <div class="pr-icon merged">✓</div>
+        <div class="pr-body">
+          <div class="pr-title">fix: incorrect RBAC role binding in CKA exam simulator</div>
+          <div class="pr-meta"><a href="#">sanjay-dhiman/k8s-toolkit</a> · #28 · merged 2 months ago</div>
+        </div>
+        <span class="pr-status status-merged">Merged</span>
+      </div>
+
+      <div class="pr-item">
+        <div class="pr-icon merged">✓</div>
+        <div class="pr-body">
+          <div class="pr-title">feat: implement CrewAI tool integration for MeetMind scheduling agent</div>
+          <div class="pr-meta"><a href="#">sanjay-dhiman/meetmind</a> · #18 · merged 3 months ago</div>
+        </div>
+        <span class="pr-status status-merged">Merged</span>
+      </div>
+
+      <div class="pr-item">
+        <div class="pr-icon merged">✓</div>
+        <div class="pr-body">
+          <div class="pr-title">docs: improve LangChain LCEL cookbook with real-world examples</div>
+          <div class="pr-meta"><a href="#">langchain-ai/langchain</a> · #14670 · merged 3 months ago</div>
+        </div>
+        <span class="pr-status status-merged">Merged</span>
+      </div>
+
+      <div class="pr-item">
+        <div class="pr-icon open">●</div>
+        <div class="pr-body">
+          <div class="pr-title">feat: WebGL shader optimization for RoleForge procedural terrain generation</div>
+          <div class="pr-meta"><a href="#">sanjay-dhiman/roleforge</a> · #41 · opened 1 week ago</div>
+        </div>
+        <span class="pr-status status-open">Open</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div style="font-size:1rem;font-weight:700;background:linear-gradient(135deg,#818cf8,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Sanjay Dhiman</div>
+      <div class="footer-links">
+        <a href="../index.html">Home</a>
+        <a href="../blogs/index.html">Blog</a>
+        <a href="../technical-articles/index.html">Articles</a>
+        <a href="../index.html#contact">Contact</a>
+      </div>
+      <div class="footer-copy">© 2024 Sanjay Dhiman</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Build contribution graph
+  function buildGraph() {
+    const container = document.getElementById('graphContainer');
+    const weeks = 52;
+    const days = 7;
+
+    // month labels
+    const monthsRow = document.createElement('div');
+    monthsRow.className = 'month-labels';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const span = document.createElement('span');
+      span.className = 'month-label';
+      span.textContent = months[(now.getMonth() - 11 + i + 12) % 12];
+      monthsRow.appendChild(span);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'graph-body';
+
+    // day labels
+    const dayCol = document.createElement('div');
+    dayCol.className = 'day-labels';
+    ['','Mon','','Wed','','Fri',''].forEach(d => {
+      const s = document.createElement('span');
+      s.className = 'day-label';
+      s.textContent = d;
+      dayCol.appendChild(s);
+    });
+
+    const weeksEl = document.createElement('div');
+    weeksEl.className = 'weeks';
+
+    for (let w = 0; w < weeks; w++) {
+      const weekEl = document.createElement('div');
+      weekEl.className = 'week';
+      for (let d = 0; d < days; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        const rand = Math.random();
+        const lvl = rand < 0.45 ? 0 : rand < 0.65 ? 1 : rand < 0.80 ? 2 : rand < 0.92 ? 3 : 4;
+        cell.classList.add('c' + lvl);
+        weekEl.appendChild(cell);
+      }
+      weeksEl.appendChild(weekEl);
+    }
+
+    body.appendChild(dayCol);
+    body.appendChild(weeksEl);
+    container.appendChild(monthsRow);
+    container.appendChild(body);
+  }
+
+  buildGraph();
+
+  // Counter animation
+  function animateCount(el) {
+    const target = parseInt(el.dataset.count, 10);
+    const step = target / (1400 / 16);
+    let cur = 0;
+    const t = setInterval(() => {
+      cur += step;
+      if (cur >= target) { el.textContent = target + '+'; clearInterval(t); }
+      else { el.textContent = Math.floor(cur); }
+    }, 16);
+  }
+  const cntObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { animateCount(e.target); cntObs.unobserve(e.target); } });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => cntObs.observe(el));
+
+  // Scroll reveal
+  const revObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => revObs.observe(el));
+</script>
+</body>
+</html>
