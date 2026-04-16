@@ -35,6 +35,221 @@ Deployment Complete
 
 ---
 
+## ✅ GitHub Setup Checklist - REQUIRED CHANGES
+
+Before this workflow will work, you MUST complete these steps in your GitHub repository:
+
+### Step 1: Configure GitHub Secrets
+
+Navigate to: **GitHub Repository → Settings → Secrets and variables → Actions**
+
+Add these **Repository Secrets**:
+
+| Secret Name | Value Source | How to Get It |
+|-------------|--------------|---------------|
+| `AWS_ACCESS_KEY_ID` | AWS IAM Console | Create IAM user → Security credentials → Create access key |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM Console | Generated when creating access key (save immediately!) |
+| `CLOUDFRONT_DISTRIBUTION_ID` | Terraform Output | Run `terraform apply` → copy `cloudfront_distribution_id` |
+| `BUCKET_NAME` (optional) | Terraform Output | Run `terraform apply` → copy `s3_bucket_name` (or use fallback) |
+
+**Detailed Steps:**
+```
+1. Go to your GitHub repository page
+2. Click "Settings" tab (top navigation)
+3. In left sidebar, click "Secrets and variables"
+4. Click "Actions" submenu
+5. Click "New repository secret" button
+6. Add AWS_ACCESS_KEY_ID:
+   - Name: AWS_ACCESS_KEY_ID
+   - Value: AKIA... (your IAM access key)
+7. Click "Add secret"
+8. Repeat for AWS_SECRET_ACCESS_KEY
+9. Repeat for CLOUDFRONT_DISTRIBUTION_ID (from Terraform output)
+10. (Optional) Add BUCKET_NAME secret
+```
+
+---
+
+### Step 2: Create AWS IAM User for GitHub Actions
+
+**In AWS Console:**
+```
+1. Go to AWS IAM Console
+2. Click "Users" in left sidebar
+3. Click "Add users"
+4. User name: github-actions-deploy
+5. Access type: Access key - Programmatic access
+6. Click "Next: Permissions"
+7. Click "Attach existing policies directly"
+8. Create inline policy with this JSON:
+```
+
+**IAM Policy (Minimal Permissions):**
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3WebsiteDeploy",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::www.sanjaydhiman.com",
+        "arn:aws:s3:::www.sanjaydhiman.com/*"
+      ]
+    },
+    {
+      "Sid": "CloudFrontInvalidation",
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:CreateInvalidation",
+        "cloudfront:GetInvalidation"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Complete IAM Setup:**
+```
+9. Attach the custom policy to your IAM user
+10. Click "Next: Tags" (skip or add tags)
+11. Click "Next: Review"
+12. Click "Create user"
+13. IMPORTANT: Copy Access key ID and Secret access key NOW
+    - You cannot see the secret key again after closing this dialog
+14. Save these for GitHub secrets (Step 1)
+```
+
+---
+
+### Step 3: Run Terraform to Create Infrastructure
+
+**In your terminal:**
+```bash
+# Navigate to terraform directory
+cd terraform/
+
+# Initialize Terraform
+terraform init
+
+# Review planned changes
+terraform plan
+
+# Apply infrastructure (creates S3, CloudFront, Route53, ACM)
+terraform apply
+
+# When prompted, type "yes"
+
+# After completion, copy these outputs for GitHub secrets:
+# - cloudfront_distribution_id
+# - s3_bucket_name (optional)
+```
+
+**Expected Terraform Outputs:**
+```
+cloudfront_distribution_id = "E1B2C3D4E5F6G7"
+s3_bucket_name = "www.sanjaydhiman.com"
+website_url = "https://www.sanjaydhiman.com"
+```
+
+---
+
+### Step 4: Verify Repository Structure
+
+**Your repository should have this structure:**
+```
+sanjay-dhiman/
+├── website/                    # REQUIRED: Website files go here
+│   ├── index.html
+│   └── ... (your static files)
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml         # This workflow file
+│       └── README.md          # This documentation
+└── terraform/                 # Infrastructure code
+    ├── main.tf
+    ├── variables.tf
+    ├── outputs.tf
+    └── terraform.tfvars
+```
+
+**CRITICAL:** Create the `website/` directory and add your files:
+```bash
+mkdir website
+cp -r your-website-files/* website/
+git add website/
+git commit -m "Add website files"
+git push origin main
+```
+
+---
+
+### Step 5: Test the Workflow
+
+**Trigger deployment:**
+```bash
+# Make any change to website files
+echo "Test deployment" >> website/index.html
+
+# Commit and push
+git add .
+git commit -m "Test deployment workflow"
+git push origin main
+```
+
+**Verify in GitHub:**
+```
+1. Go to GitHub repository
+2. Click "Actions" tab
+3. Look for "Deploy Static Website to AWS" workflow
+4. Click on the latest run
+5. Check each step for green checkmarks ✅
+6. Wait for "Deployment Summary" step
+```
+
+---
+
+### Step 6: Configure Branch Protection (Optional but Recommended)
+
+**Prevent direct pushes to main, require reviews:**
+```
+1. GitHub Repository → Settings
+2. Click "Branches" in left sidebar
+3. Click "Add rule" button
+4. Branch name pattern: main
+5. Check these options:
+   ✅ Require a pull request before merging
+   ✅ Require status checks to pass before merging
+   ✅ Require branches to be up to date before merging
+   ✅ Include administrators
+6. Click "Create"
+```
+
+---
+
+## 📋 Pre-Deployment Checklist
+
+Before your first deployment, verify:
+
+- [ ] **AWS IAM User** created with correct permissions
+- [ ] **AWS Access Keys** generated and saved
+- [ ] **GitHub Secrets** configured (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, CLOUDFRONT_DISTRIBUTION_ID)
+- [ ] **Terraform Applied** - Infrastructure exists in AWS
+- [ ] **S3 Bucket** created and accessible
+- [ ] **CloudFront Distribution** deployed (can take 15-30 min)
+- [ ] **website/** directory exists in repository root
+- [ ] **index.html** exists in website/ directory
+- [ ] **GitHub Actions** tab shows workflow is enabled
+
+---
+
 ## 🔧 Workflow Configuration
 
 ### 1. Workflow Name
