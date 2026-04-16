@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exception Handling — Java | Sanjay Dhiman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0f172a; --blue: #1e40af; --accent: #3b82f6;
+      --gold: #f59e0b; --light: #f8fafc; --muted: #64748b;
+      --border: #e2e8f0; --white: #ffffff;
+      --grad: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1e40af 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--navy); line-height: 1.7; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(15,23,42,0.95); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 56px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-logo { color: var(--white); font-weight: 700; font-size: 1rem; }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--white); }
+    .page-hero { background: var(--grad); padding: 90px 2rem 40px; text-align: center; }
+    .page-hero .breadcrumb { color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 0.75rem; }
+    .page-hero .breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; }
+    .page-hero .breadcrumb a:hover { color: var(--white); }
+    .page-hero .breadcrumb .sep { margin: 0 0.4rem; }
+    .page-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); color: var(--white); font-weight: 700; line-height: 1.2; margin-bottom: 0.6rem; }
+    .page-hero .topic-badge { display: inline-block; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); color: var(--gold); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 100px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-top: 0.75rem; }
+    .tag { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2); font-size: 0.72rem; font-weight: 500; padding: 0.2rem 0.6rem; border-radius: 100px; }
+    .blog-container { max-width: 900px; margin: 2.5rem auto 4rem; padding: 0 1.5rem; }
+    .toc-box { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
+    .toc-box h2 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; }
+    .toc-box ol { padding-left: 1.25rem; }
+    .toc-box ol li { font-size: 0.85rem; margin-bottom: 0.35rem; }
+    .toc-box ol li a { color: var(--accent); text-decoration: none; }
+    .toc-box ol li a:hover { text-decoration: underline; }
+    .section { margin-bottom: 3rem; scroll-margin-top: 70px; }
+    .section-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); }
+    .section-num { background: var(--navy); color: var(--white); font-size: 0.72rem; font-weight: 700; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-header h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--navy); }
+    h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin: 1.5rem 0 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+    h3::before { content: ''; display: inline-block; width: 4px; height: 1em; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+    p { font-size: 0.9rem; color: #475569; margin-bottom: 0.75rem; }
+    ul, ol.content-list { margin: 0.5rem 0 0.75rem 1.4rem; }
+    ul li, ol.content-list li { font-size: 0.88rem; color: #475569; margin-bottom: 0.4rem; }
+    .code-block { background: var(--navy); color: #e2e8f0; border-radius: 10px; padding: 1.25rem 1.5rem; font-family: 'Courier New', Courier, monospace; font-size: 0.82rem; line-height: 1.7; overflow-x: auto; margin: 1rem 0 1.25rem; position: relative; }
+    .code-block .lang-tag { position: absolute; top: 0.6rem; right: 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); opacity: 0.8; }
+    .code-block .kw  { color: #93c5fd; }
+    .code-block .cl  { color: #fde68a; }
+    .code-block .cm  { color: #6b7280; font-style: italic; }
+    .code-block .st  { color: #86efac; }
+    .code-block .an  { color: #fb923c; }
+    .tip-box { display: flex; gap: 0.75rem; align-items: flex-start; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 1rem 1.1rem; margin: 1rem 0; }
+    .tip-box .icon { font-size: 1.1rem; flex-shrink: 0; }
+    .tip-box p { font-size: 0.85rem; color: var(--blue); margin: 0; }
+    .warn-box { display: flex; gap: 0.75rem; align-items: flex-start; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 1rem 1.1rem; margin: 1rem 0; }
+    .warn-box .icon { font-size: 1.1rem; flex-shrink: 0; }
+    .warn-box p { font-size: 0.85rem; color: #92400e; margin: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0 1.25rem; }
+    th { background: var(--navy); color: var(--white); padding: 0.65rem 1rem; text-align: left; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; }
+    td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); color: #475569; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .timeline { list-style: none; padding: 0; margin: 1rem 0; }
+    .timeline li { display: flex; gap: 1.2rem; align-items: flex-start; padding: 0.6rem 0 0.6rem 1.2rem; border-left: 2px solid var(--border); margin-left: 0.5rem; position: relative; }
+    .timeline li::before { content: ''; position: absolute; left: -6px; top: 1.1rem; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--white); }
+    .timeline .year { font-size: 0.78rem; font-weight: 700; color: var(--accent); white-space: nowrap; min-width: 50px; padding-top: 0.15rem; }
+    .timeline .event { font-size: 0.85rem; color: #475569; }
+    .interview-q { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 0.9rem; }
+    .interview-q .q { font-size: 0.9rem; font-weight: 600; color: var(--navy); margin-bottom: 0.5rem; }
+    .interview-q .a { font-size: 0.85rem; color: #475569; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--accent); text-decoration: none; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem; }
+    .back-link:hover { text-decoration: underline; }
+    .hierarchy-diagram { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 1.25rem 0; font-size: 0.82rem; }
+    .hier-node { background: var(--navy); color: var(--white); padding: 0.4rem 1.2rem; border-radius: 6px; font-weight: 600; white-space: nowrap; }
+    .hier-node.accent { background: var(--accent); }
+    .hier-node.gold { background: var(--gold); color: var(--navy); }
+    .hier-node.red { background: #ef4444; }
+    .hier-node.green { background: #22c55e; }
+    .hier-connector { display: flex; flex-direction: column; align-items: center; }
+    .hier-line { width: 2px; height: 18px; background: var(--border); }
+    .hier-row { display: flex; gap: 1.5rem; align-items: flex-start; }
+    .hier-branch { display: flex; flex-direction: column; align-items: center; }
+    .tier-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.5rem; }
+    @media (max-width: 768px) { .blog-container { padding: 0 1rem; } .nav-links { display: none; } .hier-row { flex-wrap: wrap; justify-content: center; } }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-logo">SD<span>.</span></div>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../profile.html">About</a></li>
+      <li><a href="./index.html" class="active">Blog</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <div class="breadcrumb">
+      <a href="index.html">Blog</a>
+      <span class="sep">›</span>
+      <span>☕ Java</span>
+      <span class="sep">›</span>
+      <span>Exception Handling</span>
+    </div>
+    <h1>Exception Handling — Comprehensive Deep Dive</h1>
+    <div class="topic-badge">Core Java</div>
+    <div class="tag-row">
+      <span class="tag">Checked Exceptions</span>
+      <span class="tag">Unchecked Exceptions</span>
+      <span class="tag">try-catch-finally</span>
+      <span class="tag">Custom Exceptions</span>
+      <span class="tag">Exception Hierarchy</span>
+      <span class="tag">Multi-catch</span>
+    </div>
+  </div>
+
+  <div class="blog-container">
+    <a href="index.html" class="back-link">← Back to Blog</a>
+
+    <div class="toc-box">
+      <h2>📋 Table of Contents</h2>
+      <ol>
+        <li><a href="#s1">What is Exception Handling?</a></li>
+        <li><a href="#s2">Why Does It Exist?</a></li>
+        <li><a href="#s3">Who Should Know This?</a></li>
+        <li><a href="#s4">History &amp; Evolution</a></li>
+        <li><a href="#s5">Core Concepts — Basic 🟢</a></li>
+        <li><a href="#s6">Core Concepts — Intermediate 🟡</a></li>
+        <li><a href="#s7">Core Concepts — Advanced 🔴</a></li>
+        <li><a href="#s8">Architecture &amp; Internals</a></li>
+        <li><a href="#s9">Key Features</a></li>
+        <li><a href="#s10">Key Benefits</a></li>
+        <li><a href="#s11">Key Challenges &amp; Pitfalls</a></li>
+        <li><a href="#s12">Best Practices</a></li>
+        <li><a href="#s13">Ecosystem, Tools &amp; Integrations</a></li>
+        <li><a href="#s14">Competitors &amp; Comparison</a></li>
+        <li><a href="#s15">Key Trends &amp; Future Outlook</a></li>
+        <li><a href="#s16">Interview Questions 🎯</a></li>
+      </ol>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="section" id="s1">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <h2>What is Exception Handling?</h2>
+      </div>
+      <p>Exception handling is Java's structured mechanism for detecting, signalling, and recovering from runtime errors — preventing abrupt program termination and allowing the system to respond gracefully to abnormal conditions.</p>
+      <p><strong>Simple analogy:</strong> Think of it like an airline's emergency protocol. Normal flight = happy path. Turbulence = exception thrown. Crew procedures = catch block. Landing safely regardless = the goal of exception handling.</p>
+      <p><strong>Definition 1:</strong> An exception is a Java object that wraps an error event, carrying context (message, stack trace, cause) to the code that needs to handle it.</p>
+      <p><strong>Definition 2:</strong> Exception handling is the separation of error-detection logic from normal business logic, using <code>try/catch/finally/throw/throws</code> keywords.</p>
+      <p><strong>Category:</strong> Core Java Language Feature · Error Management · Control Flow</p>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section" id="s2">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <h2>Why Does It Exist?</h2>
+      </div>
+      <p>Before structured exception handling (e.g., in C), error codes were returned from every function and had to be checked manually — leading to deeply nested if-else chains, missed error checks, and tightly coupled error and business logic. Java introduced a compiler-enforced mechanism to make error handling impossible to ignore.</p>
+      <table>
+        <thead><tr><th>Without Exception Handling</th><th>With Exception Handling</th></tr></thead>
+        <tbody>
+          <tr><td>Return codes silently ignored</td><td>Unhandled exceptions crash loudly at the source</td></tr>
+          <tr><td>Error logic mixed with business logic</td><td>Clean separation via try/catch blocks</td></tr>
+          <tr><td>Resource leaks from missed cleanup</td><td>finally / try-with-resources guarantees cleanup</td></tr>
+          <tr><td>No stack trace — hard to debug</td><td>Full stack trace with cause chain</td></tr>
+          <tr><td>No type safety on errors</td><td>Typed exception hierarchy, compiler-enforced for checked</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="section" id="s3">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <h2>Who Should Know This?</h2>
+      </div>
+      <table>
+        <thead><tr><th>Role</th><th>Why They Need It</th><th>Depth Required</th></tr></thead>
+        <tbody>
+          <tr><td>Junior Developer</td><td>Write code that doesn't crash in production</td><td>Basic — try/catch/finally, checked vs unchecked</td></tr>
+          <tr><td>Senior Developer</td><td>Design robust error boundaries, custom exceptions, proper propagation</td><td>Intermediate–Advanced</td></tr>
+          <tr><td>Architect / Tech Lead</td><td>Global exception strategies, cross-cutting error handling, API error contracts</td><td>Expert</td></tr>
+          <tr><td>DevOps / SRE</td><td>Read stack traces, configure alerting on exception rates</td><td>Intermediate</td></tr>
+          <tr><td>Product Manager</td><td>Understand failure modes, user-facing error messages</td><td>Conceptual</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="section" id="s4">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <h2>History &amp; Evolution</h2>
+      </div>
+      <ul class="timeline">
+        <li><span class="year">1995</span><span class="event"><strong>Java 1.0</strong> — Exception handling introduced with the full <code>Throwable → Error / Exception → RuntimeException</code> hierarchy. Checked exception concept debuted.</span></li>
+        <li><span class="year">1998</span><span class="event"><strong>Java 1.2</strong> — Refined exception chaining; cause parameter added to constructors, enabling "exception wrapping".</span></li>
+        <li><span class="year">2002</span><span class="event"><strong>Java 1.4</strong> — Official <code>initCause()</code> and <code>getCause()</code> added, standardising exception chaining across the JDK.</span></li>
+        <li><span class="year">2011</span><span class="event"><strong>Java 7</strong> — Game-changer: <strong>try-with-resources</strong> (AutoCloseable), <strong>multi-catch</strong> (<code>catch (A | B e)</code>), and rethrowing with improved type inference.</span></li>
+        <li><span class="year">2014</span><span class="event"><strong>Java 8</strong> — Lambda-friendly exception patterns; <code>Optional</code> as an alternative to null/exception for absent values.</span></li>
+        <li><span class="year">2021</span><span class="event"><strong>Java 17+</strong> — Sealed classes enable exhaustive exception hierarchies; records make lightweight exception value types practical.</span></li>
+        <li><span class="year">2024</span><span class="event"><strong>Java 21/22</strong> — Pattern matching in <code>catch</code> explored; Virtual Threads (Project Loom) change stack trace depth and concurrency exception patterns.</span></li>
+      </ul>
+      <p>Java's exception model has stayed remarkably stable. The biggest practical improvement was Java 7's try-with-resources, which eliminated an entire category of resource-leak bugs. The ongoing debate about checked vs. unchecked exceptions continues to influence framework design — Spring, for instance, wraps all JDBC exceptions as unchecked.</p>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="section" id="s5">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <h2>Core Concepts — Basic 🟢</h2>
+      </div>
+
+      <h3>1. The Exception Hierarchy</h3>
+      <p>All exception types descend from <code>Throwable</code>. Two branches: <code>Error</code> (JVM-level, don't catch) and <code>Exception</code> (application-level, handle these).</p>
+      <div class="hierarchy-diagram">
+        <div class="hier-node">Throwable</div>
+        <div class="hier-connector"><div class="hier-line"></div></div>
+        <div class="hier-row">
+          <div class="hier-branch">
+            <div class="hier-node red">Error</div>
+            <div class="hier-connector"><div class="hier-line"></div></div>
+            <div style="font-size:0.75rem;color:var(--muted);text-align:center">OutOfMemoryError<br>StackOverflowError</div>
+          </div>
+          <div class="hier-branch">
+            <div class="hier-node accent">Exception</div>
+            <div class="hier-connector"><div class="hier-line"></div></div>
+            <div class="hier-row">
+              <div class="hier-branch">
+                <div class="hier-node green">Checked</div>
+                <div style="font-size:0.75rem;color:var(--muted);text-align:center;margin-top:4px">IOException<br>SQLException</div>
+              </div>
+              <div class="hier-branch">
+                <div class="hier-node gold">RuntimeException</div>
+                <div style="font-size:0.75rem;color:var(--muted);text-align:center;margin-top:4px">NullPointerException<br>IllegalArgumentException</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>2. try-catch-finally</h3>
+      <p>The basic construct. <code>try</code> wraps risky code, <code>catch</code> handles specific exception types, <code>finally</code> always runs — ideal for cleanup.</p>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="kw">try</span> {
+    <span class="cl">FileReader</span> fr = <span class="kw">new</span> <span class="cl">FileReader</span>(<span class="st">"data.txt"</span>);
+    <span class="cm">// risky code here</span>
+} <span class="kw">catch</span> (<span class="cl">FileNotFoundException</span> e) {
+    <span class="cl">System</span>.err.println(<span class="st">"File missing: "</span> + e.getMessage());
+} <span class="kw">catch</span> (<span class="cl">IOException</span> e) {
+    <span class="cl">System</span>.err.println(<span class="st">"IO error: "</span> + e.getMessage());
+} <span class="kw">finally</span> {
+    <span class="cm">// always runs — close resources, log, cleanup</span>
+    <span class="cl">System</span>.out.println(<span class="st">"Done"</span>);
+}</pre>
+      </div>
+
+      <h3>3. Checked vs. Unchecked</h3>
+      <ul>
+        <li><strong>Checked</strong> — extends <code>Exception</code> (not <code>RuntimeException</code>). Compiler forces you to declare with <code>throws</code> or catch them. E.g. <code>IOException</code>, <code>SQLException</code>.</li>
+        <li><strong>Unchecked</strong> — extends <code>RuntimeException</code>. No compiler enforcement. E.g. <code>NullPointerException</code>, <code>ArrayIndexOutOfBoundsException</code>.</li>
+      </ul>
+
+      <h3>4. throw vs. throws</h3>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="cm">// throws — declares what a method MAY throw (checked exceptions)</span>
+<span class="kw">public void</span> readFile(<span class="cl">String</span> path) <span class="kw">throws</span> <span class="cl">IOException</span> { ... }
+
+<span class="cm">// throw — actually throws an exception instance at runtime</span>
+<span class="kw">if</span> (age &lt; 0) <span class="kw">throw new</span> <span class="cl">IllegalArgumentException</span>(<span class="st">"Age cannot be negative"</span>);</pre>
+      </div>
+
+      <h3>5. Catching Multiple Exception Types (Java 7+)</h3>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="kw">try</span> {
+    process();
+} <span class="kw">catch</span> (<span class="cl">IOException</span> | <span class="cl">SQLException</span> e) {
+    <span class="cm">// handles both; 'e' is effectively final</span>
+    logger.error(<span class="st">"Operation failed"</span>, e);
+}</pre>
+      </div>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="section" id="s6">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <h2>Core Concepts — Intermediate 🟡</h2>
+      </div>
+
+      <h3>1. try-with-resources (Java 7+)</h3>
+      <p>Any object implementing <code>AutoCloseable</code> declared in the try header is automatically closed in reverse order when the block exits — even if an exception is thrown. This eliminates the infamous "close in finally" boilerplate and the double-exception suppression bug.</p>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="kw">try</span> (<span class="cl">Connection</span> conn = dataSource.getConnection();
+     <span class="cl">PreparedStatement</span> ps = conn.prepareStatement(sql);
+     <span class="cl">ResultSet</span> rs = ps.executeQuery()) {
+    <span class="kw">while</span> (rs.next()) {
+        process(rs.getString(<span class="st">"name"</span>));
+    }
+} <span class="kw">catch</span> (<span class="cl">SQLException</span> e) {
+    <span class="cm">// conn, ps, rs all closed automatically — even on exception</span>
+    <span class="kw">throw new</span> <span class="cl">DataAccessException</span>(<span class="st">"Query failed"</span>, e);
+}</pre>
+      </div>
+      <div class="warn-box"><span class="icon">⚠️</span><p><strong>Gotcha:</strong> Before try-with-resources, closing in <code>finally</code> could throw a second exception that silently swallowed the original one. Try-with-resources stores secondary exceptions as "suppressed" via <code>addSuppressed()</code> — both are preserved.</p></div>
+
+      <h3>2. Custom Exception Hierarchy</h3>
+      <p>Good domain-driven design defines application-specific exception types. This lets callers catch exactly what they care about, enables centralised handling, and documents failure modes in the API contract.</p>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="cm">// Base application exception</span>
+<span class="kw">public class</span> <span class="cl">AppException</span> <span class="kw">extends</span> <span class="cl">RuntimeException</span> {
+    <span class="kw">private final</span> <span class="cl">String</span> errorCode;
+    <span class="kw">public</span> <span class="cl">AppException</span>(<span class="cl">String</span> code, <span class="cl">String</span> msg, <span class="cl">Throwable</span> cause) {
+        <span class="kw">super</span>(msg, cause);
+        <span class="kw">this</span>.errorCode = code;
+    }
+    <span class="kw">public</span> <span class="cl">String</span> getErrorCode() { <span class="kw">return</span> errorCode; }
+}
+
+<span class="cm">// Domain-specific subtypes</span>
+<span class="kw">public class</span> <span class="cl">PaymentDeclinedException</span> <span class="kw">extends</span> <span class="cl">AppException</span> { ... }
+<span class="kw">public class</span> <span class="cl">InsufficientFundsException</span> <span class="kw">extends</span> <span class="cl">PaymentDeclinedException</span> { ... }</pre>
+      </div>
+
+      <h3>3. Exception Translation / Wrapping</h3>
+      <p>Never let low-level implementation exceptions (e.g. <code>SQLException</code>) leak through your API boundary. Wrap them in domain exceptions to preserve encapsulation.</p>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="kw">try</span> {
+    <span class="kw">return</span> jdbcTemplate.queryForObject(sql, userId, <span class="cl">User</span>.<span class="kw">class</span>);
+} <span class="kw">catch</span> (<span class="cl">EmptyResultDataAccessException</span> e) {
+    <span class="kw">throw new</span> <span class="cl">UserNotFoundException</span>(<span class="st">"User not found: "</span> + userId, e);
+} <span class="kw">catch</span> (<span class="cl">DataAccessException</span> e) {
+    <span class="kw">throw new</span> <span class="cl">RepositoryException</span>(<span class="st">"DB error fetching user"</span>, e);
+    <span class="cm">// cause preserved — full chain visible in stack trace</span>
+}</pre>
+      </div>
+
+      <h3>4. Rethrowing &amp; Type Narrowing (Java 7+)</h3>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="kw">public void</span> doWork() <span class="kw">throws</span> <span class="cl">IOException</span>, <span class="cl">SQLException</span> {
+    <span class="kw">try</span> {
+        riskyOperation();
+    } <span class="kw">catch</span> (<span class="cl">Exception</span> e) {
+        <span class="cm">// Java 7+ infers the narrower type — only IOException or SQLException</span>
+        logger.error(<span class="st">"doWork failed"</span>, e);
+        <span class="kw">throw</span> e; <span class="cm">// compiler knows this is IOException|SQLException</span>
+    }
+}</pre>
+      </div>
+      <div class="tip-box"><span class="icon">💡</span><p>Catching broad <code>Exception</code> and rethrowing is sometimes used purely for logging/instrumentation without changing the type — Java 7's type inference makes this safe.</p></div>
+
+      <h3>5. Suppressed Exceptions</h3>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="kw">try</span> (<span class="cl">MyResource</span> r = <span class="kw">new</span> <span class="cl">MyResource</span>()) {
+    r.doWork(); <span class="cm">// throws IOException</span>
+    <span class="cm">// r.close() also throws — stored as suppressed, not lost</span>
+} <span class="kw">catch</span> (<span class="cl">IOException</span> e) {
+    <span class="cl">Throwable</span>[] suppressed = e.getSuppressed();
+    <span class="cm">// suppressed[0] is the close() exception</span>
+}</pre>
+      </div>
+    </div>
+
+    <!-- SECTION 7 -->
+    <div class="section" id="s7">
+      <div class="section-header">
+        <div class="section-num">7</div>
+        <h2>Core Concepts — Advanced 🔴</h2>
+      </div>
+
+      <h3>1. Global Exception Handling in Spring Boot</h3>
+      <p>In production Spring Boot APIs, a <code>@RestControllerAdvice</code> class acts as a centralised exception handler — intercepting any unhandled exception from any controller and mapping it to a consistent HTTP error response. This separates error-response shaping from business logic entirely.</p>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="an">@RestControllerAdvice</span>
+<span class="kw">public class</span> <span class="cl">GlobalExceptionHandler</span> {
+
+    <span class="an">@ExceptionHandler</span>(<span class="cl">UserNotFoundException</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="cl">ResponseEntity</span>&lt;<span class="cl">ErrorResponse</span>&gt; handleNotFound(<span class="cl">UserNotFoundException</span> ex) {
+        <span class="kw">return</span> <span class="cl">ResponseEntity</span>.status(<span class="cl">HttpStatus</span>.NOT_FOUND)
+            .body(<span class="kw">new</span> <span class="cl">ErrorResponse</span>(<span class="st">"USER_NOT_FOUND"</span>, ex.getMessage()));
+    }
+
+    <span class="an">@ExceptionHandler</span>(<span class="cl">ConstraintViolationException</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="cl">ResponseEntity</span>&lt;<span class="cl">ErrorResponse</span>&gt; handleValidation(<span class="cl">ConstraintViolationException</span> ex) {
+        <span class="cl">List</span>&lt;<span class="cl">String</span>&gt; errors = ex.getConstraintViolations().stream()
+            .map(v -&gt; v.getPropertyPath() + <span class="st">": "</span> + v.getMessage())
+            .collect(<span class="cl">Collectors</span>.toList());
+        <span class="kw">return</span> <span class="cl">ResponseEntity</span>.badRequest()
+            .body(<span class="kw">new</span> <span class="cl">ErrorResponse</span>(<span class="st">"VALIDATION_FAILED"</span>, errors.toString()));
+    }
+
+    <span class="an">@ExceptionHandler</span>(<span class="cl">Exception</span>.<span class="kw">class</span>)
+    <span class="kw">public</span> <span class="cl">ResponseEntity</span>&lt;<span class="cl">ErrorResponse</span>&gt; handleGeneric(<span class="cl">Exception</span> ex) {
+        logger.error(<span class="st">"Unhandled exception"</span>, ex);
+        <span class="kw">return</span> <span class="cl">ResponseEntity</span>.internalServerError()
+            .body(<span class="kw">new</span> <span class="cl">ErrorResponse</span>(<span class="st">"INTERNAL_ERROR"</span>, <span class="st">"Something went wrong"</span>));
+    }
+}</pre>
+      </div>
+      <div class="tip-box"><span class="icon">💡</span><p><strong>Trade-off:</strong> Centralised handlers are great for consistency, but be careful not to catch overly broad types (like raw <code>Exception</code>) too eagerly — you may inadvertently swallow <code>InterruptedException</code> or thread-pool signals.</p></div>
+
+      <h3>2. Exception Handling in Reactive / Async Code</h3>
+      <p>Traditional try-catch doesn't work across thread boundaries. In async code with CompletableFuture or Project Reactor, exceptions flow through the pipeline and must be handled with pipeline operators.</p>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="cm">// CompletableFuture</span>
+<span class="cl">CompletableFuture</span>.supplyAsync(() -&gt; fetchUser(id))
+    .thenApply(user -&gt; enrichUser(user))
+    .exceptionally(ex -&gt; {
+        log.error(<span class="st">"Pipeline failed"</span>, ex);
+        <span class="kw">return</span> <span class="cl">User</span>.anonymous(); <span class="cm">// fallback value</span>
+    })
+    .whenComplete((result, ex) -&gt; {
+        <span class="kw">if</span> (ex != <span class="kw">null</span>) metrics.increment(<span class="st">"user.fetch.error"</span>);
+    });
+
+<span class="cm">// Project Reactor</span>
+userRepository.findById(id)
+    .switchIfEmpty(<span class="cl">Mono</span>.error(<span class="kw">new</span> <span class="cl">UserNotFoundException</span>(id)))
+    .onErrorResume(<span class="cl">TimeoutException</span>.<span class="kw">class</span>, e -&gt; <span class="cl">Mono</span>.just(<span class="cl">User</span>.cached(id)))
+    .onErrorMap(<span class="cl">DataAccessException</span>.<span class="kw">class</span>, e -&gt; <span class="kw">new</span> <span class="cl">ServiceException</span>(<span class="st">"DB down"</span>, e));</pre>
+      </div>
+
+      <h3>3. Performance Cost of Exceptions</h3>
+      <p>Creating an exception is expensive — the JVM fills in the full stack trace at construction time (not throw time). Throwing 1000 exceptions/sec can noticeably degrade throughput. Never use exceptions for control flow in hot paths.</p>
+      <div class="code-block">
+        <span class="lang-tag">Java</span>
+<pre><span class="cm">// WRONG — exception for control flow (extremely slow)</span>
+<span class="kw">try</span> {
+    <span class="kw">return</span> map.get(key); <span class="cm">// throws if missing</span>
+} <span class="kw">catch</span> (<span class="cl">NoSuchElementException</span> e) {
+    <span class="kw">return</span> defaultValue;
+}
+
+<span class="cm">// RIGHT — check before access</span>
+<span class="kw">return</span> map.getOrDefault(key, defaultValue);
+
+<span class="cm">// For libraries generating many expected "errors",</span>
+<span class="cm">// override fillInStackTrace() to skip stack capture:</span>
+<span class="kw">public class</span> <span class="cl">FastException</span> <span class="kw">extends</span> <span class="cl">RuntimeException</span> {
+    <span class="an">@Override</span>
+    <span class="kw">public synchronized</span> <span class="cl">Throwable</span> fillInStackTrace() { <span class="kw">return this</span>; }
+}</pre>
+      </div>
+      <div class="warn-box"><span class="icon">⚠️</span><p><strong>Works in dev, breaks in prod:</strong> Stack traces are cheap when JIT hasn't warmed up. On a busy prod JVM, thousands of exceptions per second (e.g. from aggressive input validation or retry storms) can cause measurable GC pressure and latency spikes.</p></div>
+    </div>
+
+    <!-- SECTION 8 -->
+    <div class="section" id="s8">
+      <div class="section-header">
+        <div class="section-num">8</div>
+        <h2>Architecture &amp; Internals</h2>
+      </div>
+      <h3>How the JVM Handles a Thrown Exception</h3>
+      <ol class="content-list">
+        <li><strong>Object creation:</strong> <code>new SomeException(msg)</code> allocates an exception object on the heap and calls <code>fillInStackTrace()</code>, which walks the JVM stack frames to build the trace.</li>
+        <li><strong>throw:</strong> JVM's bytecode instruction <code>athrow</code> is executed. The current method's execution halts.</li>
+        <li><strong>Stack unwinding:</strong> JVM searches the current method's exception table for a matching <code>catch</code> clause. If none, it pops the frame.</li>
+        <li><strong>Handler search propagates:</strong> The process repeats up each calling frame until a match is found or the thread's top-level handler is reached.</li>
+        <li><strong>Catch block execution:</strong> When a match is found, the exception object is bound to the variable and the catch block runs.</li>
+        <li><strong>finally execution:</strong> Regardless of path (normal, exception, return), the finally block runs. Under the hood this is implemented via duplicate bytecode or <code>jsr/ret</code> instructions.</li>
+        <li><strong>Uncaught exceptions:</strong> Reach <code>Thread.getDefaultUncaughtExceptionHandler()</code>, which by default prints the stack trace and terminates the thread.</li>
+      </ol>
+      <h3>Key Components</h3>
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>Internal Mechanism</th><th>Failure Mode</th></tr></thead>
+        <tbody>
+          <tr><td><code>Throwable</code></td><td>Root of exception hierarchy</td><td>Holds <code>detailMessage</code>, <code>cause</code>, <code>stackTrace[]</code>, <code>suppressedExceptions[]</code></td><td>OOM if stack trace too deep</td></tr>
+          <tr><td>Exception Table</td><td>Maps bytecode ranges to handler bytecode offsets</td><td>Compiled per-method; consulted on <code>athrow</code></td><td>Missing entry → unhandled exception</td></tr>
+          <tr><td><code>fillInStackTrace()</code></td><td>Captures current stack snapshot</td><td>Native JVM call; expensive — iterates all frames</td><td>Overriding to no-op saves CPU in hot paths</td></tr>
+          <tr><td>UncaughtExceptionHandler</td><td>Last-resort handler for unhandled exceptions</td><td>Per-thread or ThreadGroup callback</td><td>Default just prints + exits the thread</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 9 -->
+    <div class="section" id="s9">
+      <div class="section-header">
+        <div class="section-num">9</div>
+        <h2>Key Features</h2>
+      </div>
+      <ul>
+        <li><strong>Typed exception hierarchy</strong> — <code>catch</code> clauses match by exact type or any subtype, enabling fine-grained or broad handling.</li>
+        <li><strong>Checked exception enforcement</strong> — Compiler mandates declaration/handling; documents failure modes in method signatures.</li>
+        <li><strong>Exception chaining</strong> — <code>cause</code> field preserves the original error across translation layers.</li>
+        <li><strong>try-with-resources</strong> — Deterministic AutoCloseable cleanup without explicit finally.</li>
+        <li><strong>Multi-catch</strong> — Single catch block for multiple unrelated exception types.</li>
+        <li><strong>Suppressed exceptions</strong> — Secondary exceptions from <code>close()</code> stored and accessible, not silently dropped.</li>
+        <li><strong>Stack trace API</strong> — <code>getStackTrace()</code>, <code>printStackTrace()</code>, <code>fillInStackTrace()</code> for full introspection and customisation.</li>
+        <li><strong>Custom exceptions</strong> — First-class Java classes; can carry any domain data, override methods, form hierarchies.</li>
+        <li><strong>Thread-level UncaughtExceptionHandler</strong> — Customise behaviour for unhandled exceptions per thread or globally.</li>
+        <li><strong>Rethrowing with narrowed type inference</strong> — Java 7+ infers precise type when catching broad and rethrowing.</li>
+      </ul>
+    </div>
+
+    <!-- SECTION 10 -->
+    <div class="section" id="s10">
+      <div class="section-header">
+        <div class="section-num">10</div>
+        <h2>Key Benefits</h2>
+      </div>
+      <ul>
+        <li>✅ <strong>Separation of concerns</strong> — Error handling code is structurally separate from business logic, reducing cognitive load and improving readability.</li>
+        <li>✅ <strong>Compiler-enforced safety</strong> — Checked exceptions prevent silently ignoring failure conditions that must be addressed.</li>
+        <li>✅ <strong>Rich diagnostics</strong> — Stack traces with cause chains let engineers pinpoint root causes in seconds rather than hours.</li>
+        <li>✅ <strong>Resource safety</strong> — try-with-resources eliminates an entire category of connection/file leak bugs that plague manual cleanup code.</li>
+        <li>✅ <strong>Propagation without boilerplate</strong> — Unchecked exceptions bubble up automatically; no error-code threading through every call frame.</li>
+        <li>✅ <strong>Domain expressiveness</strong> — Custom exception types (<code>OrderNotFoundException</code>, <code>InsufficientStockException</code>) make failure modes part of the domain model.</li>
+        <li>✅ <strong>API contracts</strong> — <code>throws</code> declarations document what callers should expect and prepare for.</li>
+      </ul>
+    </div>
+
+    <!-- SECTION 11 -->
+    <div class="section" id="s11">
+      <div class="section-header">
+        <div class="section-num">11</div>
+        <h2>Key Challenges &amp; Pitfalls</h2>
+      </div>
+      <ul>
+        <li>⚠️ <strong>Swallowing exceptions silently</strong> — <code>catch (Exception e) {}</code> hides failures completely. Always log or rethrow. Use a linter rule (e.g. Checkstyle <code>EmptyCatchBlock</code>) to enforce this.</li>
+        <li>⚠️ <strong>Catching Throwable or Error</strong> — Catching <code>Throwable</code> inadvertently catches <code>OutOfMemoryError</code>, masking JVM-level failures you can't recover from.</li>
+        <li>⚠️ <strong>Overly broad checked exception declarations</strong> — <code>throws Exception</code> forces all callers to handle everything and provides no useful information. Be specific.</li>
+        <li>⚠️ <strong>Exception for control flow</strong> — Using try-catch instead of if-checks is 100–1000× slower due to stack trace creation. Never do this in hot paths.</li>
+        <li>⚠️ <strong>Losing the original cause</strong> — <code>throw new AppException(e.getMessage())</code> loses the original stack trace. Always wrap: <code>throw new AppException("msg", e)</code>.</li>
+        <li>⚠️ <strong>Works in dev, breaks in prod — retry storms:</strong> Clients retrying on exceptions can amplify a transient DB blip into a full outage. Always apply exponential backoff and circuit breakers alongside exception handling.</li>
+        <li>⚠️ <strong>InterruptedException mishandling</strong> — Catching and ignoring <code>InterruptedException</code> breaks thread cancellation. Always restore the interrupt flag: <code>Thread.currentThread().interrupt()</code>.</li>
+      </ul>
+    </div>
+
+    <!-- SECTION 12 -->
+    <div class="section" id="s12">
+      <div class="section-header">
+        <div class="section-num">12</div>
+        <h2>Best Practices</h2>
+      </div>
+      <h3>🟢 Beginner</h3>
+      <ul>
+        <li>Always log or rethrow — never silently swallow exceptions with empty catch blocks.</li>
+        <li>Use specific exception types in catch clauses — <code>FileNotFoundException</code> before <code>IOException</code>.</li>
+        <li>Prefer try-with-resources over manual close in finally for any Closeable.</li>
+        <li>Include a meaningful message when throwing: <code>throw new IllegalArgumentException("userId must be positive, got: " + id)</code>.</li>
+      </ul>
+      <h3>🟡 Intermediate</h3>
+      <ul>
+        <li>Build a shallow, purposeful custom exception hierarchy rooted at one <code>AppException</code>. Avoid explosion of exception types.</li>
+        <li>Translate infrastructure exceptions (<code>SQLException</code>, <code>IOException</code>) at layer boundaries — never let them leak into the domain layer.</li>
+        <li>Always wrap cause: <code>throw new ServiceException("msg", originalException)</code> to preserve the full chain.</li>
+        <li>For Spring REST APIs, use <code>@RestControllerAdvice</code> for all HTTP error mapping — keep controllers clean.</li>
+      </ul>
+      <h3>🔴 Advanced / Production</h3>
+      <ul>
+        <li>Instrument exception rates with metrics (Micrometer/Prometheus) — alert on abnormal spikes as early warning of degradation.</li>
+        <li>Set a global <code>Thread.setDefaultUncaughtExceptionHandler</code> to log and alert on unhandled exceptions in background threads.</li>
+        <li>For high-throughput services, profile exception creation cost — consider <code>fillInStackTrace()</code> override for expected "fast path" exceptions.</li>
+        <li>Combine exception handling with resilience patterns (Resilience4j <code>@CircuitBreaker</code>, <code>@Retry</code>) — exceptions alone aren't a resilience strategy.</li>
+        <li>In reactive / async code (CompletableFuture, Reactor), always attach <code>exceptionally</code> / <code>onErrorResume</code> operators — unhandled pipeline exceptions are silently dropped without them.</li>
+      </ul>
+    </div>
+
+    <!-- SECTION 13 -->
+    <div class="section" id="s13">
+      <div class="section-header">
+        <div class="section-num">13</div>
+        <h2>Ecosystem, Tools &amp; Integrations</h2>
+      </div>
+      <table>
+        <thead><tr><th>Tool / Library</th><th>Purpose</th><th>Works Best With</th><th>Notable</th></tr></thead>
+        <tbody>
+          <tr><td>Resilience4j</td><td>Circuit breaker, retry, bulkhead annotations on top of exceptions</td><td>Spring Boot</td><td>Replaces Hystrix; lightweight, no external process</td></tr>
+          <tr><td>Sentry / Datadog APM</td><td>Automatic exception capture, grouping, alerting</td><td>Any JVM app</td><td>One-line agent install; links exceptions to traces</td></tr>
+          <tr><td>Micrometer</td><td>Metrics for exception counters/rates</td><td>Spring Boot, Micronaut</td><td>Exports to Prometheus, Datadog, CloudWatch</td></tr>
+          <tr><td>Logback / SLF4J</td><td>Structured exception logging with MDC correlation</td><td>All Java</td><td><code>log.error("msg", exception)</code> logs full trace</td></tr>
+          <tr><td>Checkstyle / SpotBugs</td><td>Static analysis — catches empty catch blocks, broad catches</td><td>CI pipelines</td><td>SpotBugs rule <code>REC_CATCH_EXCEPTION</code></td></tr>
+          <tr><td>Spring @ControllerAdvice</td><td>Centralised HTTP exception-to-response mapping</td><td>Spring MVC / WebFlux</td><td>Combines with Problem Details (RFC 7807)</td></tr>
+        </tbody>
+      </table>
+      <p>In modern stacks, exception handling integrates with distributed tracing (OpenTelemetry propagates exception events as span attributes), structured logging (correlation IDs link exceptions across services), and observability dashboards (Grafana panels on exception rates per endpoint).</p>
+    </div>
+
+    <!-- SECTION 14 -->
+    <div class="section" id="s14">
+      <div class="section-header">
+        <div class="section-num">14</div>
+        <h2>Competitors &amp; Comparison</h2>
+      </div>
+      <table>
+        <thead><tr><th>Approach / Language</th><th>Key Difference</th><th>Strengths</th><th>Weaknesses</th><th>Choose When</th></tr></thead>
+        <tbody>
+          <tr><td>Java Exceptions</td><td>Object-oriented, typed, checked/unchecked split</td><td>Rich diagnostics, compiler enforcement</td><td>Checked exception boilerplate, perf cost</td><td>JVM ecosystem, enterprise apps</td></tr>
+          <tr><td>Kotlin Result / sealed classes</td><td>Monadic error handling — errors as values</td><td>No exceptions, composable, null-safe</td><td>Verbose without extension functions</td><td>Kotlin-first projects, functional style</td></tr>
+          <tr><td>Go errors-as-values</td><td>Functions return <code>(value, error)</code> tuples</td><td>Explicit, no hidden control flow</td><td>Repetitive nil checks, no stack trace by default</td><td>Systems programming, Go ecosystem</td></tr>
+          <tr><td>Rust Result&lt;T,E&gt;</td><td>Compile-time enforced error handling via type system</td><td>Zero-cost, exhaustive, no runtime overhead</td><td>Steep learning curve</td><td>Performance-critical, safety-critical code</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>Criterion</th><th>Java Exceptions</th><th>Kotlin Result</th><th>Go error values</th></tr></thead>
+        <tbody>
+          <tr><td>Compiler enforcement</td><td>Checked only</td><td>Full (type system)</td><td>None</td></tr>
+          <tr><td>Stack trace</td><td>Automatic, rich</td><td>Manual (via cause)</td><td>None by default</td></tr>
+          <tr><td>Runtime cost</td><td>High on throw</td><td>Near zero</td><td>Near zero</td></tr>
+          <tr><td>Ecosystem fit</td><td>JVM/Java</td><td>Kotlin / JVM</td><td>Go</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 15 -->
+    <div class="section" id="s15">
+      <div class="section-header">
+        <div class="section-num">15</div>
+        <h2>Key Trends &amp; Future Outlook</h2>
+      </div>
+      <ul>
+        <li><strong>Problem Details (RFC 9457)</strong> — Spring Boot 3.x ships built-in support for standardised JSON error responses (<code>application/problem+json</code>). Adoption growing in REST APIs. <em>Maturity: Production-ready now.</em></li>
+        <li><strong>Virtual Threads (Project Loom, Java 21+)</strong> — Millions of cheap threads change exception patterns: deeper virtual stack traces, new handling needed for structured concurrency scope failures. <em>Maturity: GA in Java 21.</em></li>
+        <li><strong>Structured Concurrency (JEP 453)</strong> — <code>StructuredTaskScope</code> aggregates exceptions from child tasks, enabling "fail fast on first child exception" semantics. <em>Maturity: Preview Java 21–22.</em></li>
+        <li><strong>AI-assisted exception triage</strong> — APM tools (Datadog, Sentry) increasingly use LLMs to suggest root causes and fixes from stack traces. <em>Maturity: Early production.</em></li>
+        <li><strong>Result types gaining traction</strong> — Kotlin <code>Result</code>, Vavr's <code>Try</code>, and Arrow's functional types are influencing how Java developers handle expected failure paths, especially in reactive code. <em>Maturity: Growing adoption.</em></li>
+      </ul>
+    </div>
+
+    <!-- SECTION 16 - INTERVIEW QUESTIONS -->
+    <div class="section" id="s16">
+      <div class="section-header">
+        <div class="section-num">16</div>
+        <h2>Interview Questions 🎯</h2>
+      </div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.25rem;">These questions assess deep understanding, system-design thinking, and real-world experience — not trivia.</p>
+
+      <h3>🟢 Conceptual &amp; Fundamentals</h3>
+      <div class="interview-q">
+        <div class="q">Q: What is the difference between checked and unchecked exceptions, and why does Java have both?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Checked exceptions model recoverable failures the caller is expected to handle (I/O, network). Unchecked model programming errors (bugs) where recovery isn't meaningful. Discuss the checked-exception controversy — many modern APIs (Spring, Lombok @SneakyThrows) avoid checked exceptions due to boilerplate and leaky abstraction arguments.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How does try-with-resources work internally, and what problem does it solve over try-finally?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Compiler rewrites try-with-resources into try-finally with null checks. Key improvement: if both the try body and close() throw, the close() exception is suppressed (accessible via getSuppressed()) rather than silently replacing the original — the critical bug in naive try-finally patterns.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: Why is catching Throwable generally a bad idea? When might it be acceptable?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Throwable includes Error (OutOfMemoryError, StackOverflowError) which represent JVM-level failures you can't safely recover from. Acceptable in: top-level thread handlers, frameworks bootstrapping (to log and exit cleanly), test assertions. Always log and rethrow (or terminate) when catching Throwable.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: What happens to an exception thrown inside a finally block?</div>
+        <div class="a"><strong>What a great answer covers:</strong> It replaces and discards the original exception — a notorious source of lost diagnostics. This is exactly why try-with-resources was introduced. Demonstrate with code. Mention that Kotlin and Scala handle this differently.</div>
+      </div>
+
+      <h3>🟡 Design &amp; Architecture</h3>
+      <div class="interview-q">
+        <div class="q">Q: How would you design a global exception handling strategy for a REST API serving 10 million requests/day?</div>
+        <div class="a"><strong>What a great answer covers:</strong> @RestControllerAdvice with Problem Details (RFC 9457). Custom exception hierarchy rooted at AppException. Exception-to-HTTP status mapping table. Correlation ID threading from MDC into all error responses. PII scrubbing before logging. Metrics on exception types/rates. Circuit breaker integration so downstream failures don't cascade.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: When should you use a custom checked exception vs. an unchecked exception in a library API?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Checked when the caller has a realistic chance of recovering and handling the specific failure adds value (e.g. file not found, rate limit exceeded). Unchecked for programming errors, framework-internal failures, or when callers can't meaningfully recover. Cite the Joshua Bloch Effective Java Item 70 / Spring's rationale for wrapping JDBC exceptions as unchecked.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How do you handle exceptions in a Kafka consumer that must not lose messages?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Don't commit offset on unhandled exception. Dead-letter topic (DLT) pattern — route poison messages to a DLT for manual inspection. Retry with exponential backoff using Spring-Kafka's SeekToCurrentErrorHandler / DefaultErrorHandler. Distinguish retryable (transient network) from non-retryable (bad data schema) exceptions.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How would you ensure exceptions in background threads don't silently fail?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Thread.setDefaultUncaughtExceptionHandler for bare threads. ExecutorService: submit() returns Future — call future.get() to surface exceptions, or use afterExecute() hook. CompletableFuture: always attach exceptionally(). ScheduledExecutorService: silently swallows exceptions if not handled — wrap Runnable in try-catch. Monitoring: Sentry/Datadog agent captures all unhandled exceptions.</div>
+      </div>
+
+      <h3>🔴 Advanced, Internals &amp; Trade-offs</h3>
+      <div class="interview-q">
+        <div class="q">Q: How does the JVM locate the appropriate catch handler when an exception is thrown?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Each method has a compiled exception table mapping bytecode PC ranges to handler PC offsets and exception types. On athrow, JVM walks the table for the current frame. On miss, pops frame and repeats up the call stack. Matching is by instanceof check. Performance: searching the table is O(n) in the number of catch clauses per method, but this only happens on the exceptional path — doesn't affect normal throughput.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: What is the performance cost of exceptions, and how would you mitigate it in a high-throughput service?</div>
+        <div class="a"><strong>What a great answer covers:</strong> fillInStackTrace() is the expensive part — native JVM call capturing all frames. Benchmarks show ~1–10µs per exception on a warm JVM. Mitigation: override fillInStackTrace() to return this for "expected" exceptions. Use Optional/Result types for null/empty cases instead of exceptions. Profile with async-profiler to confirm exception overhead before optimising. Never use exceptions for expected control flow.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How does exception handling change with Project Loom Virtual Threads?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Virtual threads have much deeper stack traces (hundreds of frames) because they can block freely. fillInStackTrace() becomes even more expensive per exception. Structured Concurrency (JEP 453) introduces ShutdownOnFailure scope that propagates child exceptions to the parent — fundamentally different from ExecutorService. UncaughtExceptionHandler still applies per virtual thread. Debugging improves: JFR captures virtual thread events including exceptions.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: Explain how InterruptedException should be handled and why ignoring it is dangerous.</div>
+        <div class="a"><strong>What a great answer covers:</strong> Interruption is Java's cooperative thread cancellation protocol. Catching and ignoring InterruptedException clears the interrupt flag and breaks cancellation — the thread pool can't shut down gracefully. Correct patterns: (1) rethrow as-is if caller can handle it, (2) restore interrupt flag with Thread.currentThread().interrupt() before returning. Wrapping in RuntimeException is acceptable if interrupt flag is restored first.</div>
+      </div>
+
+      <h3>💡 Scenario / Problem-Solving</h3>
+      <div class="interview-q">
+        <div class="q">Q: "Your production Spring Boot app suddenly has a 10× spike in exception rate. Walk me through how you diagnose and fix it."</div>
+        <div class="a"><strong>What a great answer covers:</strong> Check APM (Datadog/Sentry) exception dashboard — which exception type, which endpoints. Correlate with deployment timestamps — recent deploy? Check logs with correlation IDs. Look for external dependency failure (DB, downstream service). Check thread pool saturation (RejectedExecutionException). Check GC logs for memory pressure. Fix: add circuit breaker, increase timeouts, roll back bad deploy.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: "A junior developer committed code with catch (Exception e) {} everywhere to 'fix' failing tests. How do you address this technically and culturally?"</div>
+        <div class="a"><strong>What a great answer covers:</strong> Technically: add Checkstyle EmptyCatchBlock rule to CI to prevent it permanently. Revert or fix the code — log at minimum. Culturally: non-judgmental code review feedback with explanation of why. Add unit tests that assert exceptions are thrown/handled correctly. Pair programming on exception handling patterns.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: "How would you migrate a legacy codebase that uses return codes (int -1, -2 for errors) to proper exception handling without breaking existing callers?"</div>
+        <div class="a"><strong>What a great answer covers:</strong> Strangler fig pattern — wrap legacy methods with new exception-throwing facades. Keep old methods for existing callers during transition. Add comprehensive tests before touching anything. Use custom exception hierarchy that maps to the old error codes (for callers that need the code). Feature-flag the new paths. Migrate callers incrementally. Use codemods / IDE refactoring tools for mechanical changes.</div>
+      </div>
+    </div>
+
+  </div><!-- /blog-container -->
+</body>
+</html>
