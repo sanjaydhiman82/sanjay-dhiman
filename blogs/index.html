@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sanjay Dhiman — Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0f172a;
+      --blue:   #1e40af;
+      --accent: #3b82f6;
+      --gold:   #f59e0b;
+      --light:  #f8fafc;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --white:  #ffffff;
+      --grad:   linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1e40af 100%);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--light);
+      color: var(--navy);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(15,23,42,0.95);
+      backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 56px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-logo { color: var(--white); font-weight: 700; font-size: 1rem; letter-spacing: 0.02em; }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a {
+      color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem;
+      font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--white); }
+
+    /* ── HERO BANNER ── */
+    .blog-hero {
+      background: var(--grad);
+      padding: 100px 2rem 48px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .blog-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .blog-hero .badge {
+      display: inline-block;
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.4);
+      color: var(--gold);
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.3rem 1rem; border-radius: 100px; margin-bottom: 1rem;
+    }
+    .blog-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: var(--white); font-weight: 700; line-height: 1.15;
+      margin-bottom: 0.65rem;
+    }
+    .blog-hero p {
+      color: rgba(255,255,255,0.7); font-size: 1rem; max-width: 520px; margin: 0 auto;
+    }
+
+    /* ── LAYOUT ── */
+    .blog-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 200px);
+      max-width: 1280px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: sticky;
+      top: 72px;
+      align-self: start;
+      padding-right: 1.5rem;
+      max-height: calc(100vh - 90px);
+      overflow-y: auto;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .sidebar-search {
+      position: relative; margin-bottom: 1.25rem;
+    }
+    .sidebar-search input {
+      width: 100%; padding: 0.55rem 0.9rem 0.55rem 2.2rem;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 0.82rem; color: var(--navy);
+      background: var(--white); outline: none; transition: border-color 0.2s;
+    }
+    .sidebar-search input:focus { border-color: var(--accent); }
+    .sidebar-search svg {
+      position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px; color: var(--muted); pointer-events: none;
+    }
+
+    .category-block { margin-bottom: 0.5rem; }
+    .category-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 0.65rem 0.9rem; border-radius: 8px; border: none; cursor: pointer;
+      background: var(--white); color: var(--navy);
+      font-family: inherit; font-size: 0.88rem; font-weight: 600;
+      text-align: left; transition: background 0.15s, color 0.15s;
+      border: 1px solid var(--border);
+    }
+    .category-btn:hover { background: #eff6ff; color: var(--accent); border-color: #bfdbfe; }
+    .category-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+    .category-btn .cat-icon { font-size: 1rem; margin-right: 0.5rem; }
+    .category-btn .cat-label { flex: 1; }
+    .category-btn .cat-count {
+      font-size: 0.7rem; font-weight: 600; background: rgba(59,130,246,0.12);
+      color: var(--accent); padding: 0.1rem 0.45rem; border-radius: 100px;
+    }
+    .category-btn.active .cat-count { background: rgba(255,255,255,0.15); color: var(--white); }
+    .category-btn .chevron {
+      width: 14px; height: 14px; transition: transform 0.2s; margin-left: 0.4rem;
+      color: var(--muted); flex-shrink: 0;
+    }
+    .category-btn.open .chevron { transform: rotate(180deg); }
+
+    .subtopic-list {
+      display: none; flex-direction: column; gap: 0.15rem;
+      padding: 0.4rem 0 0.4rem 0.8rem;
+    }
+    .subtopic-list.open { display: flex; }
+    .subtopic-btn {
+      padding: 0.45rem 0.75rem; border-radius: 6px; border: none; cursor: pointer;
+      background: transparent; color: var(--muted); font-family: inherit;
+      font-size: 0.82rem; font-weight: 500; text-align: left;
+      transition: background 0.15s, color 0.15s;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .subtopic-btn::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--border); flex-shrink: 0; transition: background 0.15s;
+    }
+    .subtopic-btn:hover { background: #eff6ff; color: var(--accent); }
+    .subtopic-btn:hover::before { background: var(--accent); }
+    .subtopic-btn.active { background: #dbeafe; color: var(--blue); font-weight: 600; }
+    .subtopic-btn.active::before { background: var(--accent); }
+
+    /* ── CONTENT PANEL ── */
+    .content-panel {
+      border-left: 1px solid var(--border);
+      padding-left: 2rem;
+      min-height: 600px;
+    }
+
+    .content-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 400px; text-align: center; color: var(--muted);
+    }
+    .content-placeholder svg { width: 56px; height: 56px; margin-bottom: 1rem; opacity: 0.3; }
+    .content-placeholder p { font-size: 0.95rem; }
+
+    .topic-content { display: none; }
+    .topic-content.active { display: block; }
+
+    .topic-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; margin-bottom: 1.75rem; padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .topic-breadcrumb {
+      font-size: 0.75rem; color: var(--muted); font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem;
+    }
+    .topic-breadcrumb span { color: var(--accent); }
+    .topic-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--navy);
+    }
+    .topic-badge {
+      display: inline-block; white-space: nowrap;
+      background: rgba(59,130,246,0.08); color: var(--accent);
+      border: 1px solid rgba(59,130,246,0.2);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.3rem 0.8rem; border-radius: 100px; margin-top: 0.25rem;
+    }
+
+    .topic-body h3 {
+      font-size: 1.05rem; font-weight: 700; color: var(--navy);
+      margin: 1.5rem 0 0.6rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .topic-body h3::before {
+      content: ''; display: inline-block; width: 4px; height: 1em;
+      background: var(--accent); border-radius: 2px; flex-shrink: 0;
+    }
+    .topic-body p { font-size: 0.9rem; color: #475569; margin-bottom: 0.75rem; }
+    .topic-body ul { margin: 0.5rem 0 0.75rem 1.2rem; }
+    .topic-body ul li { font-size: 0.88rem; color: #475569; margin-bottom: 0.35rem; }
+
+    .code-block {
+      background: var(--navy); color: #e2e8f0;
+      border-radius: 10px; padding: 1.25rem 1.5rem;
+      font-family: 'Courier New', Courier, monospace; font-size: 0.82rem;
+      line-height: 1.7; overflow-x: auto; margin: 1rem 0 1.25rem;
+      position: relative;
+    }
+    .code-block .lang-tag {
+      position: absolute; top: 0.6rem; right: 0.8rem;
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--gold); opacity: 0.8;
+    }
+    .code-block .kw  { color: #93c5fd; }
+    .code-block .cl  { color: #fde68a; }
+    .code-block .cm  { color: #6b7280; font-style: italic; }
+    .code-block .st  { color: #86efac; }
+    .code-block .an  { color: #fb923c; }
+
+    .tip-box {
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+      padding: 1rem 1.1rem; margin: 1rem 0;
+    }
+    .tip-box svg { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+    .tip-box p { font-size: 0.85rem; color: var(--blue); margin: 0; }
+
+    .warn-box {
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+      padding: 1rem 1.1rem; margin: 1rem 0;
+    }
+    .warn-box svg { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+    .warn-box p { font-size: 0.85rem; color: #92400e; margin: 0; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.25rem 0 0; }
+    .tag {
+      background: #f1f5f9; color: var(--muted); border: 1px solid var(--border);
+      font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.65rem;
+      border-radius: 100px; letter-spacing: 0.04em;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .blog-layout { grid-template-columns: 1fr; padding: 0 1rem; }
+      .sidebar { position: static; max-height: none; padding-right: 0; margin-bottom: 1.5rem; }
+      .content-panel { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">SD<span>.</span></div>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../profile.html">About</a></li>
+      <li><a href="../profile.html#experience">Experience</a></li>
+      <li><a href="../profile.html#skills">Skills</a></li>
+      <li><a href="./index.html" class="active">Blog</a></li>
+      <li><a href="../profile.html#education">Education</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="blog-hero">
+    <div class="badge">Knowledge Base</div>
+    <h1>Tech Blog</h1>
+    <p>Deep-dives into Java, System Design, DevOps, and more — from 15+ years of engineering experience.</p>
+  </div>
+
+  <!-- BLOG LAYOUT -->
+  <div class="blog-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="sidebar-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search topics…" oninput="filterTopics(this.value)" />
+      </div>
+
+      <div id="sidebar-menu">
+
+        <!-- Java -->
+        <div class="category-block" data-category="java">
+          <button class="category-btn" onclick="toggleCategory(this, 'java')">
+            <span class="cat-icon">☕</span>
+            <span class="cat-label">Java</span>
+            <span class="cat-count">7</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="subtopic-list" id="sub-java">
+            <button class="subtopic-btn" onclick="window.location.href='exception.html'">Exceptions ↗</button>
+            <button class="subtopic-btn" onclick="showTopic('java-threads')">Threads &amp; Concurrency</button>
+            <button class="subtopic-btn" onclick="showTopic('java-files')">File I/O &amp; NIO</button>
+            <button class="subtopic-btn" onclick="showTopic('java-streams')">Streams &amp; Lambdas</button>
+            <button class="subtopic-btn" onclick="showTopic('java-collections')">Collections Framework</button>
+            <button class="subtopic-btn" onclick="showTopic('java-jvm')">JVM Internals</button>
+          </div>
+        </div>
+
+        <!-- Spring Boot -->
+        <div class="category-block" data-category="spring">
+          <button class="category-btn" onclick="toggleCategory(this, 'spring')">
+            <span class="cat-icon">🌱</span>
+            <span class="cat-label">Spring Boot</span>
+            <span class="cat-count">4</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="subtopic-list" id="sub-spring">
+            <button class="subtopic-btn" onclick="showTopic('spring-di')">Dependency Injection</button>
+            <button class="subtopic-btn" onclick="showTopic('spring-rest')">REST APIs</button>
+            <button class="subtopic-btn" onclick="showTopic('spring-security')">Spring Security</button>
+            <button class="subtopic-btn" onclick="showTopic('spring-data')">Spring Data &amp; JPA</button>
+          </div>
+        </div>
+
+        <!-- Microservices -->
+        <div class="category-block" data-category="microservices">
+          <button class="category-btn" onclick="toggleCategory(this, 'microservices')">
+            <span class="cat-icon">🔗</span>
+            <span class="cat-label">Microservices</span>
+            <span class="cat-count">4</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="subtopic-list" id="sub-microservices">
+            <button class="subtopic-btn" onclick="showTopic('ms-patterns')">Design Patterns</button>
+            <button class="subtopic-btn" onclick="showTopic('ms-communication')">Service Communication</button>
+            <button class="subtopic-btn" onclick="showTopic('ms-resilience')">Resilience &amp; Circuit Breaker</button>
+            <button class="subtopic-btn" onclick="showTopic('ms-observability')">Observability &amp; Tracing</button>
+          </div>
+        </div>
+
+        <!-- System Design -->
+        <div class="category-block" data-category="systemdesign">
+          <button class="category-btn" onclick="toggleCategory(this, 'systemdesign')">
+            <span class="cat-icon">🏗️</span>
+            <span class="cat-label">System Design</span>
+            <span class="cat-count">3</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="subtopic-list" id="sub-systemdesign">
+            <button class="subtopic-btn" onclick="showTopic('sd-scalability')">Scalability Principles</button>
+            <button class="subtopic-btn" onclick="showTopic('sd-caching')">Caching Strategies</button>
+            <button class="subtopic-btn" onclick="showTopic('sd-database')">Database Design</button>
+          </div>
+        </div>
+
+        <!-- DevOps -->
+        <div class="category-block" data-category="devops">
+          <button class="category-btn" onclick="toggleCategory(this, 'devops')">
+            <span class="cat-icon">🚀</span>
+            <span class="cat-label">DevOps &amp; CI/CD</span>
+            <span class="cat-count">3</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="subtopic-list" id="sub-devops">
+            <button class="subtopic-btn" onclick="showTopic('devops-docker')">Docker &amp; Containers</button>
+            <button class="subtopic-btn" onclick="showTopic('devops-kubernetes')">Kubernetes</button>
+            <button class="subtopic-btn" onclick="showTopic('devops-jenkins')">Jenkins Pipelines</button>
+          </div>
+        </div>
+
+
+        <!-- Kubernetes -->
+        <div class="category-block" data-category="kubernetes">
+          <button class="category-btn" onclick="toggleCategory(this, 'kubernetes')">
+            <span class="cat-icon">⎈</span>
+            <span class="cat-label">Kubernetes</span>
+            <span class="cat-count">1</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="subtopic-list" id="sub-kubernetes">
+            <button class="subtopic-btn" onclick="window.location.href='ingress.html'">Ingress ↗</button>
+          </div>
+        </div>
+
+      </div><!-- /sidebar-menu -->
+    </aside>
+
+    <!-- CONTENT PANEL -->
+    <main class="content-panel">
+
+      <!-- Default placeholder -->
+      <div class="content-placeholder" id="placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <p>Select a topic from the left to start reading</p>
+      </div>
+
+      <!-- ═══════════════ JAVA TOPICS ═══════════════ -->
+
+      <!-- Java: Exceptions -->
+      <article class="topic-content" id="java-exceptions">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">☕ Java › <span>Exceptions</span></div>
+            <div class="topic-title">Exception Handling in Java</div>
+            <div class="tag-row">
+              <span class="tag">Checked</span><span class="tag">Unchecked</span>
+              <span class="tag">try-catch</span><span class="tag">Custom Exceptions</span>
+            </div>
+          </div>
+          <span class="topic-badge">Core Java</span>
+        </div>
+        <div class="topic-body">
+          <h3>What is an Exception?</h3>
+          <p>An exception is an event that disrupts the normal flow of a program. Java uses a hierarchy rooted at <code>Throwable</code>, branching into <code>Error</code> (JVM-level) and <code>Exception</code> (application-level).</p>
+
+          <h3>Checked vs. Unchecked</h3>
+          <ul>
+            <li><strong>Checked</strong> — must be declared or caught (e.g. <code>IOException</code>, <code>SQLException</code>).</li>
+            <li><strong>Unchecked</strong> — extends <code>RuntimeException</code>; no obligation to catch (e.g. <code>NullPointerException</code>, <code>ArrayIndexOutOfBoundsException</code>).</li>
+          </ul>
+
+          <h3>try-catch-finally</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="kw">try</span> {
+    <span class="cl">FileReader</span> fr = <span class="kw">new</span> <span class="cl">FileReader</span>(<span class="st">"data.txt"</span>);
+} <span class="kw">catch</span> (<span class="cl">FileNotFoundException</span> e) {
+    <span class="cl">System</span>.err.println(<span class="st">"File not found: "</span> + e.getMessage());
+} <span class="kw">finally</span> {
+    <span class="cm">// always runs — release resources here</span>
+}</pre>
+          </div>
+
+          <h3>try-with-resources (Java 7+)</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="kw">try</span> (<span class="cl">BufferedReader</span> br = <span class="kw">new</span> <span class="cl">BufferedReader</span>(<span class="kw">new</span> <span class="cl">FileReader</span>(<span class="st">"data.txt"</span>))) {
+    <span class="cl">String</span> line = br.readLine();
+} <span class="kw">catch</span> (<span class="cl">IOException</span> e) {
+    e.printStackTrace();
+}
+<span class="cm">// br.close() is called automatically</span></pre>
+          </div>
+
+          <h3>Custom Exceptions</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="kw">public class</span> <span class="cl">PaymentException</span> <span class="kw">extends</span> <span class="cl">RuntimeException</span> {
+    <span class="kw">private final int</span> errorCode;
+
+    <span class="kw">public</span> <span class="cl">PaymentException</span>(<span class="cl">String</span> msg, <span class="kw">int</span> errorCode) {
+        <span class="kw">super</span>(msg);
+        <span class="kw">this</span>.errorCode = errorCode;
+    }
+    <span class="kw">public int</span> getErrorCode() { <span class="kw">return</span> errorCode; }
+}</pre>
+          </div>
+
+          <div class="tip-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p><strong>Best practice:</strong> Prefer specific exception types over generic <code>Exception</code> — it improves readability and lets callers handle only the errors they care about.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Java: Threads -->
+      <article class="topic-content" id="java-threads">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">☕ Java › <span>Threads &amp; Concurrency</span></div>
+            <div class="topic-title">Threads &amp; Concurrency</div>
+            <div class="tag-row">
+              <span class="tag">Thread</span><span class="tag">Runnable</span>
+              <span class="tag">ExecutorService</span><span class="tag">synchronized</span>
+            </div>
+          </div>
+          <span class="topic-badge">Core Java</span>
+        </div>
+        <div class="topic-body">
+          <h3>Creating Threads</h3>
+          <p>Two classic approaches: extending <code>Thread</code> or implementing <code>Runnable</code>. Modern code should use <code>ExecutorService</code> instead of raw threads.</p>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="cm">// Preferred: Runnable via ExecutorService</span>
+<span class="cl">ExecutorService</span> pool = <span class="cl">Executors</span>.newFixedThreadPool(4);
+pool.submit(() -&gt; {
+    <span class="cl">System</span>.out.println(<span class="st">"Running in: "</span> + <span class="cl">Thread</span>.currentThread().getName());
+});
+pool.shutdown();</pre>
+          </div>
+
+          <h3>Synchronization</h3>
+          <p>Use <code>synchronized</code> to protect shared mutable state from concurrent access:</p>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="kw">public synchronized void</span> increment() {
+    counter++;  <span class="cm">// thread-safe</span>
+}
+
+<span class="cm">// Or use AtomicInteger for simple counters</span>
+<span class="cl">AtomicInteger</span> counter = <span class="kw">new</span> <span class="cl">AtomicInteger</span>(0);
+counter.incrementAndGet();</pre>
+          </div>
+
+          <h3>CompletableFuture (Java 8+)</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="cl">CompletableFuture</span>.supplyAsync(() -&gt; fetchData())
+    .thenApply(data -&gt; transform(data))
+    .thenAccept(result -&gt; save(result))
+    .exceptionally(ex -&gt; { log(ex); <span class="kw">return null</span>; });</pre>
+          </div>
+
+          <div class="warn-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <p>Avoid sharing mutable state across threads without proper synchronization — it leads to race conditions that are notoriously hard to reproduce and debug.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Java: Files -->
+      <article class="topic-content" id="java-files">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">☕ Java › <span>File I/O &amp; NIO</span></div>
+            <div class="topic-title">File I/O &amp; NIO.2</div>
+            <div class="tag-row">
+              <span class="tag">java.io</span><span class="tag">java.nio</span>
+              <span class="tag">Path</span><span class="tag">Files</span>
+            </div>
+          </div>
+          <span class="topic-badge">Core Java</span>
+        </div>
+        <div class="topic-body">
+          <h3>Legacy IO vs NIO.2</h3>
+          <p>The legacy <code>java.io.File</code> API has many limitations. Java 7 introduced <code>java.nio.file</code> with a far richer and more reliable API.</p>
+
+          <h3>Reading a File</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="cl">Path</span> path = <span class="cl">Paths</span>.get(<span class="st">"data/config.txt"</span>);
+
+<span class="cm">// Read all lines</span>
+<span class="cl">List</span>&lt;<span class="cl">String</span>&gt; lines = <span class="cl">Files</span>.readAllLines(path, <span class="cl">StandardCharsets</span>.UTF_8);
+
+<span class="cm">// Stream lines lazily (efficient for large files)</span>
+<span class="kw">try</span> (<span class="cl">Stream</span>&lt;<span class="cl">String</span>&gt; stream = <span class="cl">Files</span>.lines(path)) {
+    stream.filter(l -&gt; l.startsWith(<span class="st">"#"</span>)).forEach(<span class="cl">System</span>.out::println);
+}</pre>
+          </div>
+
+          <h3>Writing a File</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="cl">Files</span>.writeString(path, <span class="st">"Hello World\n"</span>, <span class="cl">StandardOpenOption</span>.CREATE);
+
+<span class="cm">// Append mode</span>
+<span class="cl">Files</span>.writeString(path, <span class="st">"More content\n"</span>,
+    <span class="cl">StandardOpenOption</span>.APPEND, <span class="cl">StandardOpenOption</span>.CREATE);</pre>
+          </div>
+
+          <h3>Working with Paths</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="cl">Path</span> dir = <span class="cl">Path</span>.of(<span class="st">"/app/data"</span>);
+<span class="cl">Files</span>.createDirectories(dir);
+<span class="cl">Files</span>.copy(src, dest, <span class="cl">StandardCopyOption</span>.REPLACE_EXISTING);
+<span class="cl">Files</span>.move(src, dest);
+<span class="cl">Files</span>.delete(path);
+
+<span class="cm">// Walk directory tree</span>
+<span class="cl">Files</span>.walk(dir)
+     .filter(<span class="cl">Files</span>::isRegularFile)
+     .forEach(<span class="cl">System</span>.out::println);</pre>
+          </div>
+
+          <div class="tip-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>Always use <code>Files.lines()</code> inside a try-with-resources block — the underlying stream holds an open file handle that must be closed.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Java: Streams -->
+      <article class="topic-content" id="java-streams">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">☕ Java › <span>Streams &amp; Lambdas</span></div>
+            <div class="topic-title">Streams &amp; Lambda Expressions</div>
+            <div class="tag-row">
+              <span class="tag">Stream API</span><span class="tag">Lambda</span>
+              <span class="tag">map</span><span class="tag">filter</span><span class="tag">reduce</span>
+            </div>
+          </div>
+          <span class="topic-badge">Java 8+</span>
+        </div>
+        <div class="topic-body">
+          <h3>Stream Pipeline</h3>
+          <p>A stream pipeline has a <em>source</em>, zero or more <em>intermediate</em> operations, and a <em>terminal</em> operation. Intermediate operations are lazy — they execute only when a terminal operation is invoked.</p>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="cl">List</span>&lt;<span class="cl">String</span>&gt; seniors = employees.stream()
+    .filter(e -&gt; e.getYearsExp() &gt; 10)
+    .map(<span class="cl">Employee</span>::getName)
+    .sorted()
+    .collect(<span class="cl">Collectors</span>.toList());</pre>
+          </div>
+
+          <h3>Collectors</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="cm">// Group by department</span>
+<span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">List</span>&lt;<span class="cl">Employee</span>&gt;&gt; byDept =
+    employees.stream()
+             .collect(<span class="cl">Collectors</span>.groupingBy(<span class="cl">Employee</span>::getDept));
+
+<span class="cm">// Average salary</span>
+<span class="kw">double</span> avg = employees.stream()
+    .collect(<span class="cl">Collectors</span>.averagingDouble(<span class="cl">Employee</span>::getSalary));</pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- Java: Collections -->
+      <article class="topic-content" id="java-collections">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">☕ Java › <span>Collections Framework</span></div>
+            <div class="topic-title">Collections Framework</div>
+            <div class="tag-row">
+              <span class="tag">List</span><span class="tag">Map</span><span class="tag">Set</span><span class="tag">Queue</span>
+            </div>
+          </div>
+          <span class="topic-badge">Core Java</span>
+        </div>
+        <div class="topic-body">
+          <h3>Choosing the Right Collection</h3>
+          <ul>
+            <li><strong>ArrayList</strong> — fast random access, slow insertion at middle.</li>
+            <li><strong>LinkedList</strong> — fast insertions/deletions, slow random access.</li>
+            <li><strong>HashMap</strong> — O(1) average get/put; not thread-safe.</li>
+            <li><strong>ConcurrentHashMap</strong> — thread-safe alternative to HashMap.</li>
+            <li><strong>TreeMap</strong> — sorted keys, O(log n) operations.</li>
+            <li><strong>LinkedHashMap</strong> — maintains insertion order.</li>
+          </ul>
+          <div class="tip-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>For concurrent environments, prefer <code>ConcurrentHashMap</code> or <code>Collections.synchronizedMap()</code> over plain <code>HashMap</code>.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Java: JVM -->
+      <article class="topic-content" id="java-jvm">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">☕ Java › <span>JVM Internals</span></div>
+            <div class="topic-title">JVM Internals</div>
+            <div class="tag-row">
+              <span class="tag">Heap</span><span class="tag">GC</span><span class="tag">ClassLoader</span><span class="tag">JIT</span>
+            </div>
+          </div>
+          <span class="topic-badge">Advanced</span>
+        </div>
+        <div class="topic-body">
+          <h3>Memory Areas</h3>
+          <ul>
+            <li><strong>Heap</strong> — object storage, divided into Young Gen and Old Gen.</li>
+            <li><strong>Stack</strong> — per-thread, stores frames (local vars + operand stack).</li>
+            <li><strong>Metaspace</strong> — class metadata (replaced PermGen since Java 8).</li>
+          </ul>
+          <h3>Garbage Collection</h3>
+          <p>Modern JVMs ship with multiple GC algorithms: G1 (default since Java 9), ZGC (low-latency), Shenandoah. Tune with <code>-Xms</code>, <code>-Xmx</code>, and GC-specific flags.</p>
+          <div class="tip-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>Enable GC logging in production (<code>-Xlog:gc*</code>) to spot memory leaks and long stop-the-world pauses before they become incidents.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- ═══════════════ SPRING TOPICS ═══════════════ -->
+
+      <article class="topic-content" id="spring-di">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🌱 Spring Boot › <span>Dependency Injection</span></div>
+            <div class="topic-title">Dependency Injection</div>
+            <div class="tag-row"><span class="tag">@Autowired</span><span class="tag">@Bean</span><span class="tag">IoC</span></div>
+          </div>
+          <span class="topic-badge">Spring</span>
+        </div>
+        <div class="topic-body">
+          <h3>Constructor Injection (Preferred)</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">PaymentService</span> {
+    <span class="kw">private final</span> <span class="cl">PaymentRepository</span> repo;
+
+    <span class="cm">// @Autowired is implicit when single constructor</span>
+    <span class="kw">public</span> <span class="cl">PaymentService</span>(<span class="cl">PaymentRepository</span> repo) {
+        <span class="kw">this</span>.repo = repo;
+    }
+}</pre>
+          </div>
+          <div class="tip-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>Constructor injection makes dependencies explicit and enables immutability — prefer it over field injection (<code>@Autowired</code> on fields).</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="spring-rest">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🌱 Spring Boot › <span>REST APIs</span></div>
+            <div class="topic-title">Building REST APIs</div>
+            <div class="tag-row"><span class="tag">@RestController</span><span class="tag">ResponseEntity</span><span class="tag">@RequestBody</span></div>
+          </div>
+          <span class="topic-badge">Spring</span>
+        </div>
+        <div class="topic-body">
+          <h3>Controller Skeleton</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/api/v1/payments"</span>)
+<span class="kw">public class</span> <span class="cl">PaymentController</span> {
+
+    <span class="an">@PostMapping</span>
+    <span class="kw">public</span> <span class="cl">ResponseEntity</span>&lt;<span class="cl">PaymentDto</span>&gt; create(<span class="an">@RequestBody</span> <span class="an">@Valid</span> <span class="cl">PaymentRequest</span> req) {
+        <span class="cl">PaymentDto</span> result = service.process(req);
+        <span class="kw">return</span> <span class="cl">ResponseEntity</span>.status(<span class="cl">HttpStatus</span>.CREATED).body(result);
+    }
+
+    <span class="an">@GetMapping</span>(<span class="st">"/{id}"</span>)
+    <span class="kw">public</span> <span class="cl">ResponseEntity</span>&lt;<span class="cl">PaymentDto</span>&gt; get(<span class="an">@PathVariable</span> <span class="cl">Long</span> id) {
+        <span class="kw">return</span> service.findById(id)
+                      .map(<span class="cl">ResponseEntity</span>::ok)
+                      .orElse(<span class="cl">ResponseEntity</span>.notFound().build());
+    }
+}</pre>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="spring-security">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🌱 Spring Boot › <span>Spring Security</span></div>
+            <div class="topic-title">Spring Security</div>
+            <div class="tag-row"><span class="tag">JWT</span><span class="tag">OAuth2</span><span class="tag">Filter Chain</span></div>
+          </div>
+          <span class="topic-badge">Spring</span>
+        </div>
+        <div class="topic-body">
+          <h3>Security Filter Chain</h3>
+          <p>Spring Security intercepts every request through a chain of filters. Define your security rules via <code>SecurityFilterChain</code> bean.</p>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="an">@Bean</span>
+<span class="kw">public</span> <span class="cl">SecurityFilterChain</span> filterChain(<span class="cl">HttpSecurity</span> http) <span class="kw">throws</span> <span class="cl">Exception</span> {
+    <span class="kw">return</span> http
+        .csrf().disable()
+        .authorizeHttpRequests(auth -&gt; auth
+            .requestMatchers(<span class="st">"/api/public/**"</span>).permitAll()
+            .anyRequest().authenticated())
+        .oauth2ResourceServer(<span class="cl">OAuth2ResourceServerConfigurer</span>::jwt)
+        .build();
+}</pre>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="spring-data">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🌱 Spring Boot › <span>Spring Data &amp; JPA</span></div>
+            <div class="topic-title">Spring Data &amp; JPA</div>
+            <div class="tag-row"><span class="tag">JpaRepository</span><span class="tag">@Entity</span><span class="tag">JPQL</span></div>
+          </div>
+          <span class="topic-badge">Spring</span>
+        </div>
+        <div class="topic-body">
+          <h3>Repository Pattern</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="kw">public interface</span> <span class="cl">PaymentRepository</span> <span class="kw">extends</span> <span class="cl">JpaRepository</span>&lt;<span class="cl">Payment</span>, <span class="cl">Long</span>&gt; {
+    <span class="cl">List</span>&lt;<span class="cl">Payment</span>&gt; findByStatusAndCreatedAtAfter(<span class="cl">String</span> status, <span class="cl">LocalDateTime</span> since);
+
+    <span class="an">@Query</span>(<span class="st">"SELECT p FROM Payment p WHERE p.amount &gt; :min"</span>)
+    <span class="cl">List</span>&lt;<span class="cl">Payment</span>&gt; findLargePayments(<span class="an">@Param</span>(<span class="st">"min"</span>) <span class="cl">BigDecimal</span> min);
+}</pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- ═══════════════ MICROSERVICES TOPICS ═══════════════ -->
+
+      <article class="topic-content" id="ms-patterns">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🔗 Microservices › <span>Design Patterns</span></div>
+            <div class="topic-title">Microservices Design Patterns</div>
+            <div class="tag-row"><span class="tag">Saga</span><span class="tag">CQRS</span><span class="tag">API Gateway</span><span class="tag">Strangler Fig</span></div>
+          </div>
+          <span class="topic-badge">Architecture</span>
+        </div>
+        <div class="topic-body">
+          <h3>Key Patterns</h3>
+          <ul>
+            <li><strong>API Gateway</strong> — single entry point; handles routing, auth, rate limiting.</li>
+            <li><strong>Saga</strong> — manages distributed transactions via a sequence of local transactions with compensating actions.</li>
+            <li><strong>CQRS</strong> — separates reads and writes for independent scalability.</li>
+            <li><strong>Sidecar</strong> — auxiliary services (logging, proxy) deployed alongside the main service.</li>
+            <li><strong>Strangler Fig</strong> — incremental migration from monolith by routing traffic slice by slice.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="topic-content" id="ms-communication">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🔗 Microservices › <span>Service Communication</span></div>
+            <div class="topic-title">Service Communication</div>
+            <div class="tag-row"><span class="tag">REST</span><span class="tag">gRPC</span><span class="tag">Kafka</span><span class="tag">RabbitMQ</span></div>
+          </div>
+          <span class="topic-badge">Architecture</span>
+        </div>
+        <div class="topic-body">
+          <h3>Sync vs. Async</h3>
+          <p><strong>Synchronous (REST/gRPC)</strong> — simple request-response; tight coupling. Use when an immediate response is required.</p>
+          <p><strong>Asynchronous (Kafka/RabbitMQ)</strong> — decouples producer and consumer; improves resilience and scalability. Use for event-driven workflows.</p>
+          <div class="tip-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>At JP Morgan Chase, payment events are published to Kafka topics, allowing downstream services (notifications, audit) to react independently — zero coupling.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="ms-resilience">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🔗 Microservices › <span>Resilience</span></div>
+            <div class="topic-title">Resilience &amp; Circuit Breaker</div>
+            <div class="tag-row"><span class="tag">Resilience4j</span><span class="tag">Retry</span><span class="tag">Bulkhead</span><span class="tag">Timeout</span></div>
+          </div>
+          <span class="topic-badge">Architecture</span>
+        </div>
+        <div class="topic-body">
+          <h3>Circuit Breaker with Resilience4j</h3>
+          <div class="code-block">
+            <span class="lang-tag">Java</span>
+<pre><span class="an">@CircuitBreaker</span>(name = <span class="st">"paymentService"</span>, fallbackMethod = <span class="st">"fallback"</span>)
+<span class="an">@Retry</span>(name = <span class="st">"paymentService"</span>)
+<span class="kw">public</span> <span class="cl">PaymentResponse</span> processPayment(<span class="cl">PaymentRequest</span> req) {
+    <span class="kw">return</span> paymentClient.process(req);
+}
+
+<span class="kw">public</span> <span class="cl">PaymentResponse</span> fallback(<span class="cl">PaymentRequest</span> req, <span class="cl">Exception</span> ex) {
+    <span class="kw">return</span> <span class="cl">PaymentResponse</span>.serviceUnavailable();
+}</pre>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="ms-observability">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🔗 Microservices › <span>Observability</span></div>
+            <div class="topic-title">Observability &amp; Distributed Tracing</div>
+            <div class="tag-row"><span class="tag">OpenTelemetry</span><span class="tag">Zipkin</span><span class="tag">Prometheus</span><span class="tag">Grafana</span></div>
+          </div>
+          <span class="topic-badge">Operations</span>
+        </div>
+        <div class="topic-body">
+          <h3>The Three Pillars</h3>
+          <ul>
+            <li><strong>Logs</strong> — structured JSON logs with correlation IDs for searchability.</li>
+            <li><strong>Metrics</strong> — Prometheus counters/histograms scraped and visualised in Grafana.</li>
+            <li><strong>Traces</strong> — distributed traces via OpenTelemetry + Zipkin to track a request across services.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═══════════════ SYSTEM DESIGN TOPICS ═══════════════ -->
+
+      <article class="topic-content" id="sd-scalability">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🏗️ System Design › <span>Scalability</span></div>
+            <div class="topic-title">Scalability Principles</div>
+            <div class="tag-row"><span class="tag">Horizontal Scaling</span><span class="tag">Load Balancing</span><span class="tag">Stateless</span></div>
+          </div>
+          <span class="topic-badge">Architecture</span>
+        </div>
+        <div class="topic-body">
+          <h3>Horizontal vs. Vertical Scaling</h3>
+          <p><strong>Vertical</strong> (scale-up) — add more CPU/RAM to a single node. Has a ceiling and a single point of failure.</p>
+          <p><strong>Horizontal</strong> (scale-out) — add more nodes behind a load balancer. Preferred for modern cloud-native apps.</p>
+          <h3>Stateless Services</h3>
+          <p>Keep services stateless — move session data to a shared store (Redis, Hazelcast). Any node can handle any request, enabling seamless horizontal scaling.</p>
+        </div>
+      </article>
+
+      <article class="topic-content" id="sd-caching">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🏗️ System Design › <span>Caching</span></div>
+            <div class="topic-title">Caching Strategies</div>
+            <div class="tag-row"><span class="tag">Redis</span><span class="tag">Cache-Aside</span><span class="tag">Write-Through</span><span class="tag">TTL</span></div>
+          </div>
+          <span class="topic-badge">Architecture</span>
+        </div>
+        <div class="topic-body">
+          <h3>Common Strategies</h3>
+          <ul>
+            <li><strong>Cache-aside (lazy loading)</strong> — app checks cache; on miss, loads from DB and populates cache.</li>
+            <li><strong>Write-through</strong> — write goes to cache and DB simultaneously; cache always consistent.</li>
+            <li><strong>Write-behind</strong> — write to cache immediately, persist to DB asynchronously; risk of data loss.</li>
+          </ul>
+          <div class="warn-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <p>Always set a TTL on cache entries to prevent stale data and avoid unbounded cache growth.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="sd-database">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🏗️ System Design › <span>Database Design</span></div>
+            <div class="topic-title">Database Design</div>
+            <div class="tag-row"><span class="tag">Indexing</span><span class="tag">Sharding</span><span class="tag">ACID</span><span class="tag">CAP Theorem</span></div>
+          </div>
+          <span class="topic-badge">Architecture</span>
+        </div>
+        <div class="topic-body">
+          <h3>Indexing Strategy</h3>
+          <p>Create indexes on columns used in <code>WHERE</code>, <code>JOIN</code>, and <code>ORDER BY</code> clauses. Avoid over-indexing — each index slows down writes.</p>
+          <h3>CAP Theorem</h3>
+          <p>Distributed systems can guarantee at most two of: <strong>Consistency</strong>, <strong>Availability</strong>, <strong>Partition tolerance</strong>. Most cloud databases make this a configurable trade-off.</p>
+        </div>
+      </article>
+
+      <!-- ═══════════════ DEVOPS TOPICS ═══════════════ -->
+
+      <article class="topic-content" id="devops-docker">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🚀 DevOps › <span>Docker</span></div>
+            <div class="topic-title">Docker &amp; Containers</div>
+            <div class="tag-row"><span class="tag">Dockerfile</span><span class="tag">Image</span><span class="tag">Container</span><span class="tag">Compose</span></div>
+          </div>
+          <span class="topic-badge">DevOps</span>
+        </div>
+        <div class="topic-body">
+          <h3>Minimal Dockerfile (Multi-Stage)</h3>
+          <div class="code-block">
+            <span class="lang-tag">Dockerfile</span>
+<pre><span class="cm"># Build stage</span>
+<span class="kw">FROM</span> eclipse-temurin:21-jdk AS build
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> . .
+<span class="kw">RUN</span> ./mvnw package -DskipTests
+
+<span class="cm"># Runtime stage</span>
+<span class="kw">FROM</span> eclipse-temurin:21-jre
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> --from=build /app/target/app.jar app.jar
+<span class="kw">EXPOSE</span> 8080
+<span class="kw">ENTRYPOINT</span> ["java", "-jar", "app.jar"]</pre>
+          </div>
+          <div class="tip-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>Multi-stage builds keep final images lean — the JDK (build tools) never ends up in the production image.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="devops-kubernetes">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🚀 DevOps › <span>Kubernetes</span></div>
+            <div class="topic-title">Kubernetes Essentials</div>
+            <div class="tag-row"><span class="tag">Pod</span><span class="tag">Deployment</span><span class="tag">Service</span><span class="tag">ConfigMap</span></div>
+          </div>
+          <span class="topic-badge">DevOps</span>
+        </div>
+        <div class="topic-body">
+          <h3>Deployment Manifest</h3>
+          <div class="code-block">
+            <span class="lang-tag">YAML</span>
+<pre>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    spec:
+      containers:
+        - name: payment-service
+          image: registry/payment-service:1.2.0
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"</pre>
+          </div>
+        </div>
+      </article>
+
+      <article class="topic-content" id="devops-jenkins">
+        <div class="topic-header">
+          <div>
+            <div class="topic-breadcrumb">🚀 DevOps › <span>Jenkins Pipelines</span></div>
+            <div class="topic-title">Jenkins CI/CD Pipelines</div>
+            <div class="tag-row"><span class="tag">Jenkinsfile</span><span class="tag">Declarative</span><span class="tag">Stages</span><span class="tag">Docker</span></div>
+          </div>
+          <span class="topic-badge">DevOps</span>
+        </div>
+        <div class="topic-body">
+          <h3>Declarative Pipeline</h3>
+          <div class="code-block">
+            <span class="lang-tag">Groovy</span>
+<pre>pipeline {
+  agent { docker { image <span class="st">'eclipse-temurin:21'</span> } }
+  stages {
+    stage(<span class="st">'Build'</span>) {
+      steps { sh <span class="st">'./mvnw clean package -DskipTests'</span> }
+    }
+    stage(<span class="st">'Test'</span>) {
+      steps { sh <span class="st">'./mvnw test'</span> }
+      post { always { junit <span class="st">'**/target/surefire-reports/*.xml'</span> } }
+    }
+    stage(<span class="st">'Deploy'</span>) {
+      when { branch <span class="st">'main'</span> }
+      steps { sh <span class="st">'kubectl apply -f k8s/'</span> }
+    }
+  }
+}</pre>
+          </div>
+        </div>
+      </article>
+
+    </main>
+  </div>
+
+  <script>
+    let activeTopic = null;
+    let activeCategory = null;
+    let activeCatBtn = null;
+
+    function toggleCategory(btn, cat) {
+      const subList = document.getElementById('sub-' + cat);
+      const isOpen = subList.classList.contains('open');
+
+      // Close all
+      document.querySelectorAll('.subtopic-list').forEach(l => l.classList.remove('open'));
+      document.querySelectorAll('.category-btn').forEach(b => { b.classList.remove('open'); b.classList.remove('active'); });
+
+      if (!isOpen) {
+        subList.classList.add('open');
+        btn.classList.add('open');
+        btn.classList.add('active');
+        activeCategory = cat;
+        activeCatBtn = btn;
+      } else {
+        activeCategory = null;
+        activeCatBtn = null;
+      }
+    }
+
+    function showTopic(id) {
+      // Hide all topics & placeholder
+      document.querySelectorAll('.topic-content').forEach(t => t.classList.remove('active'));
+      document.getElementById('placeholder').style.display = 'none';
+
+      // Show selected
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+      activeTopic = id;
+
+      // Highlight subtopic button
+      document.querySelectorAll('.subtopic-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.subtopic-btn').forEach(b => {
+        if (b.getAttribute('onclick') === "showTopic('" + id + "')") b.classList.add('active');
+      });
+
+      // Scroll content to top on mobile
+      if (window.innerWidth <= 768) {
+        document.querySelector('.content-panel').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function filterTopics(query) {
+      const q = query.toLowerCase().trim();
+      document.querySelectorAll('.category-block').forEach(block => {
+        const catName = block.querySelector('.cat-label').textContent.toLowerCase();
+        const subtopicBtns = block.querySelectorAll('.subtopic-btn');
+        let anyMatch = false;
+
+        subtopicBtns.forEach(btn => {
+          const text = btn.textContent.toLowerCase();
+          const match = !q || text.includes(q) || catName.includes(q);
+          btn.style.display = match ? '' : 'none';
+          if (match) anyMatch = true;
+        });
+
+        block.style.display = anyMatch ? '' : 'none';
+        if (q && anyMatch) {
+          block.querySelector('.subtopic-list').classList.add('open');
+          block.querySelector('.category-btn').classList.add('open', 'active');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

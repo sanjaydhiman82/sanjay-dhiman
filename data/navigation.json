@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Profile",
+    "description": "View and manage your personal profile, resume, and AI career progress.",
+    "url": "profile.html",
+    "icon": "👤"
+  },
+  {
+    "name": "MeetMind",
+    "description": "AI-powered meeting assistant for live transcription, insights, and suggestions.",
+    "url": "http://localhost:5173/",
+    "icon": "🎤"
+  },
+  {
+    "name": "RoleForge",
+    "description": "AI career platform to generate resumes, analyze skill gaps, and plan your next role.",
+    "url": "http://localhost:8002/",
+    "icon": "🚀"
+  },
+  {
+    "name": "Projects",
+    "description": "Explore and build real-world AI projects to strengthen your portfolio.",
+    "url": "project.html",
+    "icon": "📦"
+  },
+  {
+    "name": "Learning",
+    "description": "Track your AI learning roadmap including Python, LLMs, and system design.",
+    "url": "learning.html",
+    "icon": "📚"
+  },
+  {
+    "name": "Agentic Skills",
+    "description": "Learn prompt engineering, agent design, and AI system thinking.",
+    "url": "agenticskills.html",
+    "icon": "🤖"
+  },
+  {
+    "name": "Tools",
+    "description": "Access curated AI tools like LangChain, OpenAI, and vector databases.",
+    "url": "agentictools.html",
+    "icon": "🛠️"
+  }
+]

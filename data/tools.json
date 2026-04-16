@@ -1,0 +1,110 @@
+[
+  {
+    "name": "LangChain",
+    "description": "Framework for building applications powered by large language models with chains, agents, and memory.",
+    "url": "https://python.langchain.com/",
+    "icon": "⛓️",
+    "category": "Frameworks",
+    "type": "Open Source",
+    "pricing": "Free"
+  },
+  {
+    "name": "OpenAI API",
+    "description": "Powerful language models including GPT-4, GPT-3.5, and embedding models for various AI applications.",
+    "url": "https://platform.openai.com/",
+    "icon": "🤖",
+    "category": "Platforms",
+    "type": "Commercial",
+    "pricing": "Pay-as-you-go"
+  },
+  {
+    "name": "Pinecone",
+    "description": "Vector database for semantic search, recommendation, and AI applications with high performance.",
+    "url": "https://www.pinecone.io/",
+    "icon": "🌲",
+    "category": "Vector Databases",
+    "type": "Commercial",
+    "pricing": "Free tier + Paid"
+  },
+  {
+    "name": "ChromaDB",
+    "description": "Open-source embedding database designed for AI applications with simple API and local deployment.",
+    "url": "https://www.trychroma.com/",
+    "icon": "🎨",
+    "category": "Vector Databases",
+    "type": "Open Source",
+    "pricing": "Free"
+  },
+  {
+    "name": "Hugging Face",
+    "description": "Platform for sharing and discovering models, datasets, and ML tools with collaborative features.",
+    "url": "https://huggingface.co/",
+    "icon": "🤗",
+    "category": "Model Hubs",
+    "type": "Platform",
+    "pricing": "Free + Paid"
+  },
+  {
+    "name": "Anthropic Claude",
+    "description": "Constitutional AI assistant with strong safety features and advanced reasoning capabilities.",
+    "url": "https://claude.ai/",
+    "icon": "🧠",
+    "category": "AI Assistants",
+    "type": "Commercial",
+    "pricing": "Subscription"
+  },
+  {
+    "name": "FAISS",
+    "description": "Facebook AI Similarity Search - library for efficient similarity search and clustering of dense vectors.",
+    "url": "https://github.com/facebookresearch/faiss",
+    "icon": "🔍",
+    "category": "Vector Databases",
+    "type": "Open Source",
+    "pricing": "Free"
+  },
+  {
+    "name": "CrewAI",
+    "description": "Framework for building multi-agent AI systems with role-based agents and collaborative workflows.",
+    "url": "https://www.crewai.com/",
+    "icon": "👥",
+    "category": "Agent Frameworks",
+    "type": "Open Source",
+    "pricing": "Free"
+  },
+  {
+    "name": "AutoGen",
+    "description": "Microsoft's multi-agent conversation framework for building complex AI applications.",
+    "url": "https://github.com/microsoft/autogen",
+    "icon": "🔄",
+    "category": "Agent Frameworks",
+    "type": "Open Source",
+    "pricing": "Free"
+  },
+  {
+    "name": "Weaviate",
+    "description": "Vector database with GraphQL API, real-time updates, and semantic search capabilities.",
+    "url": "https://weaviate.io/",
+    "icon": "🔮",
+    "category": "Vector Databases",
+    "type": "Open Source",
+    "pricing": "Free + Cloud"
+  },
+  {
+    "name": "Ollama",
+    "description": "Run large language models locally with support for various models and easy setup.",
+    "url": "https://ollama.ai/",
+    "icon": "🦙",
+    "category": "Model Serving",
+    "type": "Open Source",
+    "pricing": "Free"
+  },
+  {
+    "name": "LlamaIndex",
+    "description": "Data framework for LLM applications with data connectors, indexing, and query engines.",
+    "url": "https://www.llamaindex.ai/",
+    "icon": "🦙",
+    "category": "Frameworks",
+    "type": "Open Source",
+    "pricing": "Free"
+  }
+]

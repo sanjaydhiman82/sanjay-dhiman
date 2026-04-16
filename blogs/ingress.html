@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kubernetes Ingress — Comprehensive Deep Dive | Sanjay Dhiman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0f172a; --blue: #1e40af; --accent: #3b82f6;
+      --gold: #f59e0b; --light: #f8fafc; --muted: #64748b;
+      --border: #e2e8f0; --white: #ffffff;
+      --grad: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1e40af 100%);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--navy); line-height: 1.7; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(15,23,42,0.95); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 56px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-logo { color: var(--white); font-weight: 700; font-size: 1rem; }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--white); }
+    .page-hero { background: var(--grad); padding: 90px 2rem 40px; text-align: center; }
+    .page-hero .breadcrumb { color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-bottom: 0.75rem; }
+    .page-hero .breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; }
+    .page-hero .breadcrumb a:hover { color: var(--white); }
+    .page-hero .breadcrumb .sep { margin: 0 0.4rem; }
+    .page-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem,4vw,2.6rem); color: var(--white); font-weight: 700; line-height: 1.2; margin-bottom: 0.6rem; }
+    .page-hero .topic-badge { display: inline-block; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); color: var(--gold); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 100px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-top: 0.75rem; }
+    .tag { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2); font-size: 0.72rem; font-weight: 500; padding: 0.2rem 0.6rem; border-radius: 100px; }
+    .blog-container { max-width: 900px; margin: 2.5rem auto 4rem; padding: 0 1.5rem; }
+    .toc-box { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
+    .toc-box h2 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; }
+    .toc-box ol { padding-left: 1.25rem; }
+    .toc-box ol li { font-size: 0.85rem; margin-bottom: 0.35rem; }
+    .toc-box ol li a { color: var(--accent); text-decoration: none; }
+    .toc-box ol li a:hover { text-decoration: underline; }
+    .section { margin-bottom: 3rem; scroll-margin-top: 70px; }
+    .section-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); }
+    .section-num { background: var(--navy); color: var(--white); font-size: 0.72rem; font-weight: 700; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .section-header h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--navy); }
+    h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin: 1.5rem 0 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+    h3::before { content: ''; display: inline-block; width: 4px; height: 1em; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+    p { font-size: 0.9rem; color: #475569; margin-bottom: 0.75rem; }
+    ul, ol.content-list { margin: 0.5rem 0 0.75rem 1.4rem; }
+    ul li, ol.content-list li { font-size: 0.88rem; color: #475569; margin-bottom: 0.4rem; }
+    .code-block { background: var(--navy); color: #e2e8f0; border-radius: 10px; padding: 1.25rem 1.5rem; font-family: 'Courier New', Courier, monospace; font-size: 0.82rem; line-height: 1.7; overflow-x: auto; margin: 1rem 0 1.25rem; position: relative; }
+    .code-block .lang-tag { position: absolute; top: 0.6rem; right: 0.8rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); opacity: 0.8; }
+    .code-block .kw { color: #93c5fd; } .code-block .cl { color: #fde68a; }
+    .code-block .cm { color: #6b7280; font-style: italic; } .code-block .st { color: #86efac; }
+    .code-block .an { color: #fb923c; } .code-block .ky { color: #c4b5fd; }
+    .tip-box { display: flex; gap: 0.75rem; align-items: flex-start; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 1rem 1.1rem; margin: 1rem 0; }
+    .tip-box .icon { font-size: 1.1rem; flex-shrink: 0; }
+    .tip-box p { font-size: 0.85rem; color: var(--blue); margin: 0; }
+    .warn-box { display: flex; gap: 0.75rem; align-items: flex-start; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 1rem 1.1rem; margin: 1rem 0; }
+    .warn-box .icon { font-size: 1.1rem; flex-shrink: 0; }
+    .warn-box p { font-size: 0.85rem; color: #92400e; margin: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0 1.25rem; }
+    th { background: var(--navy); color: var(--white); padding: 0.65rem 1rem; text-align: left; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; }
+    td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); color: #475569; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .timeline { list-style: none; padding: 0; margin: 1rem 0; }
+    .timeline li { display: flex; gap: 1.2rem; align-items: flex-start; padding: 0.6rem 0 0.6rem 1.2rem; border-left: 2px solid var(--border); margin-left: 0.5rem; position: relative; }
+    .timeline li::before { content: ''; position: absolute; left: -6px; top: 1.1rem; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--white); }
+    .timeline .year { font-size: 0.78rem; font-weight: 700; color: var(--accent); white-space: nowrap; min-width: 50px; padding-top: 0.15rem; }
+    .timeline .event { font-size: 0.85rem; color: #475569; }
+    .arch-diagram { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1rem 0 1.25rem; }
+    .arch-row { display: flex; gap: 0; align-items: stretch; justify-content: center; flex-wrap: wrap; }
+    .arch-box { background: var(--navy); color: var(--white); border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.78rem; font-weight: 600; text-align: center; white-space: nowrap; }
+    .arch-box.blue { background: var(--accent); }
+    .arch-box.gold { background: var(--gold); color: var(--navy); }
+    .arch-box.green { background: #22c55e; color: var(--white); }
+    .arch-box.purple { background: #8b5cf6; }
+    .arch-box.gray { background: #94a3b8; color: var(--navy); }
+    .arch-arrow { display: flex; align-items: center; padding: 0 0.4rem; color: var(--muted); font-size: 1.1rem; }
+    .arch-col { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .arch-label { font-size: 0.68rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; margin-top: 0.3rem; }
+    .arch-vline { width: 2px; height: 20px; background: var(--border); margin: 0 auto; }
+    .interview-q { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 0.9rem; }
+    .interview-q .q { font-size: 0.9rem; font-weight: 600; color: var(--navy); margin-bottom: 0.5rem; }
+    .interview-q .a { font-size: 0.85rem; color: #475569; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--accent); text-decoration: none; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem; }
+    .back-link:hover { text-decoration: underline; }
+    @media (max-width: 768px) { .blog-container { padding: 0 1rem; } .nav-links { display: none; } .arch-row { flex-direction: column; align-items: center; } .arch-arrow { transform: rotate(90deg); } }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-logo">SD<span>.</span></div>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../profile.html">About</a></li>
+      <li><a href="./index.html" class="active">Blog</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <div class="breadcrumb">
+      <a href="index.html">Blog</a><span class="sep">›</span>
+      <span>⎈ Kubernetes</span><span class="sep">›</span>
+      <span>Ingress</span>
+    </div>
+    <h1>Kubernetes Ingress — Comprehensive Deep Dive</h1>
+    <div class="topic-badge">Kubernetes</div>
+    <div class="tag-row">
+      <span class="tag">Ingress Controller</span>
+      <span class="tag">NGINX</span>
+      <span class="tag">TLS Termination</span>
+      <span class="tag">Path Routing</span>
+      <span class="tag">Host-based Routing</span>
+      <span class="tag">Gateway API</span>
+    </div>
+  </div>
+
+  <div class="blog-container">
+    <a href="index.html" class="back-link">← Back to Blog</a>
+
+    <div class="toc-box">
+      <h2>📋 Table of Contents</h2>
+      <ol>
+        <li><a href="#s1">What is Kubernetes Ingress?</a></li>
+        <li><a href="#s2">Why Does It Exist?</a></li>
+        <li><a href="#s3">Who Should Know This?</a></li>
+        <li><a href="#s4">History &amp; Evolution</a></li>
+        <li><a href="#s5">Core Concepts — Basic 🟢</a></li>
+        <li><a href="#s6">Core Concepts — Intermediate 🟡</a></li>
+        <li><a href="#s7">Core Concepts — Advanced 🔴</a></li>
+        <li><a href="#s8">Architecture &amp; Internals</a></li>
+        <li><a href="#s9">Key Features</a></li>
+        <li><a href="#s10">Key Benefits</a></li>
+        <li><a href="#s11">Key Challenges &amp; Pitfalls</a></li>
+        <li><a href="#s12">Best Practices</a></li>
+        <li><a href="#s13">Ecosystem, Tools &amp; Integrations</a></li>
+        <li><a href="#s14">Competitors &amp; Comparison</a></li>
+        <li><a href="#s15">Key Trends &amp; Future Outlook</a></li>
+        <li><a href="#s16">Interview Questions 🎯</a></li>
+      </ol>
+    </div>
+
+    <!-- S1 -->
+    <div class="section" id="s1">
+      <div class="section-header"><div class="section-num">1</div><h2>What is Kubernetes Ingress?</h2></div>
+      <p>Kubernetes Ingress is a cluster-level API object that manages external HTTP and HTTPS access to services inside a cluster, providing URL-based routing, hostname routing, TLS termination, and load balancing — all from a single declarative configuration.</p>
+      <p><strong>Simple analogy:</strong> Think of Ingress as a smart hotel receptionist. Guests (external traffic) all walk through one front door. The receptionist checks your name (hostname) and room request (URL path) and directs you to the right room (Service). Without a receptionist, every room would need its own dedicated entrance (LoadBalancer per Service).</p>
+      <p><strong>Definition 1:</strong> An Ingress is a Kubernetes resource that declaratively defines rules for routing external HTTP(S) traffic to internal ClusterIP services, with optional TLS termination.</p>
+      <p><strong>Definition 2:</strong> Ingress is the Kubernetes way to expose many web services through a single external IP, using host and path rules — without provisioning a cloud load balancer per service.</p>
+      <p><strong>Category:</strong> Networking / Traffic Management / API Gateway Pattern</p>
+      <p><strong>Official docs:</strong> <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/" style="color:var(--accent)">kubernetes.io/docs/concepts/services-networking/ingress</a></p>
+    </div>
+
+    <!-- S2 -->
+    <div class="section" id="s2">
+      <div class="section-header"><div class="section-num">2</div><h2>Why Does It Exist?</h2></div>
+      <p>Before Ingress, exposing a service externally meant creating a <code>LoadBalancer</code> type Service — which provisions a cloud load balancer (and bills you) per service. A cluster with 20 microservices meant 20 load balancers, 20 external IPs, and no centralised SSL management or URL routing. Ingress solves all of this with a single entry point.</p>
+      <table>
+        <thead><tr><th>Without Ingress</th><th>With Ingress</th></tr></thead>
+        <tbody>
+          <tr><td>1 LoadBalancer per Service = 20 cloud LBs for 20 services</td><td>1 Ingress Controller handles all 20 services</td></tr>
+          <tr><td>No centralised TLS — each service manages its own cert</td><td>TLS terminated at the Ingress; cert-manager automates renewal</td></tr>
+          <tr><td>No URL path routing — each service has its own IP:port</td><td>Route /api → backend, /app → frontend, all on port 443</td></tr>
+          <tr><td>No hostname-based routing</td><td>app.example.com → app service, api.example.com → API service</td></tr>
+          <tr><td>High cost — each cloud LB billed separately</td><td>Single LB fronting the Ingress Controller</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- S3 -->
+    <div class="section" id="s3">
+      <div class="section-header"><div class="section-num">3</div><h2>Who Should Know This?</h2></div>
+      <table>
+        <thead><tr><th>Role</th><th>Why They Need It</th><th>Depth Required</th></tr></thead>
+        <tbody>
+          <tr><td>Junior Developer</td><td>Understand why their app is accessible via a URL in k8s</td><td>Basic — what an Ingress resource does</td></tr>
+          <tr><td>Senior Developer</td><td>Configure path/host rules, debug 404s and 502s in routing</td><td>Intermediate — annotations, TLS, debugging</td></tr>
+          <tr><td>Platform / DevOps Engineer</td><td>Deploy and operate Ingress Controllers, configure WAF, rate limiting</td><td>Advanced — controller internals, HA, performance</td></tr>
+          <tr><td>Architect / Tech Lead</td><td>Choose Ingress vs Gateway API, multi-cluster routing, security design</td><td>Expert — trade-offs, Gateway API migration</td></tr>
+          <tr><td>SRE</td><td>Incident response for traffic disruption, canary rollout verification</td><td>Intermediate–Advanced</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- S4 -->
+    <div class="section" id="s4">
+      <div class="section-header"><div class="section-num">4</div><h2>History &amp; Evolution</h2></div>
+      <ul class="timeline">
+        <li><span class="year">2015</span><span class="event"><strong>Kubernetes 1.1</strong> — Ingress introduced as a beta API. NGINX Ingress Controller was among the first implementations. Routing rules were simple host + path → service mappings.</span></li>
+        <li><span class="year">2016</span><span class="event"><strong>GCE &amp; AWS Ingress Controllers</strong> — Cloud-specific controllers emerged, wiring Ingress resources to ALB/GLB. The vendor-per-annotation problem began here.</span></li>
+        <li><span class="year">2018</span><span class="event"><strong>Traefik 1.x, Contour, HAProxy</strong> — Alternative controllers proliferated. Annotations diverged badly — <code>nginx.ingress.kubernetes.io/*</code> vs <code>traefik/*</code> made resources non-portable.</span></li>
+        <li><span class="year">2019</span><span class="event"><strong>Kubernetes 1.14</strong> — <code>IngressClass</code> concept proposed to disambiguate multiple controllers in one cluster.</span></li>
+        <li><span class="year">2020</span><span class="event"><strong>Kubernetes 1.18</strong> — <code>IngressClass</code> resource added, <code>pathType</code> (Exact, Prefix, ImplementationSpecific) formalised. Still in beta.</span></li>
+        <li><span class="year">2021</span><span class="event"><strong>Kubernetes 1.19</strong> — Ingress graduates to <strong>GA (v1)</strong>. <code>networking.k8s.io/v1</code> API. Old <code>extensions/v1beta1</code> deprecated.</span></li>
+        <li><span class="year">2022</span><span class="event"><strong>Gateway API v0.5</strong> — The SIG-Network community begins replacing Ingress with the more expressive, role-oriented <strong>Gateway API</strong> (HTTPRoute, GRPCRoute, TCPRoute).</span></li>
+        <li><span class="year">2024</span><span class="event"><strong>Gateway API v1.0 GA</strong> — HTTPRoute and Gateway reach stable. Industry moves toward Gateway API for new deployments; Ingress remains widely used for existing workloads.</span></li>
+      </ul>
+      <p>Ingress started as a minimal HTTP routing abstraction but was stretched beyond its design by annotation bloat. The Kubernetes community's answer is the Gateway API, which provides a richer, role-separated, and extensible model. Ingress won't disappear soon — millions of clusters depend on it — but new architectures increasingly prefer Gateway API.</p>
+    </div>
+
+    <!-- S5 -->
+    <div class="section" id="s5">
+      <div class="section-header"><div class="section-num">5</div><h2>Core Concepts — Basic 🟢</h2></div>
+
+      <h3>1. The Ingress Resource</h3>
+      <p>An Ingress is a YAML manifest you apply to your cluster. It contains rules mapping hostnames and URL paths to Kubernetes Services. By itself it does nothing — it needs an Ingress Controller to watch and act on it.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">apiVersion</span>: networking.k8s.io/v1
+<span class="ky">kind</span>: Ingress
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>: my-ingress
+  <span class="ky">namespace</span>: production
+<span class="ky">spec</span>:
+  <span class="ky">ingressClassName</span>: nginx
+  <span class="ky">rules</span>:
+  - <span class="ky">host</span>: app.example.com
+    <span class="ky">http</span>:
+      <span class="ky">paths</span>:
+      - <span class="ky">path</span>: /api
+        <span class="ky">pathType</span>: Prefix
+        <span class="ky">backend</span>:
+          <span class="ky">service</span>:
+            <span class="ky">name</span>: api-service
+            <span class="ky">port</span>:
+              <span class="ky">number</span>: 8080
+      - <span class="ky">path</span>: /
+        <span class="ky">pathType</span>: Prefix
+        <span class="ky">backend</span>:
+          <span class="ky">service</span>:
+            <span class="ky">name</span>: frontend-service
+            <span class="ky">port</span>:
+              <span class="ky">number</span>: 80</pre></div>
+
+      <h3>2. The Ingress Controller</h3>
+      <p>The controller is a Pod (or set of Pods) running in your cluster that watches Ingress resources via the Kubernetes API and configures an actual reverse proxy (NGINX, Traefik, HAProxy, Envoy, etc.) to match the declared rules. Without a controller, Ingress resources are ignored.</p>
+      <div class="arch-diagram">
+        <div class="arch-row">
+          <div class="arch-col"><div class="arch-box gold">External Traffic</div><div class="arch-label">Internet / LB</div></div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-col"><div class="arch-box blue">Ingress Controller Pod<br><small style="font-weight:400;opacity:0.8">(NGINX / Traefik / etc.)</small></div><div class="arch-label">Reads Ingress rules</div></div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-col">
+            <div style="display:flex;flex-direction:column;gap:0.4rem">
+              <div class="arch-box green">Service A (api)</div>
+              <div class="arch-box green">Service B (frontend)</div>
+              <div class="arch-box green">Service C (auth)</div>
+            </div>
+            <div class="arch-label">ClusterIP Services</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>3. IngressClass</h3>
+      <p>When multiple controllers run in one cluster (NGINX for production, Traefik for staging), <code>ingressClassName</code> tells each Ingress which controller should handle it. The controller is configured with a corresponding <code>IngressClass</code> resource.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">apiVersion</span>: networking.k8s.io/v1
+<span class="ky">kind</span>: IngressClass
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>: nginx
+  <span class="ky">annotations</span>:
+    <span class="ky">ingressclass.kubernetes.io/is-default-class</span>: <span class="st">"true"</span>
+<span class="ky">spec</span>:
+  <span class="ky">controller</span>: k8s.io/ingress-nginx</pre></div>
+
+      <h3>4. pathType Values</h3>
+      <table>
+        <thead><tr><th>pathType</th><th>Behaviour</th><th>Example path: /api</th></tr></thead>
+        <tbody>
+          <tr><td><code>Exact</code></td><td>Matches only that exact path</td><td>Matches <code>/api</code> only — NOT <code>/api/users</code></td></tr>
+          <tr><td><code>Prefix</code></td><td>Matches path and all sub-paths</td><td>Matches <code>/api</code>, <code>/api/users</code>, <code>/api/v2/orders</code></td></tr>
+          <tr><td><code>ImplementationSpecific</code></td><td>Controller decides the matching logic</td><td>Behaviour varies per controller</td></tr>
+        </tbody>
+      </table>
+
+      <h3>5. TLS Termination (Basic)</h3>
+      <p>Add a <code>tls</code> section referencing a Secret that holds your certificate and key. The controller handles the HTTPS handshake; traffic inside the cluster travels as plain HTTP to the backend Service.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">spec</span>:
+  <span class="ky">tls</span>:
+  - <span class="ky">hosts</span>:
+    - app.example.com
+    <span class="ky">secretName</span>: app-tls-secret   <span class="cm"># kubectl create secret tls ...</span>
+  <span class="ky">rules</span>:
+  - <span class="ky">host</span>: app.example.com
+    <span class="cm"># ... rules as normal</span></pre></div>
+      <div class="tip-box"><span class="icon">💡</span><p>Use <strong>cert-manager</strong> with a Let's Encrypt <code>ClusterIssuer</code> and the annotation <code>cert-manager.io/cluster-issuer: letsencrypt-prod</code> to fully automate certificate issuance and renewal — zero manual cert management.</p></div>
+    </div>
+
+    <!-- S6 -->
+    <div class="section" id="s6">
+      <div class="section-header"><div class="section-num">6</div><h2>Core Concepts — Intermediate 🟡</h2></div>
+
+      <h3>1. Annotations for Advanced Behaviour</h3>
+      <p>Ingress annotations are the escape hatch for controller-specific features. They're powerful but non-portable — an annotation for NGINX won't work on Traefik. This is the primary driver behind the Gateway API migration.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">metadata</span>:
+  <span class="ky">annotations</span>:
+    <span class="cm"># Rewrite /app/foo → /foo before forwarding to backend</span>
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+    <span class="cm"># Rate limiting: 10 req/s per IP</span>
+    nginx.ingress.kubernetes.io/limit-rps: <span class="st">"10"</span>
+
+    <span class="cm"># Enable CORS</span>
+    nginx.ingress.kubernetes.io/enable-cors: <span class="st">"true"</span>
+
+    <span class="cm"># Force HTTPS redirect</span>
+    nginx.ingress.kubernetes.io/ssl-redirect: <span class="st">"true"</span>
+
+    <span class="cm"># Custom upstream timeout</span>
+    nginx.ingress.kubernetes.io/proxy-read-timeout: <span class="st">"60"</span>
+
+    <span class="cm"># Use sticky sessions (cookie-based)</span>
+    nginx.ingress.kubernetes.io/affinity: <span class="st">"cookie"</span>
+    nginx.ingress.kubernetes.io/session-cookie-name: <span class="st">"INGRESSCOOKIE"</span></pre></div>
+
+      <h3>2. URL Rewriting</h3>
+      <p>A common pattern: expose services under a path prefix externally (<code>/api/orders</code>) but the backend expects just <code>/orders</code>. The capture group in the path regex + rewrite-target annotation strips the prefix.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">metadata</span>:
+  <span class="ky">annotations</span>:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+<span class="ky">spec</span>:
+  <span class="ky">rules</span>:
+  - <span class="ky">host</span>: api.example.com
+    <span class="ky">http</span>:
+      <span class="ky">paths</span>:
+      - <span class="ky">path</span>: /orders(/|$)(.*)
+        <span class="ky">pathType</span>: ImplementationSpecific
+        <span class="ky">backend</span>:
+          <span class="ky">service</span>:
+            <span class="ky">name</span>: orders-service
+            <span class="ky">port</span>:
+              <span class="ky">number</span>: 8080
+<span class="cm"># Request: GET /orders/123  → forwarded as GET /123</span></pre></div>
+      <div class="warn-box"><span class="icon">⚠️</span><p><strong>Gotcha:</strong> Forgetting capture groups in path rewrites causes the entire path to be rewritten to <code>/</code>, breaking all non-root requests. Always test rewrite rules with a staging Ingress first.</p></div>
+
+      <h3>3. Name-based Virtual Hosting</h3>
+      <p>Multiple hostnames on the same Ingress object (or multiple Ingress objects sharing a controller) route to completely different services — just like Apache VirtualHosts.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">spec</span>:
+  <span class="ky">rules</span>:
+  - <span class="ky">host</span>: app.example.com
+    <span class="ky">http</span>:
+      <span class="ky">paths</span>:
+      - <span class="ky">path</span>: /
+        <span class="ky">pathType</span>: Prefix
+        <span class="ky">backend</span>:
+          <span class="ky">service</span>: { <span class="ky">name</span>: frontend, <span class="ky">port</span>: { <span class="ky">number</span>: 80 } }
+  - <span class="ky">host</span>: api.example.com
+    <span class="ky">http</span>:
+      <span class="ky">paths</span>:
+      - <span class="ky">path</span>: /
+        <span class="ky">pathType</span>: Prefix
+        <span class="ky">backend</span>:
+          <span class="ky">service</span>: { <span class="ky">name</span>: api-gateway, <span class="ky">port</span>: { <span class="ky">number</span>: 8080 } }</pre></div>
+
+      <h3>4. Default Backend</h3>
+      <p>When no rule matches a request (unknown hostname, unknown path), the Ingress controller returns a response from the <em>default backend</em> — typically a simple 404/503 page. You can customise it to return branded error pages.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">spec</span>:
+  <span class="ky">defaultBackend</span>:          <span class="cm"># catches all unmatched requests</span>
+    <span class="ky">service</span>:
+      <span class="ky">name</span>: custom-error-page
+      <span class="ky">port</span>:
+        <span class="ky">number</span>: 80</pre></div>
+
+      <h3>5. cert-manager Integration</h3>
+      <p>cert-manager watches Ingress objects with special annotations and automatically provisions, stores, and renews TLS certificates from Let's Encrypt (or any ACME provider). Zero manual certificate management.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">metadata</span>:
+  <span class="ky">annotations</span>:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+<span class="ky">spec</span>:
+  <span class="ky">tls</span>:
+  - <span class="ky">hosts</span>: [app.example.com]
+    <span class="ky">secretName</span>: app-tls   <span class="cm"># cert-manager creates and populates this Secret</span></pre></div>
+      <div class="tip-box"><span class="icon">💡</span><p>cert-manager uses <strong>HTTP-01</strong> or <strong>DNS-01</strong> ACME challenges. HTTP-01 works for public clusters. DNS-01 is needed for private clusters or wildcard certs — requires a DNS provider integration (Route53, Cloudflare, etc.).</p></div>
+    </div>
+
+    <!-- S7 -->
+    <div class="section" id="s7">
+      <div class="section-header"><div class="section-num">7</div><h2>Core Concepts — Advanced 🔴</h2></div>
+
+      <h3>1. High Availability &amp; Horizontal Scaling of the Controller</h3>
+      <p>The Ingress Controller is a critical single point of failure if run as a single replica. In production, run at least 3 replicas across different nodes using <code>podAntiAffinity</code>. The controller's Service is a <code>LoadBalancer</code> with a static IP — all replicas share it via the cloud LB's backend pool. Each controller replica independently processes NGINX/Envoy config reloads triggered by Ingress changes.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="ky">kind</span>: Deployment
+<span class="ky">spec</span>:
+  <span class="ky">replicas</span>: 3
+  <span class="ky">template</span>:
+    <span class="ky">spec</span>:
+      <span class="ky">affinity</span>:
+        <span class="ky">podAntiAffinity</span>:
+          <span class="ky">requiredDuringSchedulingIgnoredDuringExecution</span>:
+          - <span class="ky">labelSelector</span>:
+              <span class="ky">matchLabels</span>:
+                <span class="ky">app</span>: ingress-nginx
+            <span class="ky">topologyKey</span>: kubernetes.io/hostname
+      <span class="ky">containers</span>:
+      - <span class="ky">name</span>: controller
+        <span class="ky">args</span>:
+        - --election-id=ingress-controller-leader  <span class="cm"># leader election for config</span>
+        - --ingress-class=nginx
+        <span class="ky">resources</span>:
+          <span class="ky">requests</span>: { <span class="ky">cpu</span>: 100m, <span class="ky">memory</span>: 256Mi }
+          <span class="ky">limits</span>:  { <span class="ky">cpu</span>: 1000m, <span class="ky">memory</span>: 1Gi }</pre></div>
+      <div class="tip-box"><span class="icon">💡</span><p><strong>Trade-off:</strong> More controller replicas = better availability, but each replica independently reloads NGINX config on every Ingress change. At scale (1000+ Ingress objects), aggressive HPA on the controller can cause config reload storms. Tune <code>--sync-period</code> and use batch updates.</p></div>
+
+      <h3>2. Canary / Traffic Splitting via Annotations</h3>
+      <p>NGINX Ingress Controller supports weight-based traffic splitting through a "canary" Ingress pattern — a secondary Ingress object with <code>nginx.ingress.kubernetes.io/canary: "true"</code> that intercepts a percentage of requests before they reach the primary backend.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="cm"># Primary Ingress (stable — receives 90% of traffic)</span>
+<span class="ky">apiVersion</span>: networking.k8s.io/v1
+<span class="ky">kind</span>: Ingress
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>: app-stable
+<span class="ky">spec</span>:
+  <span class="ky">rules</span>:
+  - <span class="ky">host</span>: app.example.com
+    <span class="ky">http</span>:
+      <span class="ky">paths</span>:
+      - { <span class="ky">path</span>: /, <span class="ky">pathType</span>: Prefix, <span class="ky">backend</span>: { <span class="ky">service</span>: { <span class="ky">name</span>: app-v1, <span class="ky">port</span>: { <span class="ky">number</span>: 80 } } } }
+---
+<span class="cm"># Canary Ingress (new version — receives 10% of traffic)</span>
+<span class="ky">apiVersion</span>: networking.k8s.io/v1
+<span class="ky">kind</span>: Ingress
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>: app-canary
+  <span class="ky">annotations</span>:
+    nginx.ingress.kubernetes.io/canary: <span class="st">"true"</span>
+    nginx.ingress.kubernetes.io/canary-weight: <span class="st">"10"</span>
+<span class="ky">spec</span>:
+  <span class="ky">rules</span>:
+  - <span class="ky">host</span>: app.example.com
+    <span class="ky">http</span>:
+      <span class="ky">paths</span>:
+      - { <span class="ky">path</span>: /, <span class="ky">pathType</span>: Prefix, <span class="ky">backend</span>: { <span class="ky">service</span>: { <span class="ky">name</span>: app-v2, <span class="ky">port</span>: { <span class="ky">number</span>: 80 } } } }</pre></div>
+
+      <h3>3. WAF Integration &amp; ModSecurity</h3>
+      <p>NGINX Ingress can embed ModSecurity (Web Application Firewall) inline via a ConfigMap. This inspects every request for OWASP Top 10 attack patterns (SQLi, XSS, etc.) before forwarding. The trade-off is latency (+5–20ms per request) and false positive management.</p>
+      <div class="code-block"><span class="lang-tag">YAML</span><pre><span class="cm"># Enable ModSecurity globally via controller ConfigMap</span>
+<span class="ky">kind</span>: ConfigMap
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>: ingress-nginx-controller
+<span class="ky">data</span>:
+  <span class="ky">enable-modsecurity</span>: <span class="st">"true"</span>
+  <span class="ky">enable-owasp-modsecurity-crs</span>: <span class="st">"true"</span>
+  <span class="ky">modsecurity-snippet</span>: |
+    SecRuleEngine On
+    SecRequestBodyAccess On
+    SecAuditLog /dev/stdout</pre></div>
+      <div class="warn-box"><span class="icon">⚠️</span><p><strong>Works in dev, breaks in prod:</strong> ModSecurity in DetectionOnly mode in dev silently allows malicious requests. Switching to <code>SecRuleEngine On</code> in prod often triggers false positives on legitimate API payloads (JSON bodies with special characters). Always tune rules in staging under realistic traffic before enabling enforcement.</p></div>
+
+      <h3>4. Ingress at Scale — NGINX Config Reload Problem</h3>
+      <p>Every time an Ingress resource changes (a new deployment updates an annotation, cert-manager rotates a cert), NGINX Ingress Controller generates a new <code>nginx.conf</code> and triggers a graceful reload. In large clusters (500+ Ingress objects, frequent deployments), this causes: brief connection interruptions during reload, high CPU spikes, and increased P99 latency. The fix is to use the <code>--update-status-on-shutdown=false</code> flag, tune <code>--sync-rate-limit</code>, or migrate to Envoy-based controllers (Contour, Emissary) that support hot-reload without process restart.</p>
+    </div>
+
+    <!-- S8 -->
+    <div class="section" id="s8">
+      <div class="section-header"><div class="section-num">8</div><h2>Architecture &amp; Internals</h2></div>
+
+      <h3>Full Request Flow</h3>
+      <div class="arch-diagram">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem">
+          <div class="arch-box gold" style="width:280px;text-align:center">Client (Browser / curl)</div>
+          <div class="arch-vline"></div>
+          <div class="arch-box gray" style="width:280px">DNS → Cloud Load Balancer</div>
+          <div class="arch-vline"></div>
+          <div class="arch-box blue" style="width:280px">Ingress Controller Pod (NGINX)<br><small style="font-weight:400;opacity:0.8">TLS termination · Host/path match · Rewrite</small></div>
+          <div class="arch-vline"></div>
+          <div class="arch-box" style="width:280px;background:#6366f1">Kubernetes Service (ClusterIP)<br><small style="font-weight:400;opacity:0.8">kube-proxy / iptables / IPVS</small></div>
+          <div class="arch-vline"></div>
+          <div style="display:flex;gap:1rem">
+            <div class="arch-box green" style="font-size:0.72rem">Pod A</div>
+            <div class="arch-box green" style="font-size:0.72rem">Pod B</div>
+            <div class="arch-box green" style="font-size:0.72rem">Pod C</div>
+          </div>
+          <div class="arch-label">Backend Pods (selected by Service selector)</div>
+        </div>
+      </div>
+
+      <h3>Internal Walkthrough — How NGINX Ingress Processes a Request</h3>
+      <ol class="content-list">
+        <li><strong>Client DNS resolution:</strong> Client resolves <code>app.example.com</code> → cloud LB external IP (static, assigned to the Ingress Controller's Service of type LoadBalancer).</li>
+        <li><strong>Cloud LB → Controller Pod:</strong> The cloud LB selects one of the N running Ingress Controller Pods and forwards the TCP connection.</li>
+        <li><strong>TLS handshake:</strong> If HTTPS, the controller performs TLS termination using the certificate from the referenced Secret. The connection to the backend is typically plain HTTP.</li>
+        <li><strong>NGINX config lookup:</strong> NGINX evaluates its <code>server</code> blocks (one per hostname) then <code>location</code> blocks (one per path rule) in longest-prefix order to find a match.</li>
+        <li><strong>Rewrite &amp; header manipulation:</strong> Annotations are applied — path rewrites, header injections (<code>X-Forwarded-For</code>, <code>X-Real-IP</code>), rate limiting checks.</li>
+        <li><strong>Upstream selection:</strong> NGINX uses its upstream configuration (built from the Service's Endpoints, refreshed without reload via the Lua <code>balancer_by_lua</code> module) to pick a backend Pod IP.</li>
+        <li><strong>Request forwarded:</strong> NGINX opens a connection to the Pod directly (bypassing kube-proxy in modern controllers using EndpointSlices) and proxies the request.</li>
+        <li><strong>Response returned:</strong> The backend response travels back through NGINX (where response headers may be manipulated) → cloud LB → client.</li>
+      </ol>
+
+      <h3>Key Components</h3>
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>Internal Mechanism</th><th>Failure Mode</th></tr></thead>
+        <tbody>
+          <tr><td>Ingress Resource</td><td>Declares routing rules</td><td>Stored in etcd; watched by controller via informer</td><td>Misconfigured rules silently ignored or 404</td></tr>
+          <tr><td>Ingress Controller</td><td>Watches resources; configures proxy</td><td>Kubernetes informer → diff → nginx.conf regeneration → reload</td><td>Single replica = SPOF; crash = all traffic drops</td></tr>
+          <tr><td>IngressClass</td><td>Binds Ingress to controller instance</td><td>Spec.controller field matched by controller's --ingress-class flag</td><td>Missing class = no controller picks up the Ingress</td></tr>
+          <tr><td>TLS Secret</td><td>Holds cert + key for HTTPS</td><td>Mounted into controller Pod; watched for rotation</td><td>Expired cert → 502 or browser warning</td></tr>
+          <tr><td>EndpointSlices</td><td>Live list of backend Pod IPs</td><td>Updated by endpoint controller; controller syncs without reload</td><td>Stale endpoints → 502 when pods restart</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- S9 -->
+    <div class="section" id="s9">
+      <div class="section-header"><div class="section-num">9</div><h2>Key Features</h2></div>
+      <ul>
+        <li><strong>Host-based routing</strong> — Route <code>api.example.com</code> and <code>app.example.com</code> to different services on the same IP and port.</li>
+        <li><strong>Path-based routing</strong> — Direct <code>/api/*</code>, <code>/auth/*</code>, <code>/static/*</code> to independent backend services.</li>
+        <li><strong>TLS termination</strong> — Handle HTTPS at the ingress boundary; backend services can run plain HTTP internally.</li>
+        <li><strong>Automatic certificate management</strong> — cert-manager integration for Let's Encrypt; auto-renewal before expiry.</li>
+        <li><strong>URL rewriting</strong> — Strip or transform path prefixes before forwarding to backends.</li>
+        <li><strong>Rate limiting</strong> — Per-IP or per-source rate limiting at the ingress layer, before requests reach services.</li>
+        <li><strong>Session affinity</strong> — Cookie-based sticky sessions for stateful backends.</li>
+        <li><strong>Canary deployments</strong> — Weight-based or header-based traffic splitting between service versions.</li>
+        <li><strong>Basic authentication</strong> — HTTP Basic Auth enforced at the ingress, protecting internal services without app changes.</li>
+        <li><strong>Custom error pages</strong> — Branded 404/503 responses via a default backend service.</li>
+        <li><strong>CORS headers</strong> — Inject Cross-Origin Resource Sharing headers centrally, without modifying each service.</li>
+        <li><strong>WAF integration</strong> — ModSecurity or external WAF (AWS WAF, Cloudflare) inline protection.</li>
+      </ul>
+    </div>
+
+    <!-- S10 -->
+    <div class="section" id="s10">
+      <div class="section-header"><div class="section-num">10</div><h2>Key Benefits</h2></div>
+      <ul>
+        <li>✅ <strong>Cost reduction</strong> — One cloud load balancer fronts hundreds of services instead of one LB per service — a major saving in cloud bills at scale.</li>
+        <li>✅ <strong>Centralised TLS management</strong> — Certificates managed in one place with cert-manager; no per-service SSL renewal burden.</li>
+        <li>✅ <strong>Decoupled routing from app code</strong> — Services don't need to know their external URLs; routing is infra configuration.</li>
+        <li>✅ <strong>Declarative configuration</strong> — Ingress rules are YAML, stored in Git, version-controlled, reviewed, and deployed via CI/CD like any other manifest.</li>
+        <li>✅ <strong>Namespace isolation</strong> — Each team manages their own Ingress resources in their namespace; the platform team owns the controller.</li>
+        <li>✅ <strong>Progressive delivery</strong> — Canary annotations enable safe rollouts without additional tooling like a service mesh.</li>
+        <li>✅ <strong>Observability built-in</strong> — NGINX metrics (requests/s, latency, upstream response codes) exported to Prometheus out of the box.</li>
+      </ul>
+    </div>
+
+    <!-- S11 -->
+    <div class="section" id="s11">
+      <div class="section-header"><div class="section-num">11</div><h2>Key Challenges &amp; Pitfalls</h2></div>
+      <ul>
+        <li>⚠️ <strong>Annotation lock-in</strong> — Using 20 NGINX-specific annotations makes your Ingress manifests non-portable. Switching controllers requires rewriting all annotations. Gateway API solves this.</li>
+        <li>⚠️ <strong>Config reload disruption</strong> — Every Ingress change triggers an NGINX reload. In busy clusters, this causes brief request drops. Tune <code>--sync-rate-limit</code> and consider Envoy-based controllers for hot-reload.</li>
+        <li>⚠️ <strong>Path ordering surprises</strong> — More specific paths must come before less specific ones in some controllers. <code>/api/v2</code> must be listed before <code>/api</code>, or it may never match. Always use <code>pathType: Exact</code> when precision matters.</li>
+        <li>⚠️ <strong>Single-controller SPOF</strong> — Running one controller replica for all namespaces is a cluster-wide single point of failure. Run 3+ replicas with pod anti-affinity across nodes.</li>
+        <li>⚠️ <strong>Wildcard TLS and cert mismatch</strong> — A TLS secret for <code>*.example.com</code> won't automatically match two-level subdomains (<code>api.v2.example.com</code>). Cert-manager wildcard certs require DNS-01 challenge and careful domain scoping.</li>
+        <li>⚠️ <strong>Works in dev, breaks in prod — missing proxy protocol:</strong> When a cloud LB sits in front of the Ingress Controller without proxy protocol configured, <code>X-Forwarded-For</code> contains the LB's IP, not the real client IP. Rate limiting by IP and geo-blocking then apply to the LB's address, not the attacker's.</li>
+        <li>⚠️ <strong>Ingress resource proliferation</strong> — Teams creating hundreds of Ingress objects without cleanup leads to stale rules, confusing debugging, and controller memory growth. Enforce naming conventions and use admission webhooks to validate.</li>
+      </ul>
+    </div>
+
+    <!-- S12 -->
+    <div class="section" id="s12">
+      <div class="section-header"><div class="section-num">12</div><h2>Best Practices</h2></div>
+      <h3>🟢 Beginner</h3>
+      <ul>
+        <li>Always set <code>ingressClassName</code> explicitly — don't rely on the default class annotation to avoid surprises when multiple controllers are present.</li>
+        <li>Use <code>pathType: Prefix</code> for most routes and <code>pathType: Exact</code> when you need to match only one specific path.</li>
+        <li>Always configure TLS, even in staging — use cert-manager with Let's Encrypt staging issuer to avoid rate limits.</li>
+        <li>Test ingress rules with <code>curl -H "Host: app.example.com" http://&lt;controller-ip&gt;/path</code> before adding DNS.</li>
+      </ul>
+      <h3>🟡 Intermediate</h3>
+      <ul>
+        <li>Keep Ingress annotations minimal — if you need more than 5 annotations, consider whether a service mesh or Gateway API is a better fit.</li>
+        <li>Use one Ingress per application (not one per namespace) for easier debugging and cleaner RBAC.</li>
+        <li>Configure controller resource requests/limits and HPA — the controller is on the critical path for all external traffic.</li>
+        <li>Integrate Prometheus metrics from NGINX controller into your SLO dashboards — track <code>nginx_ingress_controller_requests</code> by status code per ingress.</li>
+      </ul>
+      <h3>🔴 Advanced / Production</h3>
+      <ul>
+        <li>Run 3+ controller replicas with <code>podAntiAffinity</code> spread across nodes and availability zones; use PodDisruptionBudget to prevent all replicas being evicted during node drains.</li>
+        <li>Enable <code>--enable-ssl-passthrough</code> only if truly needed — it disables host-based routing for that traffic and increases complexity.</li>
+        <li>For clusters with 200+ Ingress objects, measure and tune NGINX reload frequency — batch changes where possible and consider Envoy-based controllers (Contour, Emissary) for zero-downtime hot-reload.</li>
+        <li>Implement admission webhooks (e.g. conftest, OPA Gatekeeper) to validate Ingress manifests — catch duplicate hosts, missing TLS, or banned annotations before they hit the cluster.</li>
+        <li>Plan your Gateway API migration now — evaluate HTTPRoute parity with your current annotations and pilot one namespace before full migration.</li>
+      </ul>
+    </div>
+
+    <!-- S13 -->
+    <div class="section" id="s13">
+      <div class="section-header"><div class="section-num">13</div><h2>Ecosystem, Tools &amp; Integrations</h2></div>
+      <table>
+        <thead><tr><th>Tool / Project</th><th>Purpose</th><th>Works Best With</th><th>Notable</th></tr></thead>
+        <tbody>
+          <tr><td>ingress-nginx</td><td>Most widely deployed Ingress Controller (NGINX-based)</td><td>Any cluster</td><td>Maintained by Kubernetes community; 50M+ downloads</td></tr>
+          <tr><td>Traefik</td><td>Dynamic Ingress Controller; auto-discovers services</td><td>Dev, smaller clusters</td><td>Built-in dashboard; native Let's Encrypt; CRD-based config</td></tr>
+          <tr><td>Contour + Envoy</td><td>Envoy-based controller; hot-reload, xDS API</td><td>Large-scale prod</td><td>First-class HTTPProxy CRD; Gateway API support</td></tr>
+          <tr><td>AWS ALB Controller</td><td>Maps Ingress to AWS Application Load Balancer</td><td>EKS</td><td>Native WAF, cognito auth, target group binding</td></tr>
+          <tr><td>cert-manager</td><td>Automates TLS cert provisioning &amp; renewal</td><td>Any controller</td><td>Integrates with Let's Encrypt, Vault, ACME, AWS ACM</td></tr>
+          <tr><td>External-DNS</td><td>Syncs Ingress hosts → DNS records automatically</td><td>Route53, Cloudflare, GCP DNS</td><td>No manual DNS management; pairs with Ingress + cert-manager</td></tr>
+          <tr><td>Argo Rollouts</td><td>Progressive delivery with Ingress canary weight control</td><td>ingress-nginx, Traefik</td><td>Automates canary promotion based on metrics</td></tr>
+        </tbody>
+      </table>
+      <p>In modern cloud-native stacks, Ingress sits between the cloud load balancer and the service mesh. External traffic enters via Ingress (handling TLS, host/path routing, WAF); east-west traffic between services is handled by the mesh (Istio, Linkerd). cert-manager and External-DNS are near-universal companions, automating the two biggest operational toils around Ingress management.</p>
+    </div>
+
+    <!-- S14 -->
+    <div class="section" id="s14">
+      <div class="section-header"><div class="section-num">14</div><h2>Competitors &amp; Comparison</h2></div>
+      <table>
+        <thead><tr><th>Option</th><th>Key Difference</th><th>Strengths</th><th>Weaknesses</th><th>Choose When</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Kubernetes Ingress</strong></td><td>Standard k8s API; widely supported</td><td>Universal, well-documented, huge ecosystem</td><td>Annotation bloat, limited expressiveness, reload issues at scale</td><td>Standard HTTP(S) routing for most clusters</td></tr>
+          <tr><td><strong>Gateway API (HTTPRoute)</strong></td><td>Next-gen k8s networking API; role-separated</td><td>Expressive, portable, no annotation hacks, multi-tenancy built-in</td><td>Newer, smaller ecosystem, migration effort from Ingress</td><td>New clusters, multi-tenant platforms, complex routing needs</td></tr>
+          <tr><td><strong>Istio VirtualService</strong></td><td>Service mesh ingress + traffic management</td><td>Fine-grained traffic policies, mTLS, retries, fault injection</td><td>Heavy operational footprint, steep learning curve, resource overhead</td><td>When you need a service mesh anyway; advanced traffic management</td></tr>
+          <tr><td><strong>AWS ALB / GCP GLB</strong></td><td>Cloud-native LB mapped directly from Ingress</td><td>Managed service, native WAF integration, no controller to operate</td><td>Vendor lock-in, slow provisioning, higher cost per rule</td><td>EKS/GKE with need for cloud-native LB features (WAF, Auth)</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>Criterion</th><th>Ingress (NGINX)</th><th>Gateway API</th><th>Istio VirtualService</th></tr></thead>
+        <tbody>
+          <tr><td>HTTP/HTTPS routing</td><td>✅ Full</td><td>✅ Full + gRPC, TCP</td><td>✅ Full + advanced</td></tr>
+          <tr><td>Portability across controllers</td><td>❌ Annotation-dependent</td><td>✅ Portable</td><td>❌ Istio-only</td></tr>
+          <tr><td>Canary/traffic splitting</td><td>⚠️ Via annotations</td><td>✅ Native weight spec</td><td>✅ Native, very fine-grained</td></tr>
+          <tr><td>Operational complexity</td><td>🟢 Low</td><td>🟡 Medium</td><td>🔴 High</td></tr>
+          <tr><td>TCP/UDP routing</td><td>❌</td><td>✅ TCPRoute/UDPRoute</td><td>✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- S15 -->
+    <div class="section" id="s15">
+      <div class="section-header"><div class="section-num">15</div><h2>Key Trends &amp; Future Outlook</h2></div>
+      <ul>
+        <li><strong>Gateway API superseding Ingress</strong> — HTTPRoute, GRPCRoute, and TCPRoute reached GA in 2023–2024. All major controllers (NGINX, Contour, Istio, Cilium) now support it. Ingress remains in maintenance mode; Gateway API is the future. <em>Maturity: GA, rapidly growing adoption.</em></li>
+        <li><strong>eBPF-based controllers (Cilium)</strong> — Cilium's Ingress and Gateway API implementation operates at the kernel level via eBPF, bypassing kube-proxy entirely. This delivers lower latency, higher throughput, and richer observability than NGINX-based controllers. <em>Maturity: Production-ready, growing fast.</em></li>
+        <li><strong>AI-driven traffic management</strong> — APM vendors (Datadog, Dynatrace) integrate with Ingress metrics to auto-suggest canary rollback, detect anomalous traffic patterns, and recommend rate limit tuning. <em>Maturity: Early production in enterprise tools.</em></li>
+        <li><strong>Zero-trust ingress</strong> — Combining Ingress with SPIFFE/SPIRE for workload identity, and requiring mTLS even for north-south traffic. Cloud providers offering native zero-trust ingress options (GKE Workload Identity + Cloud Armor). <em>Maturity: Growing in security-conscious enterprises.</em></li>
+        <li><strong>Multi-cluster ingress</strong> — Platforms routing external traffic across multiple clusters (GKE Multi-cluster Ingress, Submariner) for active-active geo-redundancy, without a global CDN dependency. <em>Maturity: Production-ready on GKE/EKS.</em></li>
+      </ul>
+    </div>
+
+    <!-- S16 -->
+    <div class="section" id="s16">
+      <div class="section-header"><div class="section-num">16</div><h2>Interview Questions 🎯</h2></div>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.25rem;">Senior-level questions for architects, leads, and platform engineers.</p>
+
+      <h3>🟢 Conceptual &amp; Fundamentals</h3>
+      <div class="interview-q">
+        <div class="q">Q: What is the difference between a Kubernetes Service of type LoadBalancer and an Ingress? When would you use each?</div>
+        <div class="a"><strong>What a great answer covers:</strong> LoadBalancer provisions one cloud LB per Service (Layer 4, TCP/UDP). Ingress is Layer 7 (HTTP/HTTPS), routing many services through one cloud LB based on host/path. Use LoadBalancer for non-HTTP protocols (gRPC raw TCP, databases), Ingress for HTTP services. Discuss cost implications — 1 LB vs N LBs at scale.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: What happens if you apply an Ingress resource but no Ingress Controller is installed in the cluster?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Nothing happens — the resource is stored in etcd but no controller is watching it. No routing occurs, no error is returned. This is a common gotcha for newcomers. The Ingress controller is the "brain" that reads the resource and configures the actual proxy. Mention IngressClass as the mechanism to match resource to controller.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: Explain pathType: Exact vs Prefix. Give an example where using the wrong one causes a production incident.</div>
+        <div class="a"><strong>What a great answer covers:</strong> Exact matches only that literal path. Prefix matches path and all sub-paths. Production incident: <code>path: /admin, pathType: Prefix</code> on a public-facing Ingress accidentally exposes <code>/admin/users</code>, <code>/admin/config</code> etc. A health check endpoint at <code>/actuator/health</code> accessible due to Prefix on <code>/actuator</code>. Always use Exact for sensitive paths.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How does cert-manager automate TLS certificate management with Ingress?</div>
+        <div class="a"><strong>What a great answer covers:</strong> cert-manager watches Ingress resources with the annotation <code>cert-manager.io/cluster-issuer</code>. It creates a Certificate resource, challenges the ACME server (HTTP-01 by creating a temporary Ingress route, or DNS-01 by creating a DNS TXT record), receives the cert, stores it in the referenced Secret, and renews it 30 days before expiry. Discuss HTTP-01 vs DNS-01 trade-offs and wildcard cert requirements.</div>
+      </div>
+
+      <h3>🟡 Design &amp; Architecture</h3>
+      <div class="interview-q">
+        <div class="q">Q: You're designing a platform for 50 dev teams sharing one Kubernetes cluster. How do you architect Ingress management to give teams autonomy while maintaining platform control?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Teams own Ingress resources in their namespaces. Platform team owns the controller and IngressClass. Use RBAC to restrict which annotations teams can use. OPA Gatekeeper admission webhooks enforce: no duplicate hostnames across namespaces, mandatory TLS, approved domain suffixes only. Use ExternalDNS for automatic DNS. Consider namespace-scoped controllers for full isolation. Discuss Gateway API's role-separation (infrastructure/application/route roles) as the future state.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: Walk me through how you'd implement a blue/green deployment using Kubernetes Ingress.</div>
+        <div class="a"><strong>What a great answer covers:</strong> Two Deployments (blue, v1; green, v2) each behind their own Service. Single Ingress initially points 100% to blue. Canary Ingress with weight annotation gradually shifts traffic to green (10% → 50% → 100%). Monitor error rates and latency during each step. On completion, update primary Ingress to green service, remove canary Ingress. Discuss Argo Rollouts as automation for this process. Contrast with a service mesh approach.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How would you design Ingress for a multi-region active-active architecture?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Global load balancer (AWS Global Accelerator / GCP GCLB / Cloudflare) routes to regional clusters based on latency/health. Each regional cluster has its own Ingress Controller. DNS failover with health checks detects regional Ingress Controller outage. Multi-cluster Ingress (GKE) as a managed alternative. Discuss session affinity challenges, data replication requirements, and the trade-off between active-active complexity and RTO/RPO goals.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: When would you choose Gateway API over Ingress for a new project?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Gateway API when: multi-tenant platform (role separation is built-in), need non-HTTP protocols (TCPRoute, UDPRoute, GRPCRoute), want to avoid annotation lock-in, need weighted traffic splitting natively, team is greenfield and not carrying Ingress migration debt. Ingress when: simpler cluster, existing annotation-based config is working, team is familiar, controller doesn't fully support Gateway API yet. Mention all major controllers now have Gateway API support.</div>
+      </div>
+
+      <h3>🔴 Advanced, Internals &amp; Trade-offs</h3>
+      <div class="interview-q">
+        <div class="q">Q: Explain the NGINX config reload problem in detail. What causes it, what are the symptoms, and how do you mitigate it?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Every Ingress change → controller regenerates nginx.conf → sends SIGHUP → NGINX graceful reload. During reload: new workers start, old workers drain. With 500+ Ingress objects and frequent deploys, this can happen every few seconds. Symptoms: P99 latency spikes, brief 502s on connections hitting dying workers. Mitigation: ingress-nginx Lua-based upstream updates avoid reload for endpoint changes; tune --sync-rate-limit; batch Ingress updates in CI; consider Envoy-based controllers (Contour) that use xDS API for hot-reload without process restart.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How does the NGINX Ingress Controller update backend endpoints without a full config reload?</div>
+        <div class="a"><strong>What a great answer covers:</strong> NGINX Ingress uses a Lua module (lua-resty-balancer) to maintain an in-memory upstream table. When EndpointSlices change (pods scale up/down), the controller pushes new Pod IPs to the Lua module via a Unix socket — without regenerating nginx.conf or triggering a reload. Only structural changes (new Ingress rules, new TLS certs) require a full reload. This is a significant scalability improvement over older versions that reloaded on every endpoint change.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: A client's IP address appears as the cluster's load balancer IP instead of the real client IP in application logs. Diagnose and fix.</div>
+        <div class="a"><strong>What a great answer covers:</strong> Root cause: cloud LB not forwarding the client IP via X-Forwarded-For or PROXY protocol. Fix options: (1) Configure cloud LB to add X-Forwarded-For — set <code>use-forwarded-headers: "true"</code> in NGINX ConfigMap. (2) Enable PROXY protocol on the cloud LB and NGINX controller (<code>use-proxy-protocol: "true"</code>) for Layer 4 passthrough of client IP. (3) Use ExternalTrafficPolicy: Local on the controller Service — preserves source IP but sacrifices even load distribution. Discuss security implications of trusting X-Forwarded-For without validation.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: How would you debug a 502 Bad Gateway returned from an Ingress for a specific path?</div>
+        <div class="a"><strong>What a great answer covers:</strong> Systematic approach: (1) Check Ingress controller logs — <code>kubectl logs -n ingress-nginx deploy/ingress-nginx-controller</code>. (2) Check if the backend Service exists and has healthy Endpoints — <code>kubectl get endpoints &lt;service&gt;</code>. (3) Verify pathType and path regex are correct — test with curl -H "Host:" directly against controller Pod IP. (4) Check if the backend Pod is actually ready — readiness probe passing? (5) Verify port numbers match between Ingress, Service, and container. (6) Check for upstream timeout annotations if backend is slow to respond.</div>
+      </div>
+
+      <h3>💡 Scenario / Problem-Solving</h3>
+      <div class="interview-q">
+        <div class="q">Q: "You're seeing a sudden 10× spike in 504 Gateway Timeout errors on your Ingress. Walk me through your incident response."</div>
+        <div class="a"><strong>What a great answer covers:</strong> Check Grafana — which Ingress/service, which path, which region. Check controller pod metrics — is the controller itself healthy or CPU-saturated? Check backend pod health and readiness. Check if a recent deployment changed resource limits or config. Look for upstream connection pool exhaustion. Check for a cloud LB health check failure causing traffic to re-route. Check for cert-manager cert renewal triggering a reload storm. Mitigation: scale backend, increase proxy-read-timeout annotation, implement circuit breaker upstream.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: "Your team wants to migrate from NGINX Ingress to Gateway API HTTPRoute with zero downtime. How do you plan and execute this?"</div>
+        <div class="a"><strong>What a great answer covers:</strong> Start with one low-traffic namespace as a pilot. Install Gateway API CRDs alongside existing Ingress. Deploy a controller that supports both (NGINX, Contour). Create HTTPRoute equivalents for existing Ingress rules. Test with shadow traffic or canary. Migrate one namespace at a time, validating with smoke tests. Handle annotation equivalents (rate limiting → RequestRate filter, auth → ReferenceGrant). Plan fallback: keep Ingress objects until HTTPRoute is proven. Update CI/CD templates last. Total migration: 2–4 sprints depending on annotation complexity.</div>
+      </div>
+      <div class="interview-q">
+        <div class="q">Q: "A developer says their new service is returning 404 from the Ingress even though the path rule looks correct. Debug it."</div>
+        <div class="a"><strong>What a great answer covers:</strong> Verify IngressClass is set and matches the running controller. Check if the Ingress is in the same namespace as the Service (backend service references are namespace-scoped). Confirm pathType — Exact may not match sub-paths as expected. Check if a more specific rule in another Ingress is capturing the request first (host+path ordering). Exec into controller pod and inspect nginx.conf to see if the rule was actually generated. Test curl directly against the controller Pod IP bypassing DNS. Check backend Service selector matches Pod labels.</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
