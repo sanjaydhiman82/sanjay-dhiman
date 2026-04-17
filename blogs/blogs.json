@@ -1,5 +1,14 @@
 [
   {
+    "title": "TRAVEL",
+    "subtitle": "Going back to where it all began — the misty valleys, familiar faces, and the quiet comfort of a place that has always felt like home.",
+    "slug": "my trip to home town Palampur",
+    "file": "my_trip_to_home_town_Palampur.html",
+    "category": "Travel",
+    "date": "2026-04-17",
+    "readTime": 7
+  },
+  {
     "title": "Artificial Intelligence",
     "subtitle": "As synthetic media floods the internet and AI grows more powerful by the day, the world races to regulate what it barely understands — before it's too late.",
     "slug": "AI regulation & deepfake safety concerns",
@@ -19,7 +28,6 @@
   },
   {
     "title": "git add .",
-
     "subtitle": "How AI changed my day to day life — a personal account of living and working with intelligent tools.",
     "slug": "How AI change my day to day life",
     "file": "How AI change my day to day life.html",
