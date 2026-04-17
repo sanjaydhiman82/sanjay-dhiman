@@ -313,73 +313,8 @@
       <span class="sidebar-label">Browse by Topic</span>
 
       <div id="sidebar-menu">
-
-        <!-- Technical -->
-        <div class="category-block" data-category="technical">
-          <button class="category-btn" onclick="toggleCategory(this, 'technical')">
-            <span class="cat-icon">💻</span>
-            <span class="cat-label">Technical</span>
-            <span class="cat-count">1</span>
-            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="subtopic-list" id="sub-technical">
-            <button class="subtopic-btn" onclick="window.location.href='ingress.html'">Kubernetes — Ingress ↗</button>
-          </div>
-        </div>
-
-        <!-- Career & Growth -->
-        <div class="category-block" data-category="career">
-          <button class="category-btn" onclick="toggleCategory(this, 'career')">
-            <span class="cat-icon">🚀</span>
-            <span class="cat-label">Career &amp; Growth</span>
-            <span class="cat-count">0</span>
-            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="subtopic-list" id="sub-career">
-            <span style="font-size:0.78rem;color:var(--muted);padding:6px 12px;display:block;">Coming soon…</span>
-          </div>
-        </div>
-
-        <!-- Personal / Life -->
-        <div class="category-block" data-category="personal">
-          <button class="category-btn" onclick="toggleCategory(this, 'personal')">
-            <span class="cat-icon">🌱</span>
-            <span class="cat-label">Personal &amp; Life</span>
-            <span class="cat-count">1</span>
-            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="subtopic-list" id="sub-personal">
-            <button class="subtopic-btn" onclick="window.location.href='why-i-adopt-ai-in-lifestyle.html'">Why I Adopt AI in Lifestyle ↗</button>
-          </div>
-        </div>
-
-        <!-- Tools & Productivity -->
-        <div class="category-block" data-category="tools">
-          <button class="category-btn" onclick="toggleCategory(this, 'tools')">
-            <span class="cat-icon">🛠️</span>
-            <span class="cat-label">Tools &amp; Productivity</span>
-            <span class="cat-count">0</span>
-            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="subtopic-list" id="sub-tools">
-            <span style="font-size:0.78rem;color:var(--muted);padding:6px 12px;display:block;">Coming soon…</span>
-          </div>
-        </div>
-
-        <!-- Opinions & Reflections -->
-        <div class="category-block" data-category="opinions">
-          <button class="category-btn" onclick="toggleCategory(this, 'opinions')">
-            <span class="cat-icon">💬</span>
-            <span class="cat-label">Opinions &amp; Reflections</span>
-            <span class="cat-count">0</span>
-            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="subtopic-list" id="sub-opinions">
-            <span style="font-size:0.78rem;color:var(--muted);padding:6px 12px;display:block;">Coming soon…</span>
-          </div>
-        </div>
-
-      </div><!-- /sidebar-menu -->
+        <!-- populated from blogs.json -->
+      </div>
     </aside>
 
     <!-- CONTENT PANEL -->
@@ -396,42 +331,61 @@
   </div>
 
   <script>
-    let activeCategory = null;
+    const CHEVRON = `<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+    function loadBlogs(blogs) {
+        const menu = document.getElementById('sidebar-menu');
+        if (!blogs.length) {
+          menu.innerHTML = '<p style="color:var(--muted);font-size:0.82rem;padding:8px 4px;">No posts yet.</p>';
+          return;
+        }
+        menu.innerHTML = blogs.map(b => {
+          const safeId = b.slug.replace(/\s+/g, '-');
+          return `
+          <div class="category-block" data-title="${b.title.toLowerCase()} ${(b.subtitle||'').toLowerCase()}">
+            <button class="category-btn" onclick="toggleCategory(this,'${safeId}')">
+              <span class="cat-label">${b.title}</span>
+              <span class="cat-count">1</span>
+              ${CHEVRON}
+            </button>
+            <div class="subtopic-list" id="sub-${safeId}">
+              <button class="subtopic-btn" onclick="window.location.href='${b.file}'">${b.subtitle || b.title} ↗</button>
+            </div>
+          </div>`;
+        }).join('');
+    }
+
+    // Inline fallback — mirrors blogs.json exactly (used when opened via file://)
+    const BLOGS_INLINE = [
+      {
+        "title": "Artificial Intelligence",
+        "subtitle": "How AI changed my day to day life — a personal account of living and working with intelligent tools.",
+        "slug": "How AI change my day to day life",
+        "file": "How AI change my day to day life.html",
+        "category": "personal",
+        "date": "2026-04-17",
+        "readTime": 7
+      }
+    ];
+
+    fetch('blogs.json')
+      .then(r => r.json())
+      .then(blogs => loadBlogs(blogs))
+      .catch(() => loadBlogs(BLOGS_INLINE));
 
     function toggleCategory(btn, cat) {
       const subList = document.getElementById('sub-' + cat);
-      const isOpen = subList.classList.contains('open');
-
+      const isOpen  = subList.classList.contains('open');
       document.querySelectorAll('.subtopic-list').forEach(l => l.classList.remove('open'));
       document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('open', 'active'));
-
-      if (!isOpen) {
-        subList.classList.add('open');
-        btn.classList.add('open', 'active');
-        activeCategory = cat;
-      } else {
-        activeCategory = null;
-      }
+      if (!isOpen) { subList.classList.add('open'); btn.classList.add('open', 'active'); }
     }
 
     function filterTopics(query) {
       const q = query.toLowerCase().trim();
       document.querySelectorAll('.category-block').forEach(block => {
-        const catName = block.querySelector('.cat-label').textContent.toLowerCase();
-        const subtopicBtns = block.querySelectorAll('.subtopic-btn');
-        let anyMatch = false;
-
-        subtopicBtns.forEach(btn => {
-          const match = !q || btn.textContent.toLowerCase().includes(q) || catName.includes(q);
-          btn.style.display = match ? '' : 'none';
-          if (match) anyMatch = true;
-        });
-
-        block.style.display = anyMatch ? '' : 'none';
-        if (q && anyMatch) {
-          block.querySelector('.subtopic-list').classList.add('open');
-          block.querySelector('.category-btn').classList.add('open', 'active');
-        }
+        const text = block.dataset.title || '';
+        block.style.display = (!q || text.includes(q)) ? '' : 'none';
       });
     }
   </script>

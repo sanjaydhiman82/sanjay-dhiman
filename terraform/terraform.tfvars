@@ -11,7 +11,7 @@ bucket_name  = "www.sanjaydhiman.com"
 # =================================================================
 # STEP 3: Set domain name value
 # =================================================================
-domain_name  = "www.sanjaydhiman.com"
+domain_name  = "sanjaydhiman.com"
 
 # =================================================================
 # STEP 4: Set project name value

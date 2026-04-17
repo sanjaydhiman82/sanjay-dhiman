@@ -1,0 +1,12 @@
+[
+  {
+    "title": "System Design — Tiny URL",
+    "subtitle": "A production-grade URL shortening service with global redirect infrastructure, zero-collision alias generation, and real-time analytics at 100k RPS.",
+    "slug": "Tiny URL",
+    "file": "Tiny URL.html",
+    "category": "system-design",
+    "type": "sdd",
+    "date": "2026-04-17",
+    "readTime": 45
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "title": "travelling",
+    "subtitle": "My trip to Palampur — wandering through mist-draped tea gardens, pine-scented trails, and the quiet magic of the Kangra Valley.",
+    "slug": "my trip to Palampur",
+    "file": "my trip to Palampur.html",
+    "category": "Travel",
+    "date": "2026-04-17",
+    "readTime": 6
+  },
+  {
+    "title": "Artificial Intelligence",
+    "subtitle": "How AI changed my day to day life — a personal account of living and working with intelligent tools.",
+    "slug": "How AI change my day to day life",
+    "file": "How AI change my day to day life.html",
+    "category": "personal",
+    "date": "2026-04-17",
+    "readTime": 7
+  }
+]

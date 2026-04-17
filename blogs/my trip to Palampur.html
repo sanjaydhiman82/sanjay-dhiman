@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>travelling | Sanjay Dhiman</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #6c63ff;
+      --accent-soft: #a89cff;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --code-bg: #12151f;
+      --tag-bg: #1e2235;
+      --radius: 12px;
+      --max-w: 780px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono: 'Fira Code', 'Cascadia Code', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+      padding: 0 16px 80px;
+    }
+    nav {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 20px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    nav a { color: var(--accent-soft); text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    nav .sep { opacity: 0.4; }
+    article { max-width: var(--max-w); margin: 40px auto 0; }
+    .post-header { margin-bottom: 40px; }
+    .tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+    .subtitle { font-size: 19px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .meta .author { color: var(--accent-soft); font-weight: 600; }
+    .meta .dot { opacity: 0.4; }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      margin: 32px 0;
+      opacity: 0.3;
+    }
+    .content h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 40px 0 12px;
+      padding-left: 14px;
+      border-left: 3px solid var(--accent);
+    }
+    .content h3 { font-size: 18px; font-weight: 600; color: var(--accent-soft); margin: 28px 0 8px; }
+    .content p { margin-bottom: 18px; color: #cbd5e1; }
+    .content a { color: var(--accent-soft); }
+    .content ul, .content ol { margin: 0 0 18px 22px; color: #cbd5e1; }
+    .content li { margin-bottom: 6px; }
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 24px 0;
+      color: #cbd5e1;
+    }
+    .callout strong { color: var(--accent-soft); }
+    footer {
+      max-width: var(--max-w);
+      margin: 60px auto 0;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent-soft); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="./index.html">🏠 Home</a>
+    <span class="sep">›</span>
+    <a href="./blogs.html">Blogs</a>
+    <span class="sep">›</span>
+    <span>travelling</span>
+  </nav>
+
+  <article>
+    <header class="post-header">
+      <span class="tag">Travel</span>
+      <h1>travelling</h1>
+      <p class="subtitle">My trip to Palampur — wandering through mist-draped tea gardens, pine-scented trails, and the quiet magic of the Kangra Valley.</p>
+      <div class="meta">
+        <span class="author">Sanjay Dhiman</span>
+        <span class="dot">•</span>
+        <span>April 17, 2026</span>
+        <span class="dot">•</span>
+        <span>6 min read</span>
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="content">
+
+      <p>
+        There are places you visit and places that visit you back. Palampur, tucked into the folds of the Dhauladhar range in Himachal Pradesh, belongs firmly in the second category. I had been meaning to go for years — it kept appearing in conversations, in offhand recommendations, in the kind of vague "you should really go sometime" advice that rarely gets followed. This spring, I finally did.
+      </p>
+
+      <h2>Getting There</h2>
+      <p>
+        I flew into Dharamsala (Gaggal Airport) and hired a cab for the 35-kilometre drive south to Palampur. The road itself was an early preview of what was to come — winding through cedar and oak forests, past small dhabas doing a brisk morning trade in paratha and chai, with the snow-streaked Dhauladhar ridge appearing and disappearing between the trees like a shy giant.
+      </p>
+      <p>
+        By the time I arrived at my guesthouse, it was mid-morning and the town was already alive with the particular unhurried energy that hill stations seem to preserve even as the rest of the country accelerates. The air carried a faint sweetness — not flowers, but tea. I would come to associate that smell with every waking hour of the next four days.
+      </p>
+
+      <h2>The Tea Gardens</h2>
+      <p>
+        Palampur is the tea capital of northwest India, and the gardens cover the hillsides the way a well-worn shawl covers a shoulder — comfortably, completely, without fuss. The Wah Tea Estate and the HPMC gardens near Bundla are the most accessible, and I spent an entire morning simply walking their paths, watching workers move between the rows with a practiced rhythm that made the whole landscape feel choreographed.
+      </p>
+
+      <div class="callout">
+        <strong>Tip for visitors:</strong> The best time to see the flush (the first tender leaves of the new growth) is March to May. The gardens turn a vivid, almost electric green during this period — unlike anything you will see at other times of year.
+      </div>
+
+      <p>
+        A factory tour arranged through the estate let me follow fresh leaves from plucking basket to withering trough to rolling machine to final packaging. I came away with a half-kilogram of first-flush Kangra tea and a new appreciation for just how much labor goes into something I had always thought of as incidental — the morning ritual I perform on autopilot before my brain is properly engaged.
+      </p>
+
+      <h2>Neugal Café and the River</h2>
+      <p>
+        Every traveller I spoke to mentioned Neugal Café in the same breath as Palampur itself, so I went on day two expecting disappointment — the kind that follows anything that has been overhyped. Instead I found a terrace perched above the Neugal Khad gorge, with the river churning white far below and the Dhauladhar wall filling the entire northern sky. The coffee was good; the view was unreasonable.
+      </p>
+      <p>
+        I stayed for two hours, ordered a second cup I didn't need, and watched a pair of lammergeiers ride thermals above the ridge. The café runs on solar power and the menu skews toward local dishes — I had <em>siddu</em> (a steamed wheat bread stuffed with walnuts and poppy seeds) that I have been dreaming about since.
+      </p>
+
+      <h2>Baijnath and the Temple Circuit</h2>
+      <p>
+        About 16 kilometres from Palampur, the ancient Baijnath Temple sits at the edge of a small lake and draws pilgrims from across the region. Built in the 13th century, the temple is dedicated to Vaidyanath — Lord Shiva as the master of physicians — and the stone carvings that cover every surface are extraordinary in their detail and preservation.
+      </p>
+      <p>
+        I am not particularly religious, but I have a hard time staying unmoved in old temples. There is something in the accumulated devotion of centuries, the worn stone steps, the smell of marigold and incense, that gets past whatever rational defenses I usually bring. I sat by the lake for a long time, watching evening light move across the water.
+      </p>
+
+      <h2>Trekking the Dhauladhar Foothills</h2>
+      <p>
+        On day three I hired a local guide and set off toward the Saurabh Van Vihar and beyond into the forest trails above Palampur. The Van Vihar itself is a small deer park that functions as a pleasant introductory stroll, but the trails above it quickly narrow into proper hill paths where the only sound is birdsong and your own breathing.
+      </p>
+
+      <p>
+        We climbed to a clearing at around 1,800 metres where the Dhauladhar peaks came into full, unobstructed view. I have seen mountains before — I live close enough to them — but there is a particular shock that comes from suddenly being in the presence of something that large. The guide, a man named Rajan who had been walking these paths since childhood, pointed out the Indrasan peak and described a route that would take a proper mountaineer three days to summit. I filed that away as something for a future, more ambitious version of myself.
+      </p>
+
+      <h2>Food, People, Pace</h2>
+      <p>
+        Palampur fed me well. Beyond the siddu at Neugal, I ate <em>chha gosht</em> (a slow-cooked lamb dish with yoghurt and spices) at a family-run restaurant on the main bazaar street, drank what felt like gallons of the local tea, and discovered that Himachali <em>aktori</em> — a buckwheat pancake — makes an excellent breakfast at any altitude.
+      </p>
+      <p>
+        The town has a quietly cosmopolitan feel for its size. There is a large agricultural university, which brings in students from across India and keeps the café culture lively. I had interesting conversations with a researcher working on apple cultivation, a Delhi-based photographer on a solo trip, and a retired schoolteacher who had spent forty years teaching in the same building I could see from my guesthouse window.
+      </p>
+
+      <div class="callout">
+        <strong>The pace is the point.</strong> Palampur is not a place for a checklist. There are no must-see landmarks demanding your attention on a tight schedule. The reward goes to people who slow down enough to let the place come to them — a slow morning walk, a long lunch, an unplanned detour down a tea-garden path.
+      </div>
+
+      <h2>Coming Back</h2>
+      <p>
+        I left on a grey morning with low cloud sitting on the ridge and the mountains invisible behind it. The drive back to the airport felt shorter than the drive in — the way return journeys always do, once a place is no longer unknown. I had a bag of first-flush tea, some photographs I will probably never properly organize, and the specific kind of tiredness that comes from doing a lot of walking and not enough sleeping.
+      </p>
+      <p>
+        Palampur did what the best travel destinations do: it made me aware of the gap between the speed I usually move at and the speed at which interesting things actually happen. I came back with a quieter mind and a longer list of places I want to go. That seems like a fair trade.
+      </p>
+
+    </div>
+  </article>
+
+  <footer>
+    <span>© 2026 Sanjay Dhiman</span>
+    <a href="./blogs.html">← Back to all posts</a>
+  </footer>
+
+</body>
+</html>

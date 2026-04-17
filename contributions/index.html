@@ -189,6 +189,8 @@
     /* FADE */
     .fade-up { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s ease; }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .loading-pulse { color: var(--muted); font-size: 0.85rem; padding: 24px 0; text-align: center; }
+    .gh-graph-img { width: 100%; border-radius: 8px; filter: hue-rotate(220deg) saturate(1.4) brightness(1.1); }
 
     @media (max-width: 700px) {
       .stats-bar { grid-template-columns: repeat(2, 1fr); }
@@ -225,20 +227,20 @@
   <!-- STATS -->
   <div class="stats-bar fade-up">
     <div class="stat-card">
-      <div class="stat-card-num" data-count="142">0</div>
-      <div class="stat-card-label">Total Commits</div>
+      <div class="stat-card-num" id="stat-repos">–</div>
+      <div class="stat-card-label">Public Repos</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card-num" data-count="38">0</div>
-      <div class="stat-card-label">PRs Merged</div>
+      <div class="stat-card-num" id="stat-prs">–</div>
+      <div class="stat-card-label">PRs Authored</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card-num" data-count="12">0</div>
-      <div class="stat-card-label">Repos Contributed</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-num" data-count="524">0</div>
+      <div class="stat-card-num" id="stat-stars">–</div>
       <div class="stat-card-label">GitHub Stars</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num" id="stat-followers">–</div>
+      <div class="stat-card-label">Followers</div>
     </div>
   </div>
 
@@ -246,7 +248,7 @@
   <div class="graph-section fade-up">
     <h2>Contribution Activity <span>· Last 12 months</span></h2>
     <div class="contrib-graph">
-      <div id="graphContainer"></div>
+      <img class="gh-graph-img" src="https://ghchart.rshah.org/6366f1/sanjay82" alt="GitHub contribution graph" />
       <div class="graph-legend">
         <span>Less</span>
         <div class="legend-cell c0"></div>
@@ -262,89 +264,11 @@
   <!-- REPOS -->
   <div class="fade-up">
     <div class="section-title-row">
-      <h2>🗂️ Contributed Repositories</h2>
-      <a href="https://github.com/sanjay-dhiman" target="_blank">View all on GitHub →</a>
+      <h2>🗂️ Repositories</h2>
+      <a href="https://github.com/sanjay82" target="_blank">View all on GitHub →</a>
     </div>
-    <div class="repo-grid">
-
-      <a class="repo-card" href="https://github.com/langchain-ai/langchain" target="_blank">
-        <div class="repo-header">
-          <div class="repo-name">🔗 langchain-ai/langchain</div>
-          <span class="repo-fork-badge">External</span>
-        </div>
-        <div class="repo-desc">Building applications with LLMs through composability. Contributed streaming improvements and bug fixes to the Python SDK.</div>
-        <div class="repo-meta">
-          <div class="repo-lang"><div class="lang-dot" style="background:#3572A5"></div> Python</div>
-          <div class="repo-stars">⭐ 89.4k</div>
-          <span class="repo-type type-merged">3 PRs merged</span>
-        </div>
-      </a>
-
-      <a class="repo-card" href="https://github.com/kubernetes/kubernetes" target="_blank">
-        <div class="repo-header">
-          <div class="repo-name">☸️ kubernetes/kubernetes</div>
-          <span class="repo-fork-badge">External</span>
-        </div>
-        <div class="repo-desc">Production-Grade Container Orchestration. Contributed documentation improvements and minor CLI flag fixes.</div>
-        <div class="repo-meta">
-          <div class="repo-lang"><div class="lang-dot" style="background:#00ADD8"></div> Go</div>
-          <div class="repo-stars">⭐ 108k</div>
-          <span class="repo-type type-merged">2 PRs merged</span>
-        </div>
-      </a>
-
-      <a class="repo-card" href="https://github.com/sanjay-dhiman/meetmind" target="_blank">
-        <div class="repo-header">
-          <div class="repo-name">🧠 sanjay-dhiman/meetmind</div>
-          <span class="repo-fork-badge">Owner</span>
-        </div>
-        <div class="repo-desc">AI-powered meeting scheduling assistant using multi-agent systems, calendar integration, and natural language understanding.</div>
-        <div class="repo-meta">
-          <div class="repo-lang"><div class="lang-dot" style="background:#3178c6"></div> TypeScript</div>
-          <div class="repo-stars">⭐ 214</div>
-          <span class="repo-type type-open">Active</span>
-        </div>
-      </a>
-
-      <a class="repo-card" href="https://github.com/sanjay-dhiman/roleforge" target="_blank">
-        <div class="repo-header">
-          <div class="repo-name">🎮 sanjay-dhiman/roleforge</div>
-          <span class="repo-fork-badge">Owner</span>
-        </div>
-        <div class="repo-desc">RPG game development platform built with Unity and WebGL. Enables rapid character and world creation with an event-driven architecture.</div>
-        <div class="repo-meta">
-          <div class="repo-lang"><div class="lang-dot" style="background:#178600"></div> C#</div>
-          <div class="repo-stars">⭐ 143</div>
-          <span class="repo-type type-open">Active</span>
-        </div>
-      </a>
-
-      <a class="repo-card" href="https://github.com/hwchase17/chroma" target="_blank">
-        <div class="repo-header">
-          <div class="repo-name">🟣 chroma-core/chroma</div>
-          <span class="repo-fork-badge">External</span>
-        </div>
-        <div class="repo-desc">The AI-native open-source embedding database. Contributed performance improvements to the Python client query layer.</div>
-        <div class="repo-meta">
-          <div class="repo-lang"><div class="lang-dot" style="background:#3572A5"></div> Python</div>
-          <div class="repo-stars">⭐ 14.2k</div>
-          <span class="repo-type type-merged">1 PR merged</span>
-        </div>
-      </a>
-
-      <a class="repo-card" href="https://github.com/sanjay-dhiman/k8s-toolkit" target="_blank">
-        <div class="repo-header">
-          <div class="repo-name">🛠️ sanjay-dhiman/k8s-toolkit</div>
-          <span class="repo-fork-badge">Owner</span>
-        </div>
-        <div class="repo-desc">A curated collection of Kubernetes utilities, Helm charts, and deployment scripts for production-grade cluster management.</div>
-        <div class="repo-meta">
-          <div class="repo-lang"><div class="lang-dot" style="background:#e34c26"></div> Shell</div>
-          <div class="repo-stars">⭐ 167</div>
-          <span class="repo-type type-open">Active</span>
-        </div>
-      </a>
-
+    <div class="repo-grid" id="repoGrid">
+      <div class="loading-pulse">Loading repositories…</div>
     </div>
   </div>
 
@@ -353,81 +277,11 @@
     <div class="section-title-row">
       <h2>🔀 Recent Pull Requests</h2>
     </div>
-    <div class="pr-list">
-
-      <div class="pr-item">
-        <div class="pr-icon merged">✓</div>
-        <div class="pr-body">
-          <div class="pr-title">fix: resolve streaming response truncation in async chains</div>
-          <div class="pr-meta"><a href="#">langchain-ai/langchain</a> · #15823 · merged 2 weeks ago</div>
-        </div>
-        <span class="pr-status status-merged">Merged</span>
-      </div>
-
-      <div class="pr-item">
-        <div class="pr-icon merged">✓</div>
-        <div class="pr-body">
-          <div class="pr-title">docs: add Kubernetes Ingress tutorial with production examples</div>
-          <div class="pr-meta"><a href="#">kubernetes/website</a> · #47201 · merged 1 month ago</div>
-        </div>
-        <span class="pr-status status-merged">Merged</span>
-      </div>
-
-      <div class="pr-item">
-        <div class="pr-icon open">●</div>
-        <div class="pr-body">
-          <div class="pr-title">feat: add multi-tenant namespace isolation support to k8s-toolkit</div>
-          <div class="pr-meta"><a href="#">sanjay-dhiman/k8s-toolkit</a> · #34 · opened 3 days ago</div>
-        </div>
-        <span class="pr-status status-open">Open</span>
-      </div>
-
-      <div class="pr-item">
-        <div class="pr-icon merged">✓</div>
-        <div class="pr-body">
-          <div class="pr-title">perf: optimize vector similarity query batching in chroma client</div>
-          <div class="pr-meta"><a href="#">chroma-core/chroma</a> · #892 · merged 6 weeks ago</div>
-        </div>
-        <span class="pr-status status-merged">Merged</span>
-      </div>
-
-      <div class="pr-item">
-        <div class="pr-icon merged">✓</div>
-        <div class="pr-body">
-          <div class="pr-title">fix: incorrect RBAC role binding in CKA exam simulator</div>
-          <div class="pr-meta"><a href="#">sanjay-dhiman/k8s-toolkit</a> · #28 · merged 2 months ago</div>
-        </div>
-        <span class="pr-status status-merged">Merged</span>
-      </div>
-
-      <div class="pr-item">
-        <div class="pr-icon merged">✓</div>
-        <div class="pr-body">
-          <div class="pr-title">feat: implement CrewAI tool integration for MeetMind scheduling agent</div>
-          <div class="pr-meta"><a href="#">sanjay-dhiman/meetmind</a> · #18 · merged 3 months ago</div>
-        </div>
-        <span class="pr-status status-merged">Merged</span>
-      </div>
-
-      <div class="pr-item">
-        <div class="pr-icon merged">✓</div>
-        <div class="pr-body">
-          <div class="pr-title">docs: improve LangChain LCEL cookbook with real-world examples</div>
-          <div class="pr-meta"><a href="#">langchain-ai/langchain</a> · #14670 · merged 3 months ago</div>
-        </div>
-        <span class="pr-status status-merged">Merged</span>
-      </div>
-
-      <div class="pr-item">
-        <div class="pr-icon open">●</div>
-        <div class="pr-body">
-          <div class="pr-title">feat: WebGL shader optimization for RoleForge procedural terrain generation</div>
-          <div class="pr-meta"><a href="#">sanjay-dhiman/roleforge</a> · #41 · opened 1 week ago</div>
-        </div>
-        <span class="pr-status status-open">Open</span>
-      </div>
-
+    <div class="pr-list" id="prList">
+      <div class="loading-pulse">Loading pull requests…</div>
     </div>
+  </div>
+
   </div>
 
 </div>
@@ -449,79 +303,104 @@
 </footer>
 
 <script>
-  // Build contribution graph
-  function buildGraph() {
-    const container = document.getElementById('graphContainer');
-    const weeks = 52;
-    const days = 7;
+  const GH_USER = 'sanjay82';
+  const GH_API  = 'https://api.github.com';
 
-    // month labels
-    const monthsRow = document.createElement('div');
-    monthsRow.className = 'month-labels';
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const now = new Date();
-    for (let i = 0; i < 12; i++) {
-      const span = document.createElement('span');
-      span.className = 'month-label';
-      span.textContent = months[(now.getMonth() - 11 + i + 12) % 12];
-      monthsRow.appendChild(span);
-    }
+  // Language → colour map
+  const LANG_COLORS = {
+    JavaScript:'#f1e05a', TypeScript:'#3178c6', Python:'#3572A5', Go:'#00ADD8',
+    Java:'#b07219', Rust:'#dea584', 'C#':'#178600', 'C++':'#f34b7d',
+    Shell:'#89e051', Ruby:'#701516', Kotlin:'#A97BFF', Swift:'#F05138',
+    HTML:'#e34c26', CSS:'#563d7c', Dockerfile:'#384d54',
+  };
+  function langDot(lang) {
+    const c = LANG_COLORS[lang] || '#94a3b8';
+    return `<div class="lang-dot" style="background:${c}"></div>`;
+  }
+  function relativeTime(iso) {
+    const diff = Date.now() - new Date(iso);
+    const d = Math.floor(diff / 86400000);
+    if (d === 0) return 'today';
+    if (d === 1) return 'yesterday';
+    if (d < 30)  return `${d} days ago`;
+    if (d < 365) return `${Math.floor(d/30)} months ago`;
+    return `${Math.floor(d/365)} years ago`;
+  }
+  function fmt(n) { return n >= 1000 ? (n/1000).toFixed(1)+'k' : n; }
 
-    const body = document.createElement('div');
-    body.className = 'graph-body';
-
-    // day labels
-    const dayCol = document.createElement('div');
-    dayCol.className = 'day-labels';
-    ['','Mon','','Wed','','Fri',''].forEach(d => {
-      const s = document.createElement('span');
-      s.className = 'day-label';
-      s.textContent = d;
-      dayCol.appendChild(s);
+  // ── 1. User stats ─────────────────────────────────────────────────────────
+  fetch(`${GH_API}/users/${GH_USER}`)
+    .then(r => r.json())
+    .then(u => {
+      document.getElementById('stat-repos').textContent     = u.public_repos;
+      document.getElementById('stat-followers').textContent = u.followers;
     });
 
-    const weeksEl = document.createElement('div');
-    weeksEl.className = 'weeks';
+  // ── 2. PR count (search API) ──────────────────────────────────────────────
+  fetch(`${GH_API}/search/issues?q=author:${GH_USER}+type:pr&per_page=1`)
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('stat-prs').textContent = d.total_count ?? '–';
+    });
 
-    for (let w = 0; w < weeks; w++) {
-      const weekEl = document.createElement('div');
-      weekEl.className = 'week';
-      for (let d = 0; d < days; d++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        const rand = Math.random();
-        const lvl = rand < 0.45 ? 0 : rand < 0.65 ? 1 : rand < 0.80 ? 2 : rand < 0.92 ? 3 : 4;
-        cell.classList.add('c' + lvl);
-        weekEl.appendChild(cell);
-      }
-      weeksEl.appendChild(weekEl);
-    }
+  // ── 3. Repos + total stars ────────────────────────────────────────────────
+  fetch(`${GH_API}/users/${GH_USER}/repos?sort=updated&per_page=6`)
+    .then(r => r.json())
+    .then(repos => {
+      // Total stars across all repos
+      fetch(`${GH_API}/users/${GH_USER}/repos?per_page=100`)
+        .then(r => r.json())
+        .then(all => {
+          const stars = all.reduce((s, r) => s + r.stargazers_count, 0);
+          document.getElementById('stat-stars').textContent = fmt(stars);
+        });
 
-    body.appendChild(dayCol);
-    body.appendChild(weeksEl);
-    container.appendChild(monthsRow);
-    container.appendChild(body);
-  }
+      const grid = document.getElementById('repoGrid');
+      if (!repos.length) { grid.innerHTML = '<p style="color:var(--muted)">No repositories found.</p>'; return; }
 
-  buildGraph();
+      grid.innerHTML = repos.map(r => `
+        <a class="repo-card" href="${r.html_url}" target="_blank">
+          <div class="repo-header">
+            <div class="repo-name">📁 ${r.full_name}</div>
+            ${r.fork ? '<span class="repo-fork-badge">Fork</span>' : '<span class="repo-fork-badge">Owner</span>'}
+          </div>
+          <div class="repo-desc">${r.description || 'No description provided.'}</div>
+          <div class="repo-meta">
+            ${r.language ? `<div class="repo-lang">${langDot(r.language)} ${r.language}</div>` : ''}
+            <div class="repo-stars">⭐ ${fmt(r.stargazers_count)}</div>
+            <div class="repo-stars">🍴 ${r.forks_count}</div>
+            <span class="repo-type ${r.archived ? 'type-merged' : 'type-open'}">${r.archived ? 'Archived' : 'Active'}</span>
+          </div>
+        </a>`).join('');
+    });
 
-  // Counter animation
-  function animateCount(el) {
-    const target = parseInt(el.dataset.count, 10);
-    const step = target / (1400 / 16);
-    let cur = 0;
-    const t = setInterval(() => {
-      cur += step;
-      if (cur >= target) { el.textContent = target + '+'; clearInterval(t); }
-      else { el.textContent = Math.floor(cur); }
-    }, 16);
-  }
-  const cntObs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { animateCount(e.target); cntObs.unobserve(e.target); } });
-  }, { threshold: 0.5 });
-  document.querySelectorAll('[data-count]').forEach(el => cntObs.observe(el));
+  // ── 4. Recent PRs ─────────────────────────────────────────────────────────
+  fetch(`${GH_API}/search/issues?q=author:${GH_USER}+type:pr&sort=updated&per_page=8`)
+    .then(r => r.json())
+    .then(data => {
+      const list = document.getElementById('prList');
+      const items = data.items || [];
+      if (!items.length) { list.innerHTML = '<p style="color:var(--muted)">No pull requests found.</p>'; return; }
 
-  // Scroll reveal
+      list.innerHTML = items.map(pr => {
+        const repo     = pr.repository_url.replace('https://api.github.com/repos/', '');
+        const isMerged = pr.pull_request?.merged_at;
+        const state    = isMerged ? 'merged' : pr.state;
+        const iconMap  = { merged: '✓', open: '●', closed: '✕' };
+        const ago      = relativeTime(pr.updated_at);
+        return `
+          <div class="pr-item">
+            <div class="pr-icon ${state}">${iconMap[state] || '●'}</div>
+            <div class="pr-body">
+              <div class="pr-title">${pr.title}</div>
+              <div class="pr-meta"><a href="https://github.com/${repo}" target="_blank">${repo}</a> · #${pr.number} · ${ago}</div>
+            </div>
+            <span class="pr-status status-${state}">${state.charAt(0).toUpperCase()+state.slice(1)}</span>
+          </div>`;
+      }).join('');
+    });
+
+  // ── Scroll reveal ─────────────────────────────────────────────────────────
   const revObs = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });

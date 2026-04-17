@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Design — Tiny URL | Sanjay Dhiman</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0e1a; --surface: #111827; --card: #1a2035; --border: #1e293b;
+      --primary: #6366f1; --primary-light: #818cf8; --secondary: #06b6d4;
+      --accent: #f59e0b; --green: #10b981; --rose: #f43f5e;
+      --text: #f1f5f9; --muted: #94a3b8; --code-bg: #0d1117;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+           font-size: 15px; line-height: 1.7; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px;
+          background: rgba(10,14,26,0.92); backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(99,102,241,0.15); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between;
+                 height: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .nav-logo { font-size: 1.2rem; font-weight: 800; text-decoration: none;
+                background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-right { display: flex; gap: 8px; }
+    .nav-link { color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 500;
+                padding: 5px 12px; border-radius: 8px; border: 1px solid transparent; transition: all .2s; }
+    .nav-link:hover { color: var(--text); border-color: var(--border); background: rgba(99,102,241,.08); }
+    .layout { display: grid; grid-template-columns: 260px 1fr; gap: 0;
+               max-width: 1200px; margin: 80px auto 60px; padding: 0 24px; }
+    .toc { position: sticky; top: 80px; align-self: start; padding-right: 24px;
+           max-height: calc(100vh - 100px); overflow-y: auto; }
+    .toc::-webkit-scrollbar { width: 3px; }
+    .toc-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 2px;
+                 text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .toc-list { list-style: none; }
+    .toc-item { margin-bottom: 2px; }
+    .toc-link { display: block; padding: 6px 10px; border-radius: 7px; text-decoration: none;
+                color: var(--muted); font-size: 0.78rem; font-weight: 500; transition: all .2s;
+                border-left: 2px solid transparent; }
+    .toc-link:hover, .toc-link.active { color: var(--primary-light); border-left-color: var(--primary);
+                                         background: rgba(99,102,241,.06); }
+    .toc-sub { padding-left: 12px; font-size: 0.72rem; }
+    .content { border-left: 1px solid var(--border); padding-left: 40px; min-width: 0; }
+    .doc-hero { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .doc-badge { display: inline-flex; align-items: center; gap: 8px;
+                 background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);
+                 border-radius: 50px; padding: 4px 14px; font-size: 0.7rem;
+                 color: var(--primary-light); font-weight: 700; letter-spacing: .08em;
+                 text-transform: uppercase; margin-bottom: 16px; }
+    .doc-title { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; line-height: 1.2;
+                 margin-bottom: 12px;
+                 background: linear-gradient(135deg, var(--text) 0%, var(--primary-light) 100%);
+                 -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .doc-subtitle { font-size: 1rem; color: var(--muted); margin-bottom: 20px; max-width: 680px; }
+    .doc-meta { display: flex; gap: 24px; flex-wrap: wrap; }
+    .doc-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .doc-meta-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+                      letter-spacing: .1em; color: var(--muted); }
+    .doc-meta-value { font-size: 0.82rem; color: var(--primary-light); font-weight: 600; }
+    .section { margin-bottom: 56px; scroll-margin-top: 80px; }
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+                      padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .section-num { font-size: 0.65rem; font-weight: 700; color: var(--primary); letter-spacing: .1em; }
+    .section-title { font-size: 1.3rem; font-weight: 800; color: var(--text); }
+    h3 { font-size: 1rem; font-weight: 700; color: var(--primary-light); margin: 24px 0 10px;
+         display: flex; align-items: center; gap: 8px; }
+    h3::before { content: ''; display: inline-block; width: 3px; height: 1em;
+                 background: var(--primary); border-radius: 2px; flex-shrink: 0; }
+    p { color: #cbd5e1; margin-bottom: 14px; font-size: 0.9rem; }
+    ul, ol { margin: 8px 0 14px 20px; color: #cbd5e1; font-size: 0.88rem; }
+    li { margin-bottom: 5px; }
+    pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+          padding: 16px; overflow-x: auto; margin: 14px 0; }
+    code { font-family: 'Fira Code', monospace; font-size: 0.82rem; color: #e2e8f0; }
+    :not(pre) > code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+                       font-size: 0.8rem; color: var(--secondary); }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.82rem; }
+    th { background: var(--surface); color: var(--primary-light); font-weight: 700;
+         padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border); }
+    td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: #cbd5e1; }
+    tr:hover td { background: rgba(99,102,241,.04); }
+    .mermaid { margin: 20px 0; background: var(--card); border: 1px solid var(--border);
+               border-radius: 12px; padding: 20px; overflow-x: auto; text-align: center; }
+    .decision { background: var(--surface); border: 1px solid var(--border);
+                border-left: 4px solid var(--primary); border-radius: 12px;
+                padding: 16px 20px; margin: 16px 0; }
+    .decision-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+                      letter-spacing: .1em; color: var(--primary-light); margin-bottom: 8px; }
+    .decision p { margin: 0; font-size: 0.85rem; }
+    .callout { display: flex; gap: 12px; border-radius: 12px; padding: 14px 16px; margin: 14px 0; }
+    .callout-info { background: rgba(99,102,241,.07); border: 1px solid rgba(99,102,241,.2); }
+    .callout-warn { background: rgba(245,158,11,.07); border: 1px solid rgba(245,158,11,.2); }
+    .callout-success { background: rgba(16,185,129,.07); border: 1px solid rgba(16,185,129,.2); }
+    .callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .callout p { font-size: 0.84rem; margin: 0; }
+    .callout-info p { color: var(--primary-light); }
+    .callout-warn p { color: var(--accent); }
+    .callout-success p { color: var(--green); }
+    .question-card { background: var(--card); border: 1px solid var(--border);
+                     border-radius: 14px; padding: 20px; margin: 14px 0; }
+    .question-text { font-weight: 700; color: var(--text); margin-bottom: 10px; font-size: 0.95rem; }
+    .question-answer { color: var(--muted); font-size: 0.84rem; line-height: 1.6; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem;
+             font-weight: 700; letter-spacing: .06em; }
+    .badge-blue { background: rgba(99,102,241,.15); color: var(--primary-light); }
+    .badge-cyan { background: rgba(6,182,212,.15); color: var(--secondary); }
+    .badge-amber { background: rgba(245,158,11,.15); color: var(--accent); }
+    .badge-green { background: rgba(16,185,129,.15); color: var(--green); }
+    footer { text-align: center; padding: 32px 24px; border-top: 1px solid var(--border);
+             color: var(--muted); font-size: 0.8rem; display: flex;
+             justify-content: center; gap: 32px; }
+    footer a { color: var(--primary-light); text-decoration: none; }
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { display: none; }
+      .content { border-left: none; padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">Sanjay Dhiman</a>
+    <div class="nav-right">
+      <a class="nav-link" href="index.html">← Articles</a>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list" id="toc">
+      <li class="toc-item"><a class="toc-link" href="#s1">1. Document Overview</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s2">2. System Overview</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s3">3. Architecture Overview</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s4">4. Functional Architecture</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s5">5. Data Architecture</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s6">6. Integration Architecture</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s7">7. Security Architecture</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s8">8. Performance Architecture</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s9">9. Availability and Reliability</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s10">10. Observability Architecture</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s11">11. Deployment Architecture</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s12">12. DevOps and CI/CD</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s13">13. NFR Mapping</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s14">14. Tech Decisions and Trade-offs</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s15">15. Risk Analysis</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s16">16. Migration Strategy</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s17">17. Future Considerations</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s18">18. LLD Guidance</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s19">19. Capacity Planning</a></li>
+      <li class="toc-item"><a class="toc-link" href="#s20">20. Interview Questions</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="doc-hero">
+      <div class="doc-badge">⚙️ System Design Document</div>
+      <h1 class="doc-title">System Design — Tiny URL</h1>
+      <p class="doc-subtitle">A production-grade URL shortening service capable of handling billions of redirects at sub-10ms latency with global availability and intelligent analytics.</p>
+      <div class="doc-meta">
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Published</span>
+          <span class="doc-meta-value">April 17, 2025</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Read Time</span>
+          <span class="doc-meta-value">45 min</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Type</span>
+          <span class="doc-meta-value">HLD + LLD</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Level</span>
+          <span class="doc-meta-value">Senior / Architect</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 1 -->
+    <section class="section" id="s1">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2 class="section-title">Document Overview</h2>
+      </div>
+      <p>This System Design Document (SDD) provides comprehensive technical guidance for building a globally distributed, highly available URL shortening service — commonly referenced as TinyURL. It covers both High-Level Design (HLD) and Low-Level Design (LLD), enabling engineering teams to implement, scale, and operate the system end to end.</p>
+
+      <h3>Scope</h3>
+      <p><strong>In Scope:</strong></p>
+      <ul>
+        <li>URL shortening and alias generation engine</li>
+        <li>Redirect service with sub-10ms latency</li>
+        <li>Custom alias support and expiry policies</li>
+        <li>Click analytics and geo-tracking</li>
+        <li>User authentication, API key management</li>
+        <li>Admin dashboard and rate limiting</li>
+        <li>Multi-region active-active deployment</li>
+      </ul>
+      <p><strong>Out of Scope:</strong></p>
+      <ul>
+        <li>Payment processing or monetisation layer</li>
+        <li>Content moderation (separate ML pipeline)</li>
+        <li>Native mobile applications</li>
+      </ul>
+
+      <h3>Audience</h3>
+      <p>Backend Engineers, Platform Architects, Tech Leads, SRE/DevOps Teams, and System Design Interview Panels.</p>
+
+      <h3>References</h3>
+      <ul>
+        <li>BRD-URL-001: Business Requirements Document — URL Shortener Platform</li>
+        <li>FRD-URL-002: Functional Requirements Document v2.3</li>
+        <li>NFR-URL-003: Non-Functional Requirements — Performance and Availability</li>
+        <li>SEC-URL-004: Security Architecture Standard — API Gateway Policies</li>
+      </ul>
+
+      <h3>Glossary</h3>
+      <table>
+        <tr><th>Term</th><th>Definition</th></tr>
+        <tr><td>Short URL</td><td>A compact alias (e.g. tny.io/aB3kZ) that redirects to a longer original URL</td></tr>
+        <tr><td>Long URL</td><td>The original destination URL, potentially thousands of characters</td></tr>
+        <tr><td>Alias / Slug</td><td>The unique alphanumeric identifier appended to the base domain</td></tr>
+        <tr><td>Base62 Encoding</td><td>Encoding using [0-9, a-z, A-Z] — 62 characters — for compact ID representation</td></tr>
+        <tr><td>Redirect</td><td>HTTP 301 (permanent) or 302 (temporary) response directing client to original URL</td></tr>
+        <tr><td>TTL</td><td>Time To Live — duration after which a short URL expires and becomes inactive</td></tr>
+        <tr><td>DAU</td><td>Daily Active Users accessing the platform for creation or redirection</td></tr>
+        <tr><td>CDN Edge</td><td>Content Delivery Network edge node used to serve cached redirects globally</td></tr>
+        <tr><td>Collision</td><td>When two long URLs hash or encode to the same short alias</td></tr>
+        <tr><td>Click Analytics</td><td>Metadata collected per redirect: timestamp, IP, referrer, user-agent, geo</td></tr>
+        <tr><td>Rate Limiting</td><td>Throttling mechanism restricting requests per API key or IP per time window</td></tr>
+        <tr><td>Counter Sharding</td><td>Partitioning a distributed counter across multiple nodes to avoid hot-spot contention</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section class="section" id="s2">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2 class="section-title">System Overview</h2>
+      </div>
+
+      <h3>System Objectives</h3>
+      <ul>
+        <li>Generate globally unique short URLs in under 50ms with zero collisions</li>
+        <li>Serve redirect responses with p99 latency below 10ms at global scale</li>
+        <li>Support 10 billion total stored URLs with horizontal scaling</li>
+        <li>Handle 100,000 redirect RPS at peak with burst tolerance of 3x</li>
+        <li>Provide real-time click analytics with 1-second event delivery lag</li>
+        <li>Offer 99.99% uptime SLA via active-active multi-region topology</li>
+        <li>Enforce per-user rate limits and per-URL expiry policies reliably</li>
+        <li>Comply with GDPR for EU user data and CCPA for California residents</li>
+      </ul>
+
+      <h3>System Context</h3>
+      <p>TinyURL sits at the intersection of a user-facing API platform, a real-time analytics pipeline, and a global redirect delivery network. It integrates with identity providers, CDN edge networks, and downstream data warehouses for business intelligence.</p>
+      <div class="mermaid">
+graph TB
+    Users["👤 End Users / API Consumers"]
+    Browser["🌐 Web Browser / Mobile App"]
+    CDN["☁️ CDN Edge Network (Cloudflare)"]
+    GW["🔀 API Gateway (Kong)"]
+    AuthSvc["🔐 Auth Service (OAuth2 / API Keys)"]
+    TinyURL["⚡ TinyURL Platform"]
+    Analytics["📊 Analytics Pipeline (Kafka + Flink)"]
+    DW["🗄️ Data Warehouse (BigQuery)"]
+    IdP["🔑 Identity Provider (Auth0)"]
+    Notif["🔔 Notification Service"]
+
+    Users --> Browser
+    Browser --> CDN
+    CDN --> GW
+    GW --> AuthSvc
+    GW --> TinyURL
+    TinyURL --> Analytics
+    Analytics --> DW
+    AuthSvc --> IdP
+    TinyURL --> Notif
+      </div>
+
+      <h3>Assumptions</h3>
+      <table>
+        <tr><th>Assumption</th><th>Impact</th><th>Risk</th></tr>
+        <tr><td>Read-to-write ratio is 100:1 (redirects dominate)</td><td>Design optimises for read path with heavy caching</td><td>Medium — bursts of writes could still spike</td></tr>
+        <tr><td>7-character Base62 alias provides sufficient namespace</td><td>62^7 = 3.5 trillion unique slugs</td><td>Low — namespace exhaustion beyond 10yr horizon</td></tr>
+        <tr><td>Users accept eventual consistency for analytics</td><td>Click counts may lag by up to 2 seconds</td><td>Low — acceptable for non-financial data</td></tr>
+        <tr><td>P95 URL length is under 2,000 characters</td><td>Allows VARCHAR(2048) storage without BLOB overhead</td><td>Low — enforced by input validation</td></tr>
+      </table>
+
+      <h3>Constraints</h3>
+      <table>
+        <tr><th>Constraint</th><th>Category</th><th>Implication</th></tr>
+        <tr><td>Short alias must be ≤ 8 characters</td><td>Product</td><td>Limits ID space; Base62 encoding required</td></tr>
+        <tr><td>GDPR — EU user IPs must not leave EU region</td><td>Compliance</td><td>Multi-region data isolation; geo-routing mandatory</td></tr>
+        <tr><td>Infrastructure on AWS (multi-region)</td><td>Technical</td><td>Use AWS-native services: ElastiCache, DynamoDB, CloudFront</td></tr>
+        <tr><td>API rate limit: 1,000 req/min per API key</td><td>Product</td><td>Redis sliding window rate limiter at gateway layer</td></tr>
+      </table>
+
+      <h3>Success Criteria</h3>
+      <table>
+        <tr><th>KPI</th><th>Target</th></tr>
+        <tr><td>Redirect p99 latency (global)</td><td>&lt; 10ms</td></tr>
+        <tr><td>URL creation p99 latency</td><td>&lt; 50ms</td></tr>
+        <tr><td>System availability (monthly)</td><td>99.99% (≤ 4.3 min downtime)</td></tr>
+        <tr><td>Redirect RPS peak sustained</td><td>100,000 RPS</td></tr>
+        <tr><td>Click analytics lag</td><td>&lt; 2 seconds (p95)</td></tr>
+        <tr><td>Alias collision rate</td><td>0% (zero-collision guarantee)</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section class="section" id="s3">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2 class="section-title">Architecture Overview</h2>
+      </div>
+
+      <div class="mermaid">
+graph TB
+    subgraph External["External Layer"]
+        Users["👤 Users / API Clients"]
+        CF["☁️ CloudFront CDN"]
+    end
+    subgraph AppLayer["Application Layer"]
+        GW["API Gateway (Kong)"]
+        RedirectSvc["Redirect Service (Go)"]
+        ShortenSvc["Shorten Service (Go)"]
+        UserSvc["User Service (Node.js)"]
+        AnalyticsSvc["Analytics Ingestor (Go)"]
+    end
+    subgraph DataLayer["Data Layer"]
+        Redis["Redis Cluster (ElastiCache)"]
+        DynDB["DynamoDB (URLs Table)"]
+        Postgres["PostgreSQL (Users / API Keys)"]
+        Kafka["Apache Kafka"]
+    end
+    subgraph InfraLayer["Infrastructure"]
+        K8s["EKS Kubernetes"]
+        Prometheus["Prometheus + Grafana"]
+    end
+    Users --> CF
+    CF --> GW
+    GW --> RedirectSvc
+    GW --> ShortenSvc
+    GW --> UserSvc
+    RedirectSvc --> Redis
+    RedirectSvc --> DynDB
+    ShortenSvc --> DynDB
+    ShortenSvc --> Redis
+    AnalyticsSvc --> Kafka
+    RedirectSvc --> AnalyticsSvc
+    DynDB --> Kafka
+    AppLayer --> K8s
+    K8s --> Prometheus
+      </div>
+
+      <h3>Architectural Style</h3>
+      <div class="decision">
+        <div class="decision-label">Decision — Microservices with Event-Driven Analytics</div>
+        <p><strong>Chosen:</strong> Domain-separated microservices (Redirect, Shorten, User, Analytics) communicating via REST internally and Kafka for async analytics events.</p>
+        <p><strong>Alternatives Considered:</strong> Monolith (poor independent scaling), Lambda/Serverless (cold-start kills latency SLA), GraphQL gateway (over-engineered for simple redirect).</p>
+        <p><strong>Selection Criteria:</strong> Redirect service must scale independently from write path. Analytics must not block the critical redirect path. Operational isolation reduces blast radius.</p>
+        <p><strong>Trade-offs:</strong> Adds operational complexity vs monolith; mitigated by Kubernetes service mesh and standardised deployment templates.</p>
+      </div>
+
+      <h3>Key Design Principles</h3>
+      <ul>
+        <li><strong>Single Responsibility:</strong> Each microservice owns one domain; Redirect Service never writes URL metadata.</li>
+        <li><strong>Eventual Consistency (CAP — AP):</strong> Redirect reads tolerate stale cache; creation path is strongly consistent via DynamoDB conditional writes.</li>
+        <li><strong>DRY Configuration:</strong> All service configs centralised in AWS Parameter Store; no env-specific hardcoding.</li>
+        <li><strong>Fail Fast:</strong> Timeouts and circuit breakers at every inter-service call boundary with fallback to direct DB reads.</li>
+        <li><strong>Idempotency:</strong> URL creation API is idempotent — duplicate long URL returns existing short alias.</li>
+        <li><strong>Zero-Trust Networking:</strong> mTLS between all internal services; no service-to-service HTTP without client certificate.</li>
+        <li><strong>Observability-First:</strong> Distributed tracing injected at entry point; every service emits structured JSON logs and Prometheus metrics.</li>
+        <li><strong>Defence in Depth:</strong> WAF at CDN edge, rate limiting at API Gateway, input validation at application layer, DB access via IAM roles only.</li>
+      </ul>
+
+      <h3>Technology Stack</h3>
+      <table>
+        <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Rationale</th></tr>
+        <tr><td>Language (Redirect/Shorten)</td><td>Go (Golang)</td><td>1.22</td><td>Sub-ms goroutine scheduling; ideal for I/O-bound redirect path</td></tr>
+        <tr><td>Language (User Service)</td><td>Node.js</td><td>20 LTS</td><td>Rich ecosystem for OAuth2 / JWT libraries; developer familiarity</td></tr>
+        <tr><td>API Gateway</td><td>Kong Gateway</td><td>3.5</td><td>Plugin-based rate limiting, JWT validation, logging out of box</td></tr>
+        <tr><td>Cache</td><td>AWS ElastiCache (Redis)</td><td>7.x</td><td>Microsecond reads; TTL-native for URL expiry; cluster mode for HA</td></tr>
+        <tr><td>Primary DB (URLs)</td><td>Amazon DynamoDB</td><td>—</td><td>Single-digit ms at any scale; conditional writes prevent collision</td></tr>
+        <tr><td>Relational DB (Users)</td><td>PostgreSQL (RDS Aurora)</td><td>15</td><td>ACID compliance for billing, API keys, user profiles</td></tr>
+        <tr><td>Message Queue</td><td>Apache Kafka (MSK)</td><td>3.6</td><td>High-throughput analytics event streaming; consumer group replay</td></tr>
+        <tr><td>Stream Processing</td><td>Apache Flink</td><td>1.18</td><td>Stateful windowed aggregations for real-time click counts</td></tr>
+        <tr><td>CDN</td><td>AWS CloudFront</td><td>—</td><td>Caches HTTP 301 redirects globally; 400+ edge locations</td></tr>
+        <tr><td>Observability</td><td>Prometheus + Grafana + Tempo</td><td>—</td><td>Metrics, dashboards, distributed traces in unified stack</td></tr>
+        <tr><td>Auth</td><td>Auth0 + JWT RS256</td><td>—</td><td>Managed OIDC; API key JWT signing; audit logging built-in</td></tr>
+        <tr><td>Infra / IaC</td><td>Terraform + Helm</td><td>1.7 / 3.14</td><td>Declarative infra; reproducible multi-region deployments</td></tr>
+        <tr><td>CI/CD</td><td>GitHub Actions + ArgoCD</td><td>—</td><td>Pull-based GitOps for Kubernetes; zero-drift deployments</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section class="section" id="s4">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2 class="section-title">Functional Architecture</h2>
+      </div>
+
+      <h3>Functional Requirements Mapping</h3>
+      <table>
+        <tr><th>FR-ID</th><th>Requirement</th><th>Module</th><th>Priority</th><th>Notes</th></tr>
+        <tr><td>FR-01</td><td>Shorten a long URL to a 7-char alias</td><td>Shorten Service</td><td>P0</td><td>Idempotent; same long URL returns same alias</td></tr>
+        <tr><td>FR-02</td><td>Redirect short URL to original with HTTP 301/302</td><td>Redirect Service</td><td>P0</td><td>301 for permanent, 302 for expiring URLs</td></tr>
+        <tr><td>FR-03</td><td>Support custom alias (user-defined slug)</td><td>Shorten Service</td><td>P1</td><td>Validate uniqueness; reject conflicts</td></tr>
+        <tr><td>FR-04</td><td>Set URL expiry (TTL)</td><td>Shorten Service</td><td>P1</td><td>Cron-based expiry sweep + Redis TTL eviction</td></tr>
+        <tr><td>FR-05</td><td>Track click count per short URL</td><td>Analytics Service</td><td>P1</td><td>Async via Kafka; eventual consistency acceptable</td></tr>
+        <tr><td>FR-06</td><td>Provide per-URL geo and referrer analytics</td><td>Analytics Service</td><td>P1</td><td>MaxMind GeoIP2 for IP-to-country resolution</td></tr>
+        <tr><td>FR-07</td><td>User registration and API key issuance</td><td>User Service</td><td>P1</td><td>OAuth2 + API key scoped to quotas</td></tr>
+        <tr><td>FR-08</td><td>Rate limiting per API key</td><td>API Gateway</td><td>P0</td><td>1,000 req/min sliding window in Redis</td></tr>
+        <tr><td>FR-09</td><td>Bulk URL creation via CSV upload</td><td>Shorten Service</td><td>P2</td><td>Async job; results delivered via webhook/email</td></tr>
+        <tr><td>FR-10</td><td>URL existence check (is short URL alive?)</td><td>Redirect Service</td><td>P2</td><td>HEAD request returns 200/404/410 (expired)</td></tr>
+        <tr><td>FR-11</td><td>Admin dashboard — URL management</td><td>Admin Service</td><td>P2</td><td>Deactivate/delete URLs; view analytics</td></tr>
+        <tr><td>FR-12</td><td>Malicious URL detection and blocking</td><td>Shorten Service</td><td>P1</td><td>Google Safe Browsing API integration at creation time</td></tr>
+      </table>
+
+      <h3>Component Design</h3>
+      <p><strong>Redirect Service (Go):</strong> The most latency-sensitive component. Receives slug, checks Redis L1 cache, falls back to DynamoDB on miss, emits analytics event to Kafka, returns HTTP redirect. No write operations. Stateless; scales horizontally to 200 pods.</p>
+      <p><strong>Shorten Service (Go):</strong> Handles URL creation. Generates or validates alias via Snowflake-inspired ID → Base62. Writes to DynamoDB with conditional put (prevents collision). Warms Redis cache. Calls Google Safe Browsing API synchronously before persisting.</p>
+      <p><strong>User Service (Node.js):</strong> Manages user registration, OAuth2 flows, API key issuance (UUID v4 hashed with SHA-256), quota enforcement. Reads from PostgreSQL. Publishes audit events to Kafka.</p>
+      <p><strong>Analytics Ingestor (Go):</strong> Consumes click events from Redirect Service via Kafka. Runs Flink stateful aggregations for windowed click counts. Writes enriched events (with GeoIP) to BigQuery and increments Redis counters for real-time dashboard.</p>
+      <p><strong>Admin Service (Node.js):</strong> Internal-only service behind VPN. Provides REST API for URL deactivation, user management, abuse reporting. Writes directly to DynamoDB and PostgreSQL with operator-level IAM roles.</p>
+
+      <h3>Class Diagram</h3>
+      <div class="mermaid">
+classDiagram
+    class URLRecord {
+        +String shortAlias PK
+        +String longURL
+        +String ownerID FK
+        +DateTime createdAt
+        +DateTime expiresAt
+        +Boolean isActive
+        +String customAlias
+        +shorten() String
+        +validate() Boolean
+        +isExpired() Boolean
+    }
+    class RedirectService {
+        +resolve(alias) URLRecord
+        +buildRedirectResponse(url) HTTPResponse
+    }
+    class ShortenService {
+        +create(longURL, options) URLRecord
+        +generateAlias(id) String
+        +checkMalicious(url) Boolean
+    }
+    class AnalyticsEvent {
+        +String alias
+        +String ipAddress
+        +String country
+        +String referrer
+        +String userAgent
+        +DateTime timestamp
+    }
+    class UserAccount {
+        +String userID PK
+        +String email
+        +String apiKey
+        +Integer quotaLimit
+        +DateTime createdAt
+    }
+    ShortenService --> URLRecord : creates
+    RedirectService --> URLRecord : reads
+    RedirectService --> AnalyticsEvent : emits
+    UserAccount --> URLRecord : owns
+      </div>
+
+      <h3>Redirect Sequence (Critical Path)</h3>
+      <div class="mermaid">
+sequenceDiagram
+    participant C as Client Browser
+    participant CF as CloudFront CDN
+    participant GW as API Gateway
+    participant RS as Redirect Service
+    participant RC as Redis Cache
+    participant DB as DynamoDB
+    participant K as Kafka
+
+    C->>CF: GET /aB3kZ
+    CF->>CF: Check edge cache hit
+    alt Cache HIT at CDN
+        CF-->>C: HTTP 301 (cached redirect)
+    else Cache MISS
+        CF->>GW: Forward request
+        GW->>RS: Route to Redirect Service
+        RS->>RC: GET url:aB3kZ
+        alt Redis HIT
+            RC-->>RS: longURL + metadata
+        else Redis MISS
+            RS->>DB: GetItem(PK=aB3kZ)
+            DB-->>RS: URLRecord
+            RS->>RC: SET url:aB3kZ TTL=3600s
+        end
+        RS->>K: Produce ClickEvent (async)
+        RS-->>GW: HTTP 301 Location: longURL
+        GW-->>CF: Propagate response
+        CF-->>C: HTTP 301 + Cache-Control: max-age=3600
+    end
+      </div>
+
+      <h3>State Management Strategy</h3>
+      <p>URL records are persisted in DynamoDB (source of truth) with a Redis write-through cache for hot redirects. Session state is stateless (JWT bearer tokens). Distributed rate limiting uses Redis atomic INCR with sliding window. Analytics state is managed by Flink with RocksDB backend for fault-tolerant checkpointing.</p>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section class="section" id="s5">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2 class="section-title">Data Architecture</h2>
+      </div>
+
+      <div class="mermaid">
+erDiagram
+    URL_RECORD {
+        string short_alias PK
+        string long_url
+        string owner_id FK
+        datetime created_at
+        datetime expires_at
+        boolean is_active
+        string custom_alias
+        string safe_browsing_status
+    }
+    USER_ACCOUNT {
+        string user_id PK
+        string email
+        string hashed_api_key
+        int quota_limit
+        int quota_used
+        datetime created_at
+        string plan_tier
+    }
+    CLICK_EVENT {
+        string event_id PK
+        string short_alias FK
+        string ip_address
+        string country_code
+        string referrer_url
+        string user_agent
+        datetime clicked_at
+    }
+    ANALYTICS_AGGREGATE {
+        string short_alias FK
+        string window_start
+        int click_count
+        string top_country
+        string top_referrer
+    }
+    API_KEY {
+        string key_id PK
+        string user_id FK
+        string hashed_key
+        int rate_limit_rpm
+        datetime created_at
+        datetime revoked_at
+    }
+    USER_ACCOUNT ||--o{ URL_RECORD : "creates"
+    URL_RECORD ||--o{ CLICK_EVENT : "generates"
+    CLICK_EVENT ||--o{ ANALYTICS_AGGREGATE : "aggregated into"
+    USER_ACCOUNT ||--o{ API_KEY : "owns"
+      </div>
+
+      <h3>Data Storage Strategy</h3>
+      <table>
+        <tr><th>Store</th><th>Type</th><th>Use Case</th><th>Scaling</th><th>Backup</th></tr>
+        <tr><td>DynamoDB</td><td>NoSQL Key-Value</td><td>URL records (primary store)</td><td>Auto-scaling; on-demand billing</td><td>PITR 35 days; cross-region replica</td></tr>
+        <tr><td>Redis (ElastiCache)</td><td>In-Memory Cache</td><td>Hot URL cache; rate limit counters</td><td>Cluster mode 6 shards; read replicas</td><td>RDB snapshots every 5min</td></tr>
+        <tr><td>PostgreSQL (Aurora)</td><td>RDBMS</td><td>Users, API keys, billing</td><td>Multi-AZ; read replicas</td><td>Automated snapshots 7 days + WAL archiving</td></tr>
+        <tr><td>Kafka (MSK)</td><td>Event Stream</td><td>Click event pipeline</td><td>6 partitions; 3 replicas; MSK Serverless</td><td>Topic retention 7 days; S3 offload</td></tr>
+        <tr><td>BigQuery</td><td>Data Warehouse</td><td>Historical analytics; BI dashboards</td><td>Serverless petabyte-scale</td><td>Managed; 90-day table snapshots</td></tr>
+      </table>
+
+      <h3>Data Flow Diagram</h3>
+      <div class="mermaid">
+graph LR
+    A["🌐 User Click (Browser)"] --> B["CDN Edge"]
+    B --> C["Redirect Service"]
+    C --> D["Redis Cache"]
+    C --> E["DynamoDB"]
+    C --> F["Kafka Topic: click-events"]
+    F --> G["Flink Stream Processor"]
+    G --> H["BigQuery (Analytics DW)"]
+    G --> I["Redis (Real-time Counters)"]
+    H --> J["Grafana BI Dashboard"]
+      </div>
+
+      <h3>Consistency Model</h3>
+      <p>The system applies a nuanced consistency strategy by partition: URL creation uses DynamoDB conditional writes for <strong>strong consistency</strong> (preventing collision). Redirect reads use Redis with <strong>eventual consistency</strong> — stale cache is tolerable for milliseconds. Click analytics accepts <strong>eventual consistency</strong> with Kafka at-least-once delivery and Flink idempotent aggregation. This balances the CAP theorem trade-offs: the system is AP for reads and CP for writes.</p>
+
+      <h3>Data Security</h3>
+      <ul>
+        <li><strong>Encryption at rest:</strong> DynamoDB AWS-managed CMK (KMS); PostgreSQL Aurora encrypted volumes; Kafka MSK TLS encryption.</li>
+        <li><strong>Encryption in transit:</strong> TLS 1.3 enforced end-to-end; mTLS between microservices via Istio service mesh.</li>
+        <li><strong>PII masking:</strong> IP addresses in click events hashed with HMAC-SHA256 before DW persistence for GDPR compliance.</li>
+        <li><strong>Access control:</strong> All DB access via IAM roles — no static credentials. Least-privilege policies per service.</li>
+        <li><strong>GDPR compliance:</strong> EU-resident click event data isolated to eu-west-1; right-to-erasure endpoint deletes URL records and associated click events within 72 hours.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section class="section" id="s6">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2 class="section-title">Integration Architecture</h2>
+      </div>
+
+      <h3>Integration Patterns</h3>
+      <ul>
+        <li><strong>REST (HTTP/JSON):</strong> Primary API contract for URL creation, user management, and admin operations. Versioned under <code>/api/v1/</code> with OpenAPI 3.1 spec.</li>
+        <li><strong>Kafka Event Streaming:</strong> Async decoupling of click analytics from the redirect hot path. Zero latency impact on redirect SLA.</li>
+        <li><strong>Webhooks:</strong> Outbound HTTP callbacks to user-registered endpoints on bulk job completion and URL expiry events.</li>
+        <li><strong>Google Safe Browsing API:</strong> Synchronous HTTP call at URL creation time; cached 24h per URL hash to reduce quota usage.</li>
+        <li><strong>MaxMind GeoIP2:</strong> Embedded database (updated weekly via S3) for IP-to-country resolution in the analytics ingestor — no external call per event.</li>
+      </ul>
+
+      <h3>External Integrations</h3>
+      <table>
+        <tr><th>System</th><th>Purpose</th><th>Protocol</th><th>Auth</th><th>SLA</th><th>Error Handling</th></tr>
+        <tr><td>Google Safe Browsing</td><td>Malicious URL detection at creation</td><td>HTTPS REST</td><td>API Key</td><td>99.9%</td><td>Fail-open with audit log on timeout; block on confirmed threat</td></tr>
+        <tr><td>Auth0</td><td>OAuth2 / OIDC user authentication</td><td>HTTPS / JWKS</td><td>Client credentials</td><td>99.99%</td><td>Circuit breaker; cached JWKS keys for 24h fallback</td></tr>
+        <tr><td>MaxMind GeoIP2</td><td>IP geolocation for analytics</td><td>Local DB</td><td>License Key (S3)</td><td>N/A (local)</td><td>Unknown country fallback; weekly DB refresh via S3 sync</td></tr>
+        <tr><td>AWS CloudFront</td><td>Global CDN caching of redirects</td><td>HTTPS / HTTP/2</td><td>IAM OAC</td><td>99.99%</td><td>Origin failover to secondary region on 5xx</td></tr>
+        <tr><td>BigQuery</td><td>Analytics data warehouse</td><td>gRPC / REST</td><td>Service Account</td><td>99.99%</td><td>Flink checkpointing retries; dead-letter topic on repeated failure</td></tr>
+        <tr><td>PagerDuty</td><td>Incident alerting</td><td>HTTPS REST</td><td>API Key</td><td>99.95%</td><td>Fallback email alert if PD unreachable</td></tr>
+      </table>
+
+      <h3>Integration Topology</h3>
+      <div class="mermaid">
+graph TB
+    TinyURL["TinyURL Platform"]
+    GSB["Google Safe Browsing API"]
+    Auth0["Auth0 OIDC Provider"]
+    GeoIP["MaxMind GeoIP2 (local DB)"]
+    CF["AWS CloudFront CDN"]
+    BQ["Google BigQuery"]
+    PD["PagerDuty"]
+    Webhook["User Webhook Endpoints"]
+
+    TinyURL -- "URL malice check (sync)" --> GSB
+    TinyURL -- "Token validation (JWKS)" --> Auth0
+    TinyURL -- "IP resolution (local)" --> GeoIP
+    CF -- "Origin pull" --> TinyURL
+    TinyURL -- "Analytics events (Flink)" --> BQ
+    TinyURL -- "Alerts (Prometheus)" --> PD
+    TinyURL -- "Job completion events" --> Webhook
+      </div>
+
+      <h3>API Design Standards</h3>
+      <ul>
+        <li><strong>Versioning:</strong> URI-based versioning (<code>/api/v1/</code>); breaking changes bump major version.</li>
+        <li><strong>Naming:</strong> Plural nouns for resources (<code>/urls</code>, <code>/users</code>); kebab-case for multi-word paths.</li>
+        <li><strong>Request/Response:</strong> JSON body; <code>Content-Type: application/json</code>; standard error envelope: <code>{error, code, message, requestId}</code>.</li>
+        <li><strong>Rate Limiting:</strong> Response headers <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code> on every response.</li>
+        <li><strong>Idempotency:</strong> POST <code>/api/v1/urls</code> accepts <code>Idempotency-Key</code> header for safe retries.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section class="section" id="s7">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2 class="section-title">Security Architecture</h2>
+      </div>
+
+      <h3>Security Principles</h3>
+      <ul>
+        <li><strong>Defence in Depth:</strong> WAF → API Gateway → App Layer → DB — each layer enforces independent security controls.</li>
+        <li><strong>Least Privilege:</strong> Each microservice has a dedicated IAM role with minimum DynamoDB/S3/Kafka permissions needed.</li>
+        <li><strong>Zero Trust Networking:</strong> No implicit trust between services; mTLS via Istio service mesh for all pod-to-pod communication.</li>
+        <li><strong>Fail Secure:</strong> On auth service degradation, requests are rejected (403) rather than allowed through.</li>
+        <li><strong>Audit Everything:</strong> All mutation operations produce immutable audit logs to CloudWatch Logs with tamper detection.</li>
+        <li><strong>Shift Left Security:</strong> SAST (Semgrep), SCA (Snyk), DAST (OWASP ZAP) integrated into CI pipeline before any merge.</li>
+      </ul>
+
+      <h3>Auth / Authz Model</h3>
+      <p><strong>Mechanism:</strong> OAuth2 Authorization Code Flow for web users; API Key (JWT RS256) for programmatic access. JWTs are verified against Auth0 JWKS endpoint cached locally for 24h.</p>
+      <p><strong>RBAC Roles:</strong> <code>user</code> (create/read own URLs), <code>admin</code> (manage all URLs + users), <code>readonly</code> (analytics view only). Role claims embedded in JWT payload.</p>
+      <p><strong>MFA:</strong> TOTP-based MFA enforced for admin role via Auth0 MFA policies. Optional for standard users.</p>
+      <p><strong>Session Management:</strong> Stateless JWT (15-min access token, 7-day refresh token). Refresh token rotation with single-use enforcement stored in Redis.</p>
+
+      <h3>Security Architecture Diagram</h3>
+      <div class="mermaid">
+graph TB
+    Internet["🌐 Internet Traffic"]
+    WAF["AWS WAF (OWASP Rules + IP Blocklist)"]
+    CF["CloudFront CDN (TLS 1.3 termination)"]
+    GW["Kong API Gateway (JWT validation + Rate Limit)"]
+    Istio["Istio Service Mesh (mTLS)"]
+    App["Application Services (Go / Node.js)"]
+    DB["DynamoDB + PostgreSQL (KMS encrypted)"]
+    Vault["AWS Secrets Manager (API Keys / DB creds)"]
+    Audit["CloudWatch Audit Logs (immutable)"]
+
+    Internet --> WAF
+    WAF --> CF
+    CF --> GW
+    GW --> Istio
+    Istio --> App
+    App --> DB
+    App --> Vault
+    App --> Audit
+      </div>
+
+      <h3>Network Security</h3>
+      <ul>
+        <li><strong>TLS/mTLS:</strong> TLS 1.3 at CloudFront; mTLS between all pods via Istio mutual authentication.</li>
+        <li><strong>Segmentation:</strong> VPC with public subnet (ALB/CloudFront), private subnet (services), isolated subnet (DB). No direct DB access from public subnet.</li>
+        <li><strong>DDoS Protection:</strong> AWS Shield Advanced on CloudFront; WAF rate-based rules auto-block IPs exceeding 10,000 req/min.</li>
+        <li><strong>Firewall Rules:</strong> Security groups allow only port 443 inbound; inter-service traffic on pod CIDR only via Istio policy.</li>
+      </ul>
+
+      <h3>Application Security</h3>
+      <ul>
+        <li><strong>Input Validation:</strong> URL format validated via RFC 3986 regex; max length 2,048 chars; scheme restricted to https/http.</li>
+        <li><strong>OWASP Mitigations:</strong> Parameterised queries (no SQL injection surface); CORS policy restricted to registered origins; HSTS header enforced.</li>
+        <li><strong>Dependency Scanning:</strong> Snyk in CI pipeline; critical CVEs block merge; weekly full-dependency audit.</li>
+        <li><strong>SAST/DAST:</strong> Semgrep on every PR; OWASP ZAP nightly against staging environment.</li>
+      </ul>
+
+      <h3>Compliance and Audit</h3>
+      <table>
+        <tr><th>Requirement</th><th>Regulation</th><th>Implementation</th></tr>
+        <tr><td>Data residency for EU users</td><td>GDPR Art. 44</td><td>Geo-routing to eu-west-1; cross-region replication blocked for EU PII</td></tr>
+        <tr><td>Right to erasure</td><td>GDPR Art. 17</td><td>Deletion API removes URL records + anonymises click events within 72h</td></tr>
+        <tr><td>Audit log retention</td><td>SOC 2 Type II</td><td>CloudWatch Logs retained 1 year; CloudTrail 7 years in S3 Glacier</td></tr>
+        <tr><td>Incident response</td><td>SOC 2 CC7</td><td>PagerDuty escalation; 1h RTO for P1 incidents; post-mortem within 48h</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 8 -->
+    <section class="section" id="s8">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2 class="section-title">Performance Architecture</h2>
+      </div>
+
+      <h3>Performance NFR Table</h3>
+      <table>
+        <tr><th>Requirement</th><th>Design Decision</th><th>Target Metric</th><th>Verification</th></tr>
+        <tr><td>Redirect p99 latency</td><td>Redis L1 cache + CloudFront edge cache</td><td>&lt; 10ms</td><td>k6 load test; Prometheus histogram</td></tr>
+        <tr><td>URL creation p99 latency</td><td>Async analytics; DynamoDB single-digit-ms writes</td><td>&lt; 50ms</td><td>Artillery benchmark; Tempo traces</td></tr>
+        <tr><td>Peak redirect throughput</td><td>Horizontal pod autoscaling; DynamoDB on-demand</td><td>100,000 RPS</td><td>Locust sustained load test</td></tr>
+        <tr><td>Cache hit ratio</td><td>Redis cluster; LRU eviction; 1h TTL for hot URLs</td><td>&gt; 95%</td><td>Redis INFO keyspace_hits/misses ratio</td></tr>
+        <tr><td>CDN offload ratio</td><td>CloudFront 301 cache with max-age=3600</td><td>&gt; 80%</td><td>CloudFront cache hit % in CloudWatch</td></tr>
+      </table>
+
+      <h3>Caching Strategy</h3>
+      <ul>
+        <li><strong>Browser cache:</strong> HTTP 301 with <code>Cache-Control: max-age=86400</code> for permanent URLs; 302 with no-cache for expiring URLs.</li>
+        <li><strong>CDN (CloudFront):</strong> Caches redirect responses at 400+ edge PoPs globally. Cache TTL 3,600s for stable URLs. Purge via CloudFront invalidation on URL deactivation.</li>
+        <li><strong>Application cache (Redis):</strong> Write-through on URL creation; TTL matches URL expiry. LRU eviction policy. Hit ratio target: 95%+. Warming: top 10,000 URLs pre-loaded on pod startup.</li>
+        <li><strong>DB query cache:</strong> DynamoDB DAX considered but not used — Redis already serves this role with higher flexibility.</li>
+      </ul>
+
+      <h3>Scalability Diagram</h3>
+      <div class="mermaid">
+graph TB
+    LB["AWS ALB (Layer 7 Load Balancer)"]
+    Pod1["Redirect Pod 1"]
+    Pod2["Redirect Pod 2"]
+    PodN["Redirect Pod N (HPA: up to 200)"]
+    Redis1["Redis Shard 1"]
+    Redis2["Redis Shard 2"]
+    Redis3["Redis Shard 3"]
+    DDB["DynamoDB (Auto-scaling RCU/WCU)"]
+    Replica1["DynamoDB Global Table — eu-west-1"]
+    Replica2["DynamoDB Global Table — ap-southeast-1"]
+
+    LB --> Pod1
+    LB --> Pod2
+    LB --> PodN
+    Pod1 --> Redis1
+    Pod2 --> Redis2
+    PodN --> Redis3
+    Pod1 --> DDB
+    DDB --> Replica1
+    DDB --> Replica2
+      </div>
+
+      <h3>Scalability Design</h3>
+      <ul>
+        <li><strong>Horizontal Scaling:</strong> Redirect Service pods scale via HPA on CPU &gt; 60% or RPS &gt; 500/pod. Max 200 pods per region.</li>
+        <li><strong>Auto-scaling:</strong> DynamoDB on-demand mode adjusts RCU/WCU automatically; no capacity planning needed for DB layer.</li>
+        <li><strong>Sharding:</strong> Redis cluster mode with 6 shards; consistent hashing distributes keys. Short aliases are hash keys — uniform distribution.</li>
+        <li><strong>Read Replicas:</strong> PostgreSQL Aurora has 2 read replicas for user service queries; writes go to primary.</li>
+      </ul>
+
+      <h3>Query Optimisation</h3>
+      <ul>
+        <li><strong>DynamoDB access pattern:</strong> Single-table design with <code>short_alias</code> as PK; no scans, only point reads. GetItem is O(1).</li>
+        <li><strong>PostgreSQL indexes:</strong> B-tree index on <code>users.email</code> and <code>api_keys.hashed_key</code> for O(log n) lookups.</li>
+        <li><strong>Connection pooling:</strong> PgBouncer sidecar in transaction mode; max 100 connections per Aurora instance.</li>
+        <li><strong>Async processing:</strong> Analytics events fire-and-forget via Kafka; redirect response does not wait for Kafka ack.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 9 -->
+    <section class="section" id="s9">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2 class="section-title">Availability and Reliability</h2>
+      </div>
+
+      <h3>Availability NFR Table</h3>
+      <table>
+        <tr><th>Requirement</th><th>Design Decision</th><th>Target</th><th>Verification</th></tr>
+        <tr><td>Overall availability</td><td>Active-active multi-region; no single SPOF</td><td>99.99% monthly</td><td>SLO tracking in Grafana; error budget burn alerts</td></tr>
+        <tr><td>Redirect service availability</td><td>CDN edge serves cached redirects even if origin down</td><td>99.999%</td><td>Synthetic monitor every 30s from 5 global PoPs</td></tr>
+        <tr><td>DB availability</td><td>DynamoDB Global Tables; Aurora Multi-AZ</td><td>99.99%</td><td>AWS console SLA; automated failover test quarterly</td></tr>
+        <tr><td>Cache availability</td><td>Redis cluster mode; 3 AZ spread; auto-failover &lt;60s</td><td>99.9%</td><td>Chaos engineering: kill primary shard; measure failover time</td></tr>
+      </table>
+
+      <h3>High Availability Design</h3>
+      <ul>
+        <li><strong>Redundancy:</strong> All services run minimum 3 pods across 3 AZs. ALB routes only to healthy pods (health check every 10s).</li>
+        <li><strong>Failover:</strong> Route53 health-check-based latency routing; automatic DNS failover to secondary region within 60s.</li>
+        <li><strong>Circuit Breakers:</strong> Hystrix/Resilience4j pattern: open after 5 consecutive DB failures; half-open probe every 30s.</li>
+        <li><strong>Retry Logic:</strong> Exponential backoff with jitter (100ms base, 3 attempts) for DynamoDB; no retry on Kafka produce (fire-and-forget).</li>
+        <li><strong>Health Checks:</strong> <code>/healthz</code> (liveness) and <code>/readyz</code> (readiness) on all pods; separate DB connectivity check on readyz.</li>
+      </ul>
+
+      <h3>HA Diagram</h3>
+      <div class="mermaid">
+graph TB
+    subgraph Primary["us-east-1 (Primary)"]
+        ALB1["ALB"] --> RS1["Redirect Service x3 pods"]
+        RS1 --> Redis1["Redis Cluster"]
+        RS1 --> DDB1["DynamoDB Global Table"]
+    end
+    subgraph Secondary["eu-west-1 (Secondary)"]
+        ALB2["ALB"] --> RS2["Redirect Service x3 pods"]
+        RS2 --> Redis2["Redis Cluster"]
+        RS2 --> DDB2["DynamoDB Global Table"]
+    end
+    R53["Route53 Latency Routing + Health Check"]
+    R53 --> ALB1
+    R53 --> ALB2
+    DDB1 -- "Active-Active Replication" --> DDB2
+      </div>
+
+      <h3>Disaster Recovery</h3>
+      <table>
+        <tr><th>Data</th><th>Backup Type</th><th>Frequency</th><th>Retention</th><th>RTO</th><th>RPO</th></tr>
+        <tr><td>DynamoDB URLs</td><td>PITR + Global Tables</td><td>Continuous</td><td>35 days</td><td>&lt; 60s</td><td>~0s (active-active)</td></tr>
+        <tr><td>PostgreSQL Users</td><td>Automated snapshots + WAL</td><td>Daily snapshot + continuous WAL</td><td>7 days</td><td>&lt; 15 min</td><td>&lt; 5 min</td></tr>
+        <tr><td>Redis Cache</td><td>RDB snapshots</td><td>Every 5 min</td><td>24h</td><td>&lt; 2 min (cold start)</td><td>Up to 5 min (cache warm)</td></tr>
+        <tr><td>Kafka Topics</td><td>S3 Tiered Storage</td><td>Real-time offload</td><td>7 days hot + 90 days S3</td><td>&lt; 5 min</td><td>&lt; 1 min</td></tr>
+      </table>
+
+      <h3>Resilience Patterns</h3>
+      <ul>
+        <li><strong>Bulkhead:</strong> Separate thread pools for DB calls vs Kafka produce vs external API calls; failure in one does not exhaust others.</li>
+        <li><strong>Graceful Degradation:</strong> If Redis is unavailable, Redirect Service falls back to DynamoDB with 30ms latency penalty — no user-facing error.</li>
+        <li><strong>Timeout Configuration:</strong> Redis: 5ms; DynamoDB: 50ms; Google Safe Browsing: 200ms; all configurable via Parameter Store.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 10 -->
+    <section class="section" id="s10">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <h2 class="section-title">Observability Architecture</h2>
+      </div>
+
+      <h3>Monitoring Strategy</h3>
+      <p>All services emit Prometheus metrics on <code>/metrics</code>; scraped every 15s. Key SLIs (redirect latency, error rate, cache hit ratio) tracked as Grafana SLO dashboards. Alerting via Alertmanager → PagerDuty with severity tiers (P1–P4).</p>
+
+      <h3>Observability Stack</h3>
+      <div class="mermaid">
+graph TB
+    Services["Application Services (Go / Node.js)"]
+    Prom["Prometheus (metrics scrape)"]
+    Loki["Grafana Loki (log aggregation)"]
+    Tempo["Grafana Tempo (distributed traces)"]
+    Grafana["Grafana Dashboards"]
+    AM["Alertmanager"]
+    PD["PagerDuty"]
+    OTel["OpenTelemetry Collector"]
+
+    Services -- "metrics /metrics" --> Prom
+    Services -- "structured JSON logs" --> Loki
+    Services -- "OTLP traces" --> OTel
+    OTel --> Tempo
+    Prom --> Grafana
+    Loki --> Grafana
+    Tempo --> Grafana
+    Prom --> AM
+    AM --> PD
+      </div>
+
+      <h3>Logging Architecture</h3>
+      <ul>
+        <li><strong>Format:</strong> Structured JSON logs with fields: <code>timestamp, level, service, traceId, spanId, requestId, userId, message, durationMs</code>.</li>
+        <li><strong>Aggregation:</strong> Fluent Bit DaemonSet ships pod logs to Grafana Loki; label-indexed by service, env, region.</li>
+        <li><strong>Retention:</strong> 30 days hot in Loki; 1 year cold in S3 Glacier via Loki ruler.</li>
+        <li><strong>Correlation:</strong> <code>traceId</code> injected at API Gateway and propagated via W3C Trace Context headers across all services.</li>
+      </ul>
+
+      <h3>Distributed Tracing</h3>
+      <ul>
+        <li><strong>Implementation:</strong> OpenTelemetry SDK in all services; OTLP export to Grafana Tempo.</li>
+        <li><strong>Span Propagation:</strong> W3C <code>traceparent</code> header; Istio sidecar propagates for service-mesh hops.</li>
+        <li><strong>Sampling:</strong> 100% sampling for errors and latency &gt; 100ms; 1% head-based sampling for normal traffic.</li>
+        <li><strong>Performance Analysis:</strong> Tempo integrated with Grafana; flame graph view for p99 trace breakdown by span.</li>
+      </ul>
+
+      <h3>Key Alert Rules</h3>
+      <table>
+        <tr><th>Alert</th><th>Threshold</th><th>Severity</th><th>Response Action</th></tr>
+        <tr><td>Redirect error rate</td><td>&gt; 0.1% over 5 min</td><td>P1</td><td>Page on-call SRE immediately; rollback if recent deploy</td></tr>
+        <tr><td>Redirect p99 latency</td><td>&gt; 50ms for 3 min</td><td>P2</td><td>Check Redis hit ratio; scale pods if CPU-bound</td></tr>
+        <tr><td>Redis cache hit ratio</td><td>&lt; 85% for 10 min</td><td>P2</td><td>Investigate eviction pattern; increase cache capacity</td></tr>
+        <tr><td>DynamoDB read throttles</td><td>&gt; 100/min</td><td>P2</td><td>Auto-scaling lag; manual WCU increase if persistent</td></tr>
+        <tr><td>Kafka consumer lag</td><td>&gt; 100,000 events</td><td>P3</td><td>Scale Flink parallelism; check consumer group health</td></tr>
+        <tr><td>Pod restart rate</td><td>&gt; 3 restarts in 5 min</td><td>P2</td><td>Check OOM; review resource limits; check recent config change</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 11 -->
+    <section class="section" id="s11">
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <h2 class="section-title">Deployment Architecture</h2>
+      </div>
+
+      <h3>Deployment Strategy</h3>
+      <p>All production deployments use <strong>Blue-Green switching</strong> for the Redirect Service (zero-downtime, instant rollback) and <strong>Canary releases</strong> (5% → 25% → 100% traffic over 30 min) for the Shorten and User services. Rollback triggers on error rate &gt; 0.5% or p99 latency &gt; 100ms during canary window.</p>
+
+      <h3>CI/CD Pipeline</h3>
+      <div class="mermaid">
+graph LR
+    Dev["Developer Push (GitHub)"]
+    CI["GitHub Actions CI"]
+    Build["Docker Build + Tag"]
+    Test["Unit + Integration Tests"]
+    SAST["Semgrep SAST + Snyk SCA"]
+    ECR["Push to ECR (image registry)"]
+    ArgoCD["ArgoCD GitOps (Staging)"]
+    Staging["EKS Staging"]
+    E2E["E2E Tests (Playwright + k6)"]
+    Prod["ArgoCD (Production)"]
+    BG["Blue-Green Switch"]
+
+    Dev --> CI
+    CI --> Build
+    Build --> Test
+    Test --> SAST
+    SAST --> ECR
+    ECR --> ArgoCD
+    ArgoCD --> Staging
+    Staging --> E2E
+    E2E --> Prod
+    Prod --> BG
+      </div>
+
+      <h3>Infrastructure as Code</h3>
+      <ul>
+        <li><strong>Terraform:</strong> Manages VPC, EKS clusters, DynamoDB tables, ElastiCache, MSK, RDS Aurora, CloudFront, Route53, IAM roles across us-east-1 and eu-west-1.</li>
+        <li><strong>Helm:</strong> Kubernetes manifests templated with Helm charts per service; environment-specific values.yaml for staging/prod.</li>
+        <li><strong>Compliance-as-Code:</strong> OPA Gatekeeper policies enforce pod security standards; deny containers without resource limits or liveness probes.</li>
+      </ul>
+
+      <h3>Container Strategy</h3>
+      <ul>
+        <li><strong>Orchestration:</strong> Amazon EKS 1.29 with managed node groups; Karpenter for fast node provisioning (&lt;45s).</li>
+        <li><strong>Image Management:</strong> Multi-stage Docker builds; base images on <code>distroless/static</code>; images scanned by ECR on push and blocked if critical CVE found.</li>
+        <li><strong>Resource Quotas:</strong> Redirect Service: 0.5 CPU / 256MB request; 1 CPU / 512MB limit. Burstable QoS class.</li>
+        <li><strong>Service Mesh:</strong> Istio 1.20; mTLS enforced cluster-wide; Envoy sidecar for traffic management and telemetry.</li>
+      </ul>
+
+      <h3>Multi-Region Strategy</h3>
+      <ul>
+        <li><strong>Regions:</strong> us-east-1 (primary), eu-west-1 (EU data residency + latency), ap-southeast-1 (APAC latency).</li>
+        <li><strong>Traffic Routing:</strong> Route53 latency-based routing; geolocation policy routes EU users to eu-west-1 for GDPR compliance.</li>
+        <li><strong>Data Residency:</strong> DynamoDB Global Tables replicate between us and ap regions; EU table has cross-region replication disabled for GDPR.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 12 -->
+    <section class="section" id="s12">
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <h2 class="section-title">DevOps and CI/CD</h2>
+      </div>
+
+      <h3>Testing Strategy</h3>
+      <table>
+        <tr><th>Type</th><th>Framework</th><th>Coverage Target</th><th>When Run</th><th>Owner</th></tr>
+        <tr><td>Unit Tests</td><td>Go testing / Jest</td><td>85% line coverage</td><td>Every PR, pre-merge</td><td>Feature developer</td></tr>
+        <tr><td>Integration Tests</td><td>Testcontainers (Go)</td><td>70% service paths</td><td>Every PR, post-unit</td><td>Feature developer</td></tr>
+        <tr><td>Contract Tests</td><td>Pact</td><td>All inter-service APIs</td><td>Every PR</td><td>API owner</td></tr>
+        <tr><td>E2E Tests</td><td>Playwright</td><td>Top 10 user flows</td><td>Post staging deploy</td><td>QA team</td></tr>
+        <tr><td>Load / Perf Tests</td><td>k6 + Locust</td><td>100k RPS baseline</td><td>Weekly + pre-release</td><td>SRE team</td></tr>
+        <tr><td>Security / DAST</td><td>OWASP ZAP</td><td>All public endpoints</td><td>Nightly on staging</td><td>Security team</td></tr>
+        <tr><td>Chaos Tests</td><td>AWS Fault Injection Simulator</td><td>All failure scenarios</td><td>Monthly</td><td>SRE team</td></tr>
+      </table>
+
+      <h3>Quality Gates</h3>
+      <ul>
+        <li><strong>Code Coverage:</strong> PRs below 85% unit test coverage are blocked from merge via GitHub Actions status check.</li>
+        <li><strong>Static Analysis:</strong> Semgrep with Go/Node.js rulesets; zero critical findings allowed to merge.</li>
+        <li><strong>Vulnerability Scan:</strong> Snyk SCA blocks on CVSS &gt; 7.0 in direct dependencies.</li>
+        <li><strong>Performance Baseline:</strong> k6 smoke test on staging must confirm redirect p99 &lt; 50ms before prod promotion.</li>
+        <li><strong>Canary Health Gate:</strong> Automated rollback if error rate &gt; 0.5% or p99 &gt; 100ms within 30-minute canary window.</li>
+      </ul>
+
+      <h3>Configuration Management</h3>
+      <ul>
+        <li><strong>Config Sources:</strong> AWS Parameter Store for non-secrets (timeouts, feature flags, rate limits). AWS Secrets Manager for credentials (DB passwords, API keys).</li>
+        <li><strong>Secret Injection:</strong> External Secrets Operator syncs Secrets Manager values into Kubernetes secrets at pod startup.</li>
+        <li><strong>Environment-specific configs:</strong> Helm values.yaml per environment (staging/prod); no env hardcoding in application code.</li>
+        <li><strong>Drift Detection:</strong> ArgoCD App of Apps pattern; auto-sync detects and remediates config drift within 60s.</li>
+        <li><strong>Feature Flags:</strong> AWS AppConfig for percentage rollout of new features; flag reads cached in-process (10s TTL).</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 13 -->
+    <section class="section" id="s13">
+      <div class="section-header">
+        <span class="section-num">13</span>
+        <h2 class="section-title">NFR Mapping</h2>
+      </div>
+
+      <h3>Performance NFRs</h3>
+      <table>
+        <tr><th>NFR-ID</th><th>Requirement</th><th>Design Solution</th><th>Verification Method</th></tr>
+        <tr><td>PERF-01</td><td>Redirect p99 latency &lt; 10ms globally</td><td>Redis cache + CloudFront edge; Go goroutines handle 10k concurrent conns per pod</td><td>k6 global load test; Grafana SLO dashboard</td></tr>
+        <tr><td>PERF-02</td><td>URL creation p99 &lt; 50ms</td><td>DynamoDB conditional write (single round-trip); Safe Browsing cached 24h</td><td>Artillery benchmark; p99 Tempo trace</td></tr>
+        <tr><td>PERF-03</td><td>Throughput: 100,000 redirect RPS</td><td>200 pods × 500 RPS; DynamoDB on-demand; Redis 6-shard cluster</td><td>Locust sustained 30-min load test</td></tr>
+        <tr><td>PERF-04</td><td>Analytics event lag &lt; 2s</td><td>Kafka async produce; Flink 1s event-time windows</td><td>End-to-end Flink lag monitor</td></tr>
+      </table>
+
+      <h3>Scalability NFRs</h3>
+      <table>
+        <tr><th>NFR-ID</th><th>Requirement</th><th>Design Solution</th><th>Verification Method</th></tr>
+        <tr><td>SCAL-01</td><td>Support 10B stored URLs</td><td>DynamoDB unlimited storage; Base62 7-char alias (3.5T namespace)</td><td>Storage projection model; quarterly capacity review</td></tr>
+        <tr><td>SCAL-02</td><td>Scale to 300k RPS on burst</td><td>Karpenter auto-provision nodes in &lt;45s; pre-warming via scheduled HPA</td><td>Burst load test 3× peak</td></tr>
+        <tr><td>SCAL-03</td><td>Zero-downtime scaling events</td><td>Rolling pod scale-up; PodDisruptionBudget min 2 pods always available</td><td>Chaos: terminate 50% pods; measure error rate</td></tr>
+      </table>
+
+      <h3>Availability NFRs</h3>
+      <table>
+        <tr><th>NFR-ID</th><th>Requirement</th><th>Design Solution</th><th>Verification Method</th></tr>
+        <tr><td>AVAIL-01</td><td>99.99% monthly uptime</td><td>Active-active multi-region; no SPOF in critical path</td><td>SLO error budget tracking; monthly availability report</td></tr>
+        <tr><td>AVAIL-02</td><td>RTO &lt; 60s for region failure</td><td>Route53 health-check failover; DynamoDB Global Tables active-active</td><td>Quarterly regional failover drill</td></tr>
+        <tr><td>AVAIL-03</td><td>RPO &lt; 5s for URL data</td><td>DynamoDB Global Tables multi-master replication (sub-second)</td><td>Simulate primary region loss; measure data loss</td></tr>
+      </table>
+
+      <h3>Security NFRs</h3>
+      <table>
+        <tr><th>NFR-ID</th><th>Requirement</th><th>Design Solution</th><th>Verification Method</th></tr>
+        <tr><td>SEC-01</td><td>Zero critical CVEs in production images</td><td>ECR scanning; CI/CD blocks on critical CVE; weekly Snyk audit</td><td>ECR scan results; Snyk dashboard</td></tr>
+        <tr><td>SEC-02</td><td>All data encrypted in transit and at rest</td><td>TLS 1.3 everywhere; KMS CMK for DynamoDB / Aurora</td><td>SSL Labs scan; AWS Config encryption rule</td></tr>
+        <tr><td>SEC-03</td><td>No malicious URLs served</td><td>Google Safe Browsing check at creation; domain blocklist in WAF</td><td>Monthly penetration test; red team URL submission test</td></tr>
+      </table>
+
+      <h3>Reliability NFRs</h3>
+      <table>
+        <tr><th>NFR-ID</th><th>Requirement</th><th>Design Solution</th><th>Verification Method</th></tr>
+        <tr><td>REL-01</td><td>Zero alias collisions</td><td>DynamoDB conditional put; Snowflake ID guarantees global uniqueness</td><td>10M URL creation load test; collision count = 0</td></tr>
+        <tr><td>REL-02</td><td>Graceful degradation on cache failure</td><td>Redirect falls back to DynamoDB; user impact: +30ms, no error</td><td>Chaos: kill all Redis nodes; measure error rate</td></tr>
+        <tr><td>REL-03</td><td>At-least-once analytics delivery</td><td>Kafka acks=all; Flink exactly-once state with Kafka transactions</td><td>Chaos: kill Flink task; verify replay from offset</td></tr>
+      </table>
+
+      <h3>Maintainability NFRs</h3>
+      <table>
+        <tr><th>NFR-ID</th><th>Requirement</th><th>Design Solution</th><th>Verification Method</th></tr>
+        <tr><td>MAINT-01</td><td>Deploy new service version in &lt; 10 min</td><td>ArgoCD GitOps; blue-green switch &lt; 2 min; canary auto-promotion</td><td>Deployment pipeline timing metrics</td></tr>
+        <tr><td>MAINT-02</td><td>Onboard new developer in &lt; 1 day</td><td>docker-compose local dev; seed data scripts; runbook wiki</td><td>New hire onboarding survey</td></tr>
+      </table>
+
+      <h3>Observability NFRs</h3>
+      <table>
+        <tr><th>NFR-ID</th><th>Requirement</th><th>Design Solution</th><th>Verification Method</th></tr>
+        <tr><td>OBS-01</td><td>All requests traceable end-to-end</td><td>OpenTelemetry traceId on every request; Grafana Tempo correlation</td><td>Trace sampling audit; 100% error trace coverage</td></tr>
+        <tr><td>OBS-02</td><td>MTTD (Mean Time To Detect) &lt; 2 min</td><td>Prometheus alerts firing within 1 scrape cycle (15s); PagerDuty P1 &lt; 2 min</td><td>Synthetic incident drill; MTTD measurement</td></tr>
+        <tr><td>OBS-03</td><td>Log retention for 1 year</td><td>Loki 30-day hot; S3 Glacier 1-year cold tier via Loki ruler</td><td>Compliance log audit; query 1-year-old logs</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 14 -->
+    <section class="section" id="s14">
+      <div class="section-header">
+        <span class="section-num">14</span>
+        <h2 class="section-title">Technology Decisions and Trade-offs</h2>
+      </div>
+
+      <div class="decision">
+        <div class="decision-label">Decision 1 — DynamoDB over MySQL for URL Storage</div>
+        <p><strong>Chosen:</strong> Amazon DynamoDB. <strong>Alternatives:</strong> MySQL/PostgreSQL, Cassandra, MongoDB.</p>
+        <p><strong>Criteria:</strong> Single-digit ms reads at any scale; no schema migration overhead; auto-scaling RCU/WCU; native TTL for expiry.</p>
+        <p><strong>Trade-offs:</strong> No native SQL joins (not needed — access pattern is always point read by PK). Higher cost per GB vs MySQL. Mitigated by single-table design maximising efficiency.</p>
+      </div>
+
+      <div class="decision">
+        <div class="decision-label">Decision 2 — Base62 Encoding over MD5 Hashing for Alias Generation</div>
+        <p><strong>Chosen:</strong> Snowflake-style distributed counter → Base62 encode to 7 chars. <strong>Alternatives:</strong> MD5 hash truncation, UUID, Nano ID.</p>
+        <p><strong>Criteria:</strong> Guaranteed zero collisions (counter is monotonically unique); compact output; no retry on collision needed.</p>
+        <p><strong>Trade-offs:</strong> Counter service is a potential bottleneck. Mitigated by pre-allocating counter ranges (batch of 1000) per Shorten Service pod — no coordination needed per request.</p>
+      </div>
+
+      <div class="decision">
+        <div class="decision-label">Decision 3 — Redis over Memcached for Caching</div>
+        <p><strong>Chosen:</strong> Redis (ElastiCache). <strong>Alternatives:</strong> Memcached, in-process LRU cache.</p>
+        <p><strong>Criteria:</strong> TTL-native (aligned with URL expiry); cluster mode for HA; also serves rate-limiting counters (INCR + EXPIRE atomic ops); Lua scripting for sliding window.</p>
+        <p><strong>Trade-offs:</strong> Slightly higher memory overhead vs Memcached. Mitigated by zipping cache values and using efficient Redis data types.</p>
+      </div>
+
+      <div class="decision">
+        <div class="decision-label">Decision 4 — Go over Java for Redirect Service</div>
+        <p><strong>Chosen:</strong> Go 1.22. <strong>Alternatives:</strong> Java (Spring Boot), Rust, Python.</p>
+        <p><strong>Criteria:</strong> Sub-ms goroutine context switch; tiny binary (distroless image &lt;12MB); native concurrency model; standard library HTTP server handles 50k+ concurrent conns with minimal memory.</p>
+        <p><strong>Trade-offs:</strong> Smaller talent pool than Java. Mitigated by team upskilling programme and Go's simplicity relative to JVM.</p>
+      </div>
+
+      <div class="decision">
+        <div class="decision-label">Decision 5 — HTTP 301 vs HTTP 302 Redirect</div>
+        <p><strong>Chosen:</strong> 301 for permanent URLs (no expiry); 302 for expiring URLs. <strong>Trade-offs:</strong> 301 is cached by browsers indefinitely — analytics undercounts repeat clicks from same browser. Mitigated by tracking unique vs repeat clicks at CDN layer via cookies for analytics-sensitive customers. 302 forces every browser request through the redirect service, enabling full analytics at the cost of higher origin traffic.</p>
+      </div>
+
+      <div class="decision">
+        <div class="decision-label">Decision 6 — Kafka over SQS for Analytics Events</div>
+        <p><strong>Chosen:</strong> Apache Kafka (AWS MSK). <strong>Alternatives:</strong> AWS SQS, AWS Kinesis, RabbitMQ.</p>
+        <p><strong>Criteria:</strong> Consumer group replay for backfill; topic partitioning by alias for ordered per-URL events; Flink-native Kafka connector; 7-day retention without extra cost.</p>
+        <p><strong>Trade-offs:</strong> Operational complexity vs SQS. Mitigated by using MSK Serverless — no broker management needed.</p>
+      </div>
+
+      <h3>Architectural Trade-offs Summary</h3>
+      <table>
+        <tr><th>Decision</th><th>Benefit</th><th>Drawback</th><th>Mitigation</th></tr>
+        <tr><td>Eventual consistency for analytics</td><td>Non-blocking redirect path</td><td>Click counts may lag 2s</td><td>Acceptable per product requirements</td></tr>
+        <tr><td>CDN-cached 301 redirects</td><td>80%+ origin traffic offloaded</td><td>Analytics blind spot for cached redirects</td><td>302 for analytics-enabled URLs</td></tr>
+        <tr><td>DynamoDB single-table design</td><td>O(1) reads; no joins</td><td>Complex access patterns need GSIs</td><td>GSI on owner_id for user URL listing</td></tr>
+        <tr><td>Microservices over monolith</td><td>Independent scaling and deployment</td><td>Increased operational overhead</td><td>Standardised Helm templates; ArgoCD GitOps</td></tr>
+      </table>
+
+      <h3>Technical Debt Register</h3>
+      <table>
+        <tr><th>Item</th><th>Impact</th><th>Priority</th><th>Remediation Timeline</th></tr>
+        <tr><td>No custom domain support (CNAME mapping)</td><td>Limits enterprise customer adoption</td><td>High</td><td>Q3 2025</td></tr>
+        <tr><td>Analytics dashboard uses polling (not WebSocket)</td><td>Stale data in real-time view</td><td>Medium</td><td>Q4 2025</td></tr>
+        <tr><td>Flink cluster on EC2 (not Flink serverless)</td><td>Manual cluster management overhead</td><td>Low</td><td>Q1 2026</td></tr>
+        <tr><td>No A/B testing framework for redirect variants</td><td>Cannot test redirect page personalisation</td><td>Low</td><td>Q2 2026</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 15 -->
+    <section class="section" id="s15">
+      <div class="section-header">
+        <span class="section-num">15</span>
+        <h2 class="section-title">Risk Analysis</h2>
+      </div>
+
+      <h3>Technical Risks</h3>
+      <table>
+        <tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation Strategy</th></tr>
+        <tr><td>Redis cluster failure during peak traffic</td><td>Low</td><td>High</td><td>3-AZ ElastiCache cluster; Redirect Service falls back to DynamoDB; automated failover &lt;60s</td></tr>
+        <tr><td>DynamoDB hot partition on viral URL alias</td><td>Medium</td><td>High</td><td>DynamoDB Adaptive Capacity auto-rebalances; CDN caching absorbs 80% of reads before hitting origin</td></tr>
+        <tr><td>Kafka consumer lag spike (analytics backpressure)</td><td>Medium</td><td>Medium</td><td>Flink autoscaling on lag metric; DLQ for failed events; consumer lag alert at 100k events</td></tr>
+        <tr><td>Counter range exhaustion causing alias collision</td><td>Very Low</td><td>Critical</td><td>DynamoDB conditional write as final collision guard; counter range pre-allocation with 1M headroom</td></tr>
+        <tr><td>Base62 namespace exhaustion</td><td>Very Low</td><td>High</td><td>7-char alias = 3.5T unique IDs; at 500 URLs/s = 222 years to exhaust; proactive 8-char migration at 50% fill</td></tr>
+      </table>
+
+      <h3>Operational Risks</h3>
+      <table>
+        <tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation Strategy</th></tr>
+        <tr><td>Runbook not followed during incident</td><td>Medium</td><td>Medium</td><td>Automated playbooks in PagerDuty; quarterly incident response drills</td></tr>
+        <tr><td>Terraform state corruption during multi-region apply</td><td>Low</td><td>High</td><td>S3-backed Terraform state with DynamoDB locking; state versioning; never apply without plan review</td></tr>
+        <tr><td>Secrets leaked via misconfigured pod environment</td><td>Low</td><td>Critical</td><td>External Secrets Operator only; no env vars in Helm values; OPA policy blocks hardcoded secrets</td></tr>
+        <tr><td>DNS failover slower than 60s SLA</td><td>Low</td><td>High</td><td>Route53 health check interval 10s; TTL 30s; tested quarterly in chaos drills</td></tr>
+      </table>
+
+      <h3>Security Risks</h3>
+      <table>
+        <tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation Strategy</th></tr>
+        <tr><td>Abuse: URL shortener used to hide phishing links</td><td>High</td><td>High</td><td>Google Safe Browsing at creation; WAF domain blocklist; user reporting endpoint; URL deactivation within 5 min</td></tr>
+        <tr><td>API key brute force for rate limit bypass</td><td>Medium</td><td>Medium</td><td>Kong rate limiting per IP + per key; WAF geo-blocking; anomaly detection on API key RPS spike</td></tr>
+        <tr><td>DynamoDB data exfiltration via compromised IAM role</td><td>Low</td><td>Critical</td><td>IAM role least privilege (GetItem/PutItem only); AWS GuardDuty anomalous data access alerting; VPC endpoint for DynamoDB</td></tr>
+        <tr><td>Supply chain attack via compromised npm/Go module</td><td>Low</td><td>High</td><td>Snyk SCA on every PR; dependency pinning with lockfiles; private Go module proxy with verified checksums</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 16 -->
+    <section class="section" id="s16">
+      <div class="section-header">
+        <span class="section-num">16</span>
+        <h2 class="section-title">Migration and Transition Strategy</h2>
+      </div>
+
+      <h3>Migration Approach — Phased Plan</h3>
+      <table>
+        <tr><th>Phase</th><th>Goals</th><th>Duration</th><th>Rollback Trigger</th></tr>
+        <tr><td>Phase 1 — Foundation</td><td>Deploy DynamoDB + Redis + EKS cluster; migrate auth to Auth0; run in shadow mode (no prod traffic)</td><td>4 weeks</td><td>DB connectivity failure; auth latency &gt; 500ms</td></tr>
+        <tr><td>Phase 2 — Traffic Migration</td><td>Dual-write to legacy DB and DynamoDB; canary 10% prod traffic to new Redirect Service; validate redirect parity</td><td>3 weeks</td><td>Error rate delta &gt; 0.1% vs legacy; any data mismatch in validation</td></tr>
+        <tr><td>Phase 3 — Full Cutover</td><td>100% traffic to new system; stop dual-write; decommission legacy DB after 2-week validation period</td><td>2 weeks</td><td>SLO breach &gt; 10 min; data integrity audit failure</td></tr>
+      </table>
+
+      <h3>Data Migration Strategy</h3>
+      <ul>
+        <li><strong>Extraction:</strong> Full legacy DB dump via pg_dump (PostgreSQL) or mysqldump; exported to S3 as Parquet files.</li>
+        <li><strong>Transformation:</strong> AWS Glue ETL job maps legacy schema to DynamoDB single-table design; normalises alias encoding.</li>
+        <li><strong>Validation:</strong> Row count comparison; 5% random sample URL redirect validation; MD5 hash comparison of long URLs.</li>
+        <li><strong>Cutover:</strong> Maintenance window of 10 minutes for final delta sync; DNS switch; legacy system in read-only mode for 2 weeks.</li>
+      </ul>
+
+      <h3>Legacy Integration Patterns</h3>
+      <ul>
+        <li><strong>Dual-Write:</strong> Phase 2 Shorten Service writes to both legacy MySQL and DynamoDB simultaneously; reads from legacy until validation complete.</li>
+        <li><strong>Strangler Fig:</strong> New Redirect Service handles specific URL patterns first (e.g. newly created URLs); legacy handles old aliases until migration complete.</li>
+        <li><strong>Data Sync:</strong> AWS DMS (Database Migration Service) continuous replication for legacy-to-DynamoDB delta sync during transition period.</li>
+      </ul>
+
+      <h3>Decommissioning Timeline</h3>
+      <ul>
+        <li><strong>Week 1–2 post-cutover:</strong> Legacy DB in read-only; monitor for missed redirects or data gaps.</li>
+        <li><strong>Week 3:</strong> Final audit sign-off by data team; archive legacy DB snapshot to S3 Glacier (7-year retention).</li>
+        <li><strong>Week 4:</strong> Terminate legacy EC2 instances, RDS instances, and legacy load balancers. Remove legacy VPC peering.</li>
+        <li><strong>Checklist:</strong> Data parity confirmed ✓ | Alerts migrated ✓ | Runbooks updated ✓ | DNS TTLs reduced ✓ | Stakeholder sign-off ✓</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 17 -->
+    <section class="section" id="s17">
+      <div class="section-header">
+        <span class="section-num">17</span>
+        <h2 class="section-title">Future Considerations</h2>
+      </div>
+
+      <h3>Scalability Roadmap</h3>
+      <ul>
+        <li><strong>Year 1 (current):</strong> 100k redirect RPS; 1B stored URLs; 2 regions.</li>
+        <li><strong>Year 2 trigger (50% Redis saturation):</strong> Add 3rd Redis shard ring; migrate to 8-char Base62 alias namespace.</li>
+        <li><strong>Year 3 trigger (500k RPS):</strong> Introduce eBPF-based XDP load balancing at network layer for kernel-bypass redirect on hottest URLs.</li>
+        <li><strong>Year 5 trigger (10B URLs):</strong> Evaluate DynamoDB to Cassandra migration for multi-cloud flexibility; 5-region active-active topology.</li>
+      </ul>
+
+      <h3>Technology Evolution</h3>
+      <table>
+        <tr><th>Technology</th><th>Relevance</th><th>Timeframe</th></tr>
+        <tr><td>WebAssembly (WASM) Edge Functions</td><td>Run redirect logic at CDN edge with Cloudflare Workers — zero origin hops</td><td>12–18 months</td></tr>
+        <tr><td>eBPF XDP Packet Processing</td><td>Kernel-bypass for redirect — sub-100μs latency for viral URLs</td><td>18–24 months</td></tr>
+        <tr><td>HTTP/3 (QUIC) at CDN Edge</td><td>Eliminate TCP handshake overhead; reduce tail latency on mobile networks</td><td>Now (CloudFront H3 GA)</td></tr>
+        <tr><td>Flink Serverless on AWS</td><td>Replace self-managed Flink cluster; reduce ops overhead for analytics pipeline</td><td>6–12 months</td></tr>
+        <tr><td>Vector Embeddings for URL Categorisation</td><td>Classify URLs by topic (news, e-commerce, social) for analytics enrichment</td><td>12–18 months</td></tr>
+        <tr><td>Confidential Computing (AWS Nitro Enclaves)</td><td>Process PII (IP, geo) in isolated enclave — strengthens GDPR compliance posture</td><td>24 months</td></tr>
+      </table>
+
+      <h3>Planned Architectural Improvements</h3>
+      <ul>
+        <li><strong>Custom Domain Support:</strong> Allow enterprise users to bring their own domain (CNAME to platform); wildcard TLS via Let's Encrypt ACME.</li>
+        <li><strong>Plugin Architecture:</strong> Extension points for redirect middleware (QR code generation, UTM parameter injection, preview pages) without core service changes.</li>
+        <li><strong>GraphQL Analytics API:</strong> Replace REST analytics endpoints with GraphQL for flexible dashboard queries and reduced over-fetching.</li>
+      </ul>
+
+      <h3>AI/ML Enhancement Opportunities</h3>
+      <ul>
+        <li><strong>Phishing / Malware URL Detection:</strong> Train a transformer-based classifier on URL structure and HTML content features — supplement (not replace) Google Safe Browsing for novel threats.</li>
+        <li><strong>Click Anomaly Detection:</strong> LSTM model to detect bot-driven click fraud on analytics events; flag URLs with unnatural click velocity patterns.</li>
+        <li><strong>Smart Alias Suggestion:</strong> LLM-powered alias suggestions from long URL content (e.g. tny.io/aws-s3-guide) instead of random characters — improves memorability.</li>
+        <li><strong>Predictive Cache Warming:</strong> Time-series model predicts which URLs will trend (based on referrer patterns) and pre-warms CDN edge before traffic spike.</li>
+        <li><strong>Geo-personalised Redirect:</strong> ML-driven landing page personalisation by visitor country — serve localised destination URL variants for enterprise marketing campaigns.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 18 -->
+    <section class="section" id="s18">
+      <div class="section-header">
+        <span class="section-num">18</span>
+        <h2 class="section-title">LLD Guidance</h2>
+      </div>
+
+      <h3>LLD Document Structure</h3>
+      <p>Each microservice (Redirect, Shorten, User, Analytics) should produce its own LLD covering: Component Overview → Class/Interface Design → Database Schema (DDL) → API Contracts (OpenAPI) → Business Logic Pseudocode → Error Handling → Unit Test Plan.</p>
+
+      <h3>LLD Checklist</h3>
+      <ul>
+        <li>✅ All public interfaces defined with input/output types and error codes</li>
+        <li>✅ Database schema includes all indexes, constraints, and partition keys</li>
+        <li>✅ Business logic edge cases documented (expired URL, custom alias conflict, rate limit breach)</li>
+        <li>✅ Class diagram covers all domain entities and their relationships</li>
+        <li>✅ Sequence diagrams for every critical path (create, redirect, expire, delete)</li>
+        <li>✅ Error handling matrix: error condition → HTTP status → log level → alert</li>
+        <li>✅ Configuration parameters documented with defaults and valid ranges</li>
+        <li>✅ Unit test coverage targets defined per module</li>
+      </ul>
+
+      <h3>HLD to LLD Mapping</h3>
+      <table>
+        <tr><th>HLD Section</th><th>LLD Section</th><th>Relationship</th></tr>
+        <tr><td>Functional Architecture (S4)</td><td>Class Design + Interface Contracts</td><td>HLD defines what; LLD defines how and with what types</td></tr>
+        <tr><td>Data Architecture (S5)</td><td>Schema DDL + Migration Scripts</td><td>HLD ER diagram → LLD CREATE TABLE with full column specs</td></tr>
+        <tr><td>Security Architecture (S7)</td><td>Auth Middleware Implementation + Input Validator</td><td>HLD policies → LLD code-level enforcement</td></tr>
+        <tr><td>Performance Architecture (S8)</td><td>Cache Warming Logic + Connection Pool Config</td><td>HLD targets → LLD tuning parameters</td></tr>
+        <tr><td>Integration Architecture (S6)</td><td>HTTP Client Config + Retry/Timeout Settings</td><td>HLD integration map → LLD SDK/client implementation</td></tr>
+      </table>
+
+      <h3>LLD Best Practices</h3>
+      <p><strong>When to create:</strong> After HLD is reviewed and signed off; before sprint planning for the component. Do not write LLD for services not scheduled in the next 2 sprints — over-specification of unbuilt systems leads to waste.</p>
+      <p><strong>Review Process (5-Step):</strong></p>
+      <ol>
+        <li><strong>Author self-review:</strong> Author validates against HLD alignment and checklist completeness.</li>
+        <li><strong>Peer review:</strong> A second engineer verifies logic correctness and edge case coverage.</li>
+        <li><strong>Tech lead review:</strong> Confirms consistency with platform standards and cross-service contracts.</li>
+        <li><strong>Security review:</strong> Security team validates auth, input handling, and data access patterns.</li>
+        <li><strong>Architect sign-off:</strong> Final approval; LLD is baselined in Confluence and linked to Jira epic.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 19 -->
+    <section class="section" id="s19">
+      <div class="section-header">
+        <span class="section-num">19</span>
+        <h2 class="section-title">Capacity Planning</h2>
+      </div>
+
+      <h3>Back-of-the-Envelope Calculations</h3>
+      <p><strong>Storage Estimates:</strong></p>
+      <ul>
+        <li>Average URL record size: 500 bytes (alias + long URL + metadata)</li>
+        <li>New URLs per day: 10 million → 10M × 500B = 5 GB/day</li>
+        <li>10-year retention: 5 GB × 3,650 days = 18.25 TB total (DynamoDB)</li>
+        <li>Click events: 100k RPS × 86,400s × 200 bytes = ~1.7 TB/day → 7-day Kafka retention = 12 TB</li>
+        <li>BigQuery analytics: compressed Parquet ~10% raw size → 170 GB/day ingestion</li>
+      </ul>
+      <p><strong>Bandwidth Estimates:</strong></p>
+      <ul>
+        <li>Peak redirect RPS: 100,000 RPS × 1 KB avg response = 100 MB/s origin egress</li>
+        <li>CDN offload 80%: effective origin bandwidth = 20 MB/s</li>
+        <li>URL creation: 10M/day = ~115 RPS × 2 KB request/response = 0.23 MB/s (negligible)</li>
+      </ul>
+      <p><strong>Compute Estimates:</strong></p>
+      <ul>
+        <li>Redirect Service: 100k RPS / 500 RPS per pod = 200 pods × (0.5 vCPU, 256 MB) = 100 vCPU, 51 GB RAM</li>
+        <li>EKS node sizing: m6i.2xlarge (8 vCPU, 32 GB) × 15 nodes for redirect workload</li>
+        <li>Redis cluster: 6 shards × r7g.large (2 vCPU, 16 GB) = 12 vCPU, 96 GB RAM</li>
+      </ul>
+
+      <h3>Traffic Model</h3>
+      <table>
+        <tr><th>Time Period</th><th>Expected RPS</th><th>Peak Multiplier</th><th>Peak RPS</th><th>Pods Needed</th></tr>
+        <tr><td>Normal (off-peak)</td><td>10,000</td><td>1×</td><td>10,000</td><td>20</td></tr>
+        <tr><td>Business hours</td><td>40,000</td><td>1×</td><td>40,000</td><td>80</td></tr>
+        <tr><td>Evening peak</td><td>70,000</td><td>1×</td><td>70,000</td><td>140</td></tr>
+        <tr><td>Viral event burst</td><td>70,000</td><td>3×</td><td>210,000</td><td>200 + CDN absorbs overflow</td></tr>
+        <tr><td>Super Bowl / launch event</td><td>100,000</td><td>3×</td><td>300,000</td><td>CDN + Karpenter burst nodes</td></tr>
+      </table>
+
+      <h3>Database Sizing</h3>
+      <ul>
+        <li>URL records: 10M/day × 3,650 days = 36.5B rows → 18.25 TB raw → DynamoDB auto-manages</li>
+        <li>Click events: 100k RPS × 86,400s = 8.64B events/day → BigQuery partitioned by date</li>
+        <li>PostgreSQL users: 50M users × 2 KB = 100 GB → comfortably within Aurora r7g.xlarge</li>
+      </ul>
+
+      <h3>Scaling Thresholds</h3>
+      <table>
+        <tr><th>Metric</th><th>Normal</th><th>Warning</th><th>Critical</th><th>Action</th></tr>
+        <tr><td>Redirect Service CPU</td><td>&lt; 50%</td><td>60%</td><td>80%</td><td>HPA scale-out; Karpenter new nodes</td></tr>
+        <tr><td>Redis memory utilisation</td><td>&lt; 60%</td><td>70%</td><td>85%</td><td>Add Redis shard; review eviction policy</td></tr>
+        <tr><td>DynamoDB consumed RCU</td><td>&lt; 70% provisioned</td><td>80%</td><td>95%</td><td>On-demand mode auto-scales; manual review</td></tr>
+        <tr><td>Kafka consumer lag</td><td>&lt; 10,000</td><td>100,000</td><td>1,000,000</td><td>Scale Flink parallelism; add Kafka partitions</td></tr>
+        <tr><td>Cache hit ratio</td><td>&gt; 95%</td><td>90%</td><td>80%</td><td>Investigate eviction; increase Redis memory</td></tr>
+      </table>
+    </section>
+
+    <!-- SECTION 20 -->
+    <section class="section" id="s20">
+      <div class="section-header">
+        <span class="section-num">20</span>
+        <h2 class="section-title">Senior Architect Interview Questions</h2>
+      </div>
+
+      <h3>Tier 1 — Architecture and Design</h3>
+
+      <div class="question-card">
+        <div class="question-text">Q1. Why choose an active-active multi-region topology over active-passive for this system?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Redirect latency benefit: active-active routes user to nearest region; active-passive adds 50–100ms cross-region hop for non-primary users</li>
+            <li>RTO difference: active-active = 0s (traffic already flowing); active-passive = 60s DNS failover</li>
+            <li>Data conflict handling: DynamoDB Global Tables uses last-writer-wins; URL creation is idempotent so conflicts are benign</li>
+            <li>Cost trade-off: active-active costs ~2× infra; justified by 99.999% SLA requirement for redirect service</li>
+            <li>GDPR constraint: EU region is isolated from US/APAC replication — nuances the "active-active everywhere" claim</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q2. How does your alias generation strategy guarantee zero collisions at 100k URLs/second without a centralised lock?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Snowflake-inspired ID: worker_id (10 bits) + timestamp (41 bits) + sequence (12 bits) = globally unique 63-bit integer without coordination</li>
+            <li>Base62 encode to 7 chars: 62^7 = 3.5 trillion IDs — namespace exhaustion not a concern for 20+ years at current scale</li>
+            <li>DynamoDB conditional write as safety net: <code>attribute_not_exists(short_alias)</code> — even if two workers somehow generate the same ID (impossible with Snowflake), DB write fails cleanly</li>
+            <li>Counter range pre-allocation: each Shorten Service pod pre-allocates a range of 1,000 IDs from a shared Atomic Counter in DynamoDB — eliminates per-request network coordination</li>
+            <li>Explain trade-off vs MD5 hash: hash has collision probability and requires retry; counter is deterministic and collision-free</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q3. What are the single points of failure in this design and how are each mitigated?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>API Gateway (Kong): multi-pod deployment with ALB; stateless config from DB; health check routes around failed pod</li>
+            <li>Redis: ElastiCache cluster mode with auto-failover; Redirect Service degrades gracefully to DynamoDB on cache miss</li>
+            <li>DynamoDB Global Tables: managed; no operator-facing SPOF; AWS SLA 99.99%</li>
+            <li>DNS (Route53): AWS managed; health-check-based failover; low TTL (30s) for fast convergence</li>
+            <li>Kafka MSK: 3-AZ broker replication; consumer group offsets persist on Kafka itself; Flink checkpoints every 60s</li>
+            <li>Acknowledge that CloudFront edge node failure is theoretically possible — mitigated by 400+ PoP redundancy</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q4. Apply the CAP theorem to this system. Which guarantee do you sacrifice and where?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Write path (URL creation): CP — DynamoDB conditional write enforces consistency; availability sacrifice is acceptable (creation can retry)</li>
+            <li>Read path (redirects): AP — eventual consistency via Redis cache; stale-but-functional redirects preferred over unavailability</li>
+            <li>Analytics: AP — Kafka at-least-once; click counts may temporarily lag; correctness over latency is not a hard requirement here</li>
+            <li>Network partition: with multi-region DynamoDB, partition in replication link means both regions serve potentially diverged data (AP) until reconciliation</li>
+            <li>Show maturity: CAP is a spectrum not a binary; PACELC model better captures the latency vs consistency trade-off in normal (non-partition) operation</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Tier 2 — Scalability and Performance</h3>
+
+      <div class="question-card">
+        <div class="question-text">Q5. A viral tweet causes redirect traffic to spike from 100k to 1M RPS in 30 seconds. Walk me through what happens in the system.</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>CloudFront absorbs 80%+ of the spike from edge cache (301 cached at PoP); only ~200k RPS hits origin</li>
+            <li>HPA triggers on CPU &gt; 60%; Karpenter provisions new EC2 nodes in ~45s — there is a 30–45s window of pressure</li>
+            <li>DynamoDB on-demand auto-scales RCU; no throttling expected; one viral URL = hot partition mitigated by DynamoDB Adaptive Capacity</li>
+            <li>Redis cluster handles read spike without saturation (single key = round-robin to one shard; ElastiCache replication lag &lt;1ms)</li>
+            <li>Honest answer: the 30-second pre-scale gap means p99 may degrade to ~50ms during Karpenter warmup — CDN cache is the true spike absorber</li>
+            <li>Mitigation: predictive pre-scaling on Kafka click-velocity signal; CDN cache warming for top-100 trending URLs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q6. How do you handle the thundering herd problem when Redis cache is cold (e.g. after a cluster restart)?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Without mitigation: cache cold → all 100k RPS hit DynamoDB simultaneously → DynamoDB throttling → cascading failure</li>
+            <li>Solution 1: Cache warming on pod startup — Redirect Service reads top 10,000 most-clicked URLs from DynamoDB and pre-populates Redis before accepting traffic</li>
+            <li>Solution 2: Request coalescing (dogpile prevention) — use Redis SETNX to set a "lock" key; only one goroutine fetches from DynamoDB per cache miss per key; others wait 5ms and retry</li>
+            <li>Solution 3: Probabilistic early expiration — refresh cache slightly before TTL expires using <code>rand() &lt; β * TTL * -log(rand())</code> formula to spread renewal load</li>
+            <li>Solution 4: Staggered rollout — roll Redis cluster restart one shard at a time, not all at once</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q7. The analytics team wants sub-second real-time click counts. How does the current design support this and what would you change?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Current design: Redis counter incremented atomically on each redirect (fire-and-forget INCR); dashboard reads Redis counter for near-real-time view (~1s lag)</li>
+            <li>Flink 1-second event-time windows aggregate Kafka events and flush to BigQuery — not suitable for sub-second; Redis is the answer for real-time</li>
+            <li>Enhancement: WebSocket push from a counter change notification service (Redis keyspace notifications → SSE to dashboard); eliminates polling</li>
+            <li>Trade-off: INCR in Redis per redirect adds ~0.1ms; at 100k RPS = 100k INCR/s on one key = hot write; mitigate with counter sharding (10 shards, sum on read)</li>
+            <li>Demonstrate depth: HyperLogLog for unique visitor count at massive scale (12 KB memory for 1B unique IPs with 0.81% error)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q8. How would you identify and fix a performance bottleneck that only appears at 80k+ RPS?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Observability-first: Grafana Tempo flame graph to find the slowest span at high RPS — typically connection pool exhaustion or GC pause</li>
+            <li>Common culprits: Redis connection pool exhaustion (default pool too small for 200 pods × concurrent requests); fix with pool size = max_concurrency / pod_count</li>
+            <li>DynamoDB batch get vs individual GetItem at scale; HTTP keep-alive tuning on Go HTTP client</li>
+            <li>Network saturation: check AWS ENI bandwidth limits per instance type; upgrade to m6i.4xlarge if hitting 12.5 Gbps limit</li>
+            <li>Process: reproduce in staging with Locust at 85k RPS → profile with Go pprof → fix → verify p99 improvement → release with canary</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Tier 3 — Security and Reliability</h3>
+
+      <div class="question-card">
+        <div class="question-text">Q9. A security researcher reports your URL shortener is being used to distribute malware. What is your incident response?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Immediate (0–5 min): Admin Service deactivates flagged short aliases (sets is_active=false in DynamoDB); CloudFront invalidation removes cached 301; CDN edge now returns 410 Gone</li>
+            <li>Short-term (5–30 min): Query DynamoDB for all URLs sharing same long URL domain; bulk deactivate entire domain; add domain to WAF blocklist</li>
+            <li>Investigation: review creator's API key and account; suspend account; check if API key compromised or deliberate abuse</li>
+            <li>Prevention: retroactive Google Safe Browsing re-check on all URLs from that account; add to abuse report feed</li>
+            <li>Communication: notify security researcher; post incident report to status page within 4 hours; update abuse@ policy</li>
+            <li>Systemic fix: if Safe Browsing missed it, evaluate additional ML-based URL classifier and consider human review queue for high-risk domains</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q10. How do you ensure a full AWS region failure results in zero data loss for URL records?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>DynamoDB Global Tables: multi-master active-active replication; writes in us-east-1 replicated to eu-west-1 in sub-second; RPO ≈ 0</li>
+            <li>Route53 health check: detects us-east-1 ALB failure within 30s; DNS TTL 30s; traffic switches to eu-west-1 within 60s total</li>
+            <li>Redis: cache is warm-able from DynamoDB; losing Redis = 0 data loss (cache is derivative of source of truth)</li>
+            <li>Kafka MSK: cross-region MirrorMaker 2 replication to secondary region; analytics events may have up to 5s lag in replication — at-least-once delivery guarantees eventual consistency</li>
+            <li>PostgreSQL: Aurora Global Database with cross-region replica; RPO &lt; 1s; RTO ~1 min for manual promotion to secondary</li>
+            <li>Demonstrate operational readiness: quarterly failover drill simulates region loss; playbook is practised not just documented</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q11. How would you protect this system from a volumetric DDoS attack targeting the redirect endpoint?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Layer 7: AWS WAF rate-based rules on CloudFront — auto-block IPs exceeding 10,000 req/min within 5 minutes; no manual intervention</li>
+            <li>Layer 4/3: AWS Shield Advanced absorbs SYN floods and UDP reflection attacks at CloudFront edge; scrubbing capacity up to Tbps</li>
+            <li>Anycast routing: CloudFront distributes attack traffic across 400+ PoPs — no single origin is overwhelmed</li>
+            <li>Origin shielding: CloudFront Origin Shield means only one PoP acts as cache origin; attack traffic that reaches origin is reduced to cache-miss fraction only</li>
+            <li>API Gateway: Kong rate limiting is a second line of defence for authenticated API traffic; blocks per-key abuse even if WAF passes traffic</li>
+            <li>Cost concern: Shield Advanced fixed cost $3,000/month — justified by SLA value; DDoS cost protection reimburses AWS bill spikes</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Tier 4 — Scenario-Based</h3>
+
+      <div class="question-card">
+        <div class="question-text">Q12. At 2am on Black Friday, redirect error rate spikes to 5%. Walk me through your diagnosis and remediation steps.</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Step 1: Check Grafana SLO dashboard — is it all regions or one? Is it all aliases or specific ones?</li>
+            <li>Step 2: Open Grafana Tempo — find p99 traces for erroring requests; identify which span is failing (Redis? DynamoDB? routing?)</li>
+            <li>Step 3: Check recent deployments in ArgoCD — was there a release in the last 2 hours? If yes, rollback is fastest mitigation</li>
+            <li>Step 4: If no recent deploy — check CloudWatch for DynamoDB throttle count and Redis eviction rate; check pod OOM events (kubectl get events)</li>
+            <li>Step 5: If DynamoDB throttling, switch to DynamoDB on-demand mode immediately via Terraform apply (3-minute change)</li>
+            <li>Step 6: Declare P1 incident; update status page; assign incident commander; start 15-minute update cadence</li>
+            <li>Post-incident: blameless post-mortem within 48h; add load test scenario covering Black Friday traffic profile</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q13. You discover that 500,000 URL records were corrupted in DynamoDB due to a bug in the Shorten Service deployed last night. How do you recover?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Immediate: rollback the buggy Shorten Service deployment via ArgoCD; no new corruptions after rollback</li>
+            <li>Scope assessment: query DynamoDB using GSI on <code>created_at</code> timestamp range for records created during the bad deploy window; export to S3 for analysis</li>
+            <li>Recovery: use DynamoDB PITR (Point-in-Time Recovery) to restore the table to T-1 hour (before deploy); replay valid writes from Kafka topic (URLs created legitimately in the window)</li>
+            <li>Kafka replay: Flink consumer replays URL creation events from the affected timestamp range; re-applies them to the restored table</li>
+            <li>Validation: reconcile record count and spot-check 1,000 random aliases; verify redirects resolve correctly</li>
+            <li>Communication: notify affected users if their URLs were impacted; personalised email from user_id in URL records</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Q14. Finance wants to cut infrastructure costs by 40%. Which components would you target and what are the trade-offs?</div>
+        <div class="question-answer">What a great answer covers:
+          <ul>
+            <li>Compute (30% saving): right-size Redirect Service pods using VPA recommendations; use Spot Instances for Flink analytics (fault-tolerant workload); Karpenter consolidation reduces node count by 20%</li>
+            <li>DynamoDB (15% saving): switch analytics GSI queries to S3 Select on exported Parquet; remove expensive DynamoDB GSIs used only for analytics</li>
+            <li>Redis (10% saving): reduce Redis shard count from 6 to 4 by evicting less-popular URLs earlier (reduce TTL from 1h to 20min for URLs with zero clicks in 24h)</li>
+            <li>CloudFront (5% saving): increase cache TTL for stable URLs from 1h to 24h; reduces origin requests by additional 10%</li>
+            <li>What not to cut: Shield Advanced ($3k/month) is non-negotiable for DDoS protection; multi-region replication is non-negotiable for 99.99% SLA</li>
+            <li>Show maturity: cost cutting should be driven by FinOps dashboards (AWS Cost Explorer + Kubecost), not guesswork; measure before and after</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <span>© 2026 Sanjay Dhiman — System Design Document</span>
+  <a href="index.html">← Back to Articles</a>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      darkMode: true,
+      background: '#1a2035',
+      primaryColor: '#6366f1',
+      primaryTextColor: '#f1f5f9',
+      primaryBorderColor: '#818cf8',
+      lineColor: '#94a3b8',
+      secondaryColor: '#1e293b',
+      tertiaryColor: '#111827',
+      edgeLabelBackground: '#1a2035',
+      fontSize: '14px'
+    },
+    flowchart: { htmlLabels: true, curve: 'basis' },
+    sequence: { actorMargin: 40, messageMargin: 20 },
+    er: { layoutDirection: 'TB' }
+  });
+  const sections = document.querySelectorAll('.section');
+  const tocLinks = document.querySelectorAll('.toc-link');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.toc-link[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-60px 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
