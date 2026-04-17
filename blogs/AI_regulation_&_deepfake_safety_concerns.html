@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artificial Intelligence | Sanjay Dhiman</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #6c63ff;
+      --accent-soft: #a89cff;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --code-bg: #12151f;
+      --tag-bg: #1e2235;
+      --radius: 12px;
+      --max-w: 780px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono: 'Fira Code', 'Cascadia Code', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+      padding: 0 16px 80px;
+    }
+    nav {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 20px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    nav a { color: var(--accent-soft); text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    nav .sep { opacity: 0.4; }
+    article {
+      max-width: var(--max-w);
+      margin: 40px auto 0;
+    }
+    .post-header { margin-bottom: 40px; }
+    .tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+    .subtitle {
+      font-size: 19px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .meta .author { color: var(--accent-soft); font-weight: 600; }
+    .meta .dot { opacity: 0.4; }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      margin: 32px 0;
+      opacity: 0.3;
+    }
+    .content h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 40px 0 12px;
+      padding-left: 14px;
+      border-left: 3px solid var(--accent);
+    }
+    .content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent-soft);
+      margin: 28px 0 8px;
+    }
+    .content p { margin-bottom: 18px; color: #cbd5e1; }
+    .content a { color: var(--accent-soft); }
+    .content ul, .content ol {
+      margin: 0 0 18px 22px;
+      color: #cbd5e1;
+    }
+    .content li { margin-bottom: 6px; }
+    .content code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: #a78bfa;
+    }
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 24px 0;
+      color: #cbd5e1;
+    }
+    .callout strong { color: var(--accent-soft); }
+    .warning-callout {
+      background: #1f1510;
+      border: 1px solid #4a2c10;
+      border-left: 4px solid #f97316;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 24px 0;
+      color: #cbd5e1;
+    }
+    .warning-callout strong { color: #fb923c; }
+    footer {
+      max-width: var(--max-w);
+      margin: 60px auto 0;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent-soft); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="./index.html">🏠 Home</a>
+    <span class="sep">›</span>
+    <a href="./blogs.html">Blogs</a>
+    <span class="sep">›</span>
+    <span>AI regulation & deepfake safety concerns</span>
+  </nav>
+
+  <article>
+    <header class="post-header">
+      <span class="tag">Artificial Intelligence</span>
+      <h1>AI Regulation &amp; Deepfake Safety Concerns</h1>
+      <p class="subtitle">As synthetic media floods the internet and AI grows more powerful by the day, the world races to regulate what it barely understands — before it's too late.</p>
+      <div class="meta">
+        <span class="author">Sanjay Dhiman</span>
+        <span class="dot">•</span>
+        <span>April 17, 2026</span>
+        <span class="dot">•</span>
+        <span>8 min read</span>
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="content">
+
+      <p>
+        It started with a viral video of a world leader saying something they never said. Then came the audio clips — fake voices of CEOs announcing company collapses, causing stock market chaos. Then the intimate imagery, fabricated and weaponised against private individuals. Welcome to the age of deepfakes, where seeing is no longer believing, and artificial intelligence has become both the architect and the antidote of a new kind of misinformation crisis.
+      </p>
+
+      <p>
+        AI's capabilities are accelerating at a pace that outstrips our legal, ethical, and institutional frameworks. Governments worldwide are scrambling to respond — but the question isn't just whether we need regulation. It's whether regulation can even keep up.
+      </p>
+
+      <h2>The Deepfake Problem: More Than Just Fake News</h2>
+
+      <p>
+        Deepfakes — AI-generated synthetic media that replaces a person's likeness, voice, or both — have evolved from clumsy curiosities to alarmingly convincing forgeries. Powered by generative adversarial networks (GANs) and increasingly by diffusion models, today's deepfakes can be created by almost anyone with a consumer GPU and a few hours of source footage.
+      </p>
+
+      <p>
+        The threat landscape is broad and deeply personal:
+      </p>
+
+      <ul>
+        <li><strong>Political manipulation:</strong> Fabricated videos of politicians making inflammatory statements can sway elections and incite violence within hours of going viral.</li>
+        <li><strong>Financial fraud:</strong> AI-cloned voices have been used to impersonate executives in phone calls, authorising fraudulent wire transfers worth millions.</li>
+        <li><strong>Non-consensual intimate imagery (NCII):</strong> One of the most devastating uses — fake explicit content targeting individuals, predominantly women, with life-altering consequences.</li>
+        <li><strong>Identity theft:</strong> Synthetic identities built from real people's faces and voices to bypass biometric security systems.</li>
+        <li><strong>Erosion of trust:</strong> Perhaps the most insidious harm — when everything can be faked, nothing can be trusted. The "liar's dividend" means even authentic footage can be dismissed as a deepfake.</li>
+      </ul>
+
+      <div class="warning-callout">
+        <strong>⚠️ Reality Check:</strong> A 2024 study found that humans can correctly identify deepfake videos only 50–53% of the time — barely better than chance. Detection AI, while more accurate, is in a constant arms race with generation models.
+      </div>
+
+      <h2>The Global Regulatory Landscape</h2>
+
+      <p>
+        Countries are approaching AI regulation with vastly different philosophies — and the gaps between them are exploited daily.
+      </p>
+
+      <h3>The European Union: Risk-Based Regulation</h3>
+      <p>
+        The EU AI Act, which came into force in 2024, represents the world's most comprehensive attempt at AI governance. It classifies AI systems by risk level — from minimal to unacceptable — and imposes strict obligations on high-risk applications. Deepfakes fall under transparency requirements: AI-generated content must be labelled as such, and systems used to create synthetic media must include technical safeguards. Violations can attract fines up to €35 million or 7% of global annual turnover. The EU is betting that regulation done right can be a competitive advantage, not just a constraint.
+      </p>
+
+      <h3>The United States: Fragmented and Playing Catch-Up</h3>
+      <p>
+        The US has no comprehensive federal AI law — yet. Regulation has been left largely to individual states, resulting in a patchwork. California has laws targeting deepfakes in elections and non-consensual intimate imagery. Texas and Georgia followed suit for electoral deepfakes. At the federal level, the Biden executive order on AI safety (2023) and subsequent congressional hearings signalled intent, but legislative action has been slow. The incoming and outgoing administrations have both faced criticism for prioritising industry competitiveness over citizen protection.
+      </p>
+
+      <h3>China: Regulation with Chinese Characteristics</h3>
+      <p>
+        China introduced some of the world's earliest deepfake regulations in 2022, requiring real-name verification for users of synthetic media platforms and mandatory watermarking of AI-generated content. But critics note that China's regulations are less about protecting individual rights and more about maintaining state control over information — a cautionary tale for how AI governance frameworks can be shaped by political priorities.
+      </p>
+
+      <h3>India: Emerging but Urgent</h3>
+      <p>
+        India, home to one of the world's largest internet populations, has been grappling with a surge in AI-generated misinformation — particularly around elections. The government has issued advisories requiring platforms to label AI-generated content and obtain explicit consent before publishing synthetic media of identifiable individuals. The Digital Personal Data Protection Act provides some foundation, but dedicated AI legislation remains under development as of 2026.
+      </p>
+
+      <h2>Technical Countermeasures: Can AI Fight AI?</h2>
+
+      <p>
+        The arms race between deepfake generation and detection is perhaps the defining technical challenge of this era. Here's how the defence side is evolving:
+      </p>
+
+      <h3>Detection Models</h3>
+      <p>
+        Companies like Microsoft, Intel, and academic institutions have built deepfake detectors trained on massive datasets of synthetic media. These models look for subtle artefacts — unnatural blinking patterns, inconsistent lighting, audio-visual desync, and pixel-level anomalies. But every advance in detection spurs improvements in generation. Current state-of-the-art detectors achieve around 90%+ accuracy on known deepfake types — but struggle with novel generation techniques.
+      </p>
+
+      <h3>Content Provenance and Watermarking</h3>
+      <p>
+        The Coalition for Content Provenance and Authenticity (C2PA), backed by Adobe, Microsoft, Google, and others, is pushing a cryptographic standard that embeds metadata into media files at the point of creation. This "content credentials" system creates an auditable trail: where was this image taken, on what device, and has it been modified? Watermarking approaches — both visible and invisible — can also embed signals into AI-generated content that survive compression and sharing. The challenge is adoption: the standard is only useful if cameras, phones, and social platforms implement it universally.
+      </p>
+
+      <h3>Blockchain and Decentralised Verification</h3>
+      <p>
+        Some startups are exploring blockchain-based media registries, where authentic media is timestamped and signed at source, allowing later verification. While theoretically robust, practical adoption faces significant infrastructure and UX hurdles.
+      </p>
+
+      <div class="callout">
+        <strong>💡 Insight:</strong> The most promising near-term solution isn't a single silver bullet — it's a combination of provenance standards, platform-level detection, legal deterrents, and media literacy education working in concert.
+      </div>
+
+      <h2>Platform Responsibility: Where the Battle Is Really Won</h2>
+
+      <p>
+        Even perfect detection technology means nothing if platforms don't act on it. Social media companies occupy a uniquely powerful position: they're the distribution infrastructure for both authentic content and synthetic misinformation. Their choices about labelling, amplification, and removal shape what billions of people see.
+      </p>
+
+      <p>
+        Under the EU's Digital Services Act, large platforms are now required to assess and mitigate systemic risks — including those posed by AI-generated content — and to provide researchers with data access. Meta, TikTok, YouTube, and X (formerly Twitter) have all announced AI content labelling policies, though implementation has been inconsistent and enforcement patchwork.
+      </p>
+
+      <p>
+        The harder problem is speed. A deepfake can go viral in hours; platform review processes often take days. Automated detection at scale, combined with rapid human review for high-priority content (political candidates, breaking news), is the operational model most platforms are moving toward — but it's expensive and imperfect.
+      </p>
+
+      <h2>The Human Dimension: Who Gets Hurt?</h2>
+
+      <p>
+        It's easy to discuss AI regulation in abstract policy terms and lose sight of the human cost. The victims of deepfake abuse are disproportionately women, minorities, journalists, and activists — those who are already vulnerable to harassment and whose voices are often already marginalised.
+      </p>
+
+      <p>
+        For a journalist investigating corruption, a deepfake video depicting them accepting bribes can destroy their credibility overnight. For a young woman targeted with NCII, the psychological harm is severe and lasting — and the legal remedies, where they exist at all, are slow and inadequate. For a democracy facing elections, AI-generated disinformation can suppress voter turnout and poison public discourse in ways that persist long after the fake is debunked.
+      </p>
+
+      <p>
+        Any regulatory framework worth its name must centre these human harms, not just the technical capabilities of AI systems. Victim support, rapid takedown mechanisms, and civil liability for deepfake creators are as important as watermarking standards.
+      </p>
+
+      <h2>What Good Regulation Looks Like</h2>
+
+      <p>
+        Effective AI regulation in the deepfake space should balance several competing imperatives:
+      </p>
+
+      <ul>
+        <li><strong>Transparency mandates:</strong> AI-generated content must be labelled clearly, at the point of creation and throughout distribution.</li>
+        <li><strong>Consent frameworks:</strong> Using someone's likeness to create synthetic media without their consent should be legally actionable, with meaningful penalties.</li>
+        <li><strong>Proportionality:</strong> Not all deepfakes are harmful — satire, art, and entertainment using synthetic media have legitimate uses. Regulation must distinguish between intent and impact.</li>
+        <li><strong>Platform accountability:</strong> Platforms that profit from the amplification of synthetic misinformation must bear some responsibility for the harms it causes.</li>
+        <li><strong>International coordination:</strong> AI doesn't respect borders. Regulatory arbitrage — where bad actors operate from lax jurisdictions — is a major risk. G20-level coordination on minimum standards is essential.</li>
+        <li><strong>Adaptive governance:</strong> AI capabilities are evolving too fast for static legislation. Regulatory frameworks need built-in review cycles and the flexibility to respond to novel threats.</li>
+      </ul>
+
+      <h2>The Road Ahead</h2>
+
+      <p>
+        We are at an inflection point. The same technology that enables artists to create breathtaking synthetic worlds, that helps people hear the voice of a deceased loved one one last time, that powers accessibility tools for the differently abled — also enables fraud, manipulation, and abuse at unprecedented scale.
+      </p>
+
+      <p>
+        The answer is not to halt AI development. It is to insist, loudly and collectively, that the benefits of AI are shared broadly and the harms are not borne disproportionately by the vulnerable. That means investing in detection technology, yes — but also in the legal frameworks to prosecute abuse, the platform policies to limit spread, and the media literacy to help people navigate an increasingly synthetic information environment.
+      </p>
+
+      <p>
+        Regulation is not the enemy of innovation. Done thoughtfully, it is the foundation on which trustworthy innovation can be built. The question is whether our institutions can move fast enough to build it before the damage becomes irreversible.
+      </p>
+
+      <div class="callout">
+        <strong>🔮 Looking Forward:</strong> The next frontier isn't just video deepfakes — it's real-time synthetic media, AI-generated voices in live phone calls, and personalised misinformation tailored to individual psychology. Regulation must be forward-looking, not just reactive.
+      </div>
+
+    </div>
+  </article>
+
+  <footer>
+    <span>© 2026 Sanjay Dhiman</span>
+    <a href="./blogs.html">← Back to all posts</a>
+  </footer>
+
+</body>
+</html>

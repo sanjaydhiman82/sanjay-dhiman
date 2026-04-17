@@ -1,5 +1,14 @@
 [
   {
+    "title": "Artificial Intelligence",
+    "subtitle": "As synthetic media floods the internet and AI grows more powerful by the day, the world races to regulate what it barely understands — before it's too late.",
+    "slug": "AI regulation & deepfake safety concerns",
+    "file": "AI_regulation_&_deepfake_safety_concerns.html",
+    "category": "Artificial Intelligence",
+    "date": "2026-04-17",
+    "readTime": 8
+  },
+  {
     "title": "travelling",
     "subtitle": "My trip to Palampur — wandering through mist-draped tea gardens, pine-scented trails, and the quiet magic of the Kangra Valley.",
     "slug": "my trip to Palampur",
@@ -9,7 +18,8 @@
     "readTime": 6
   },
   {
-    "title": "Artificial Intelligence",
+    "title": "git add .",
+
     "subtitle": "How AI changed my day to day life — a personal account of living and working with intelligent tools.",
     "slug": "How AI change my day to day life",
     "file": "How AI change my day to day life.html",
