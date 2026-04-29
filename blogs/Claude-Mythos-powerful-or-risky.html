@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artificial Intelligence | Sanjay Dhiman</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #6c63ff;
+      --accent-soft: #a89cff;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --code-bg: #12151f;
+      --tag-bg: #1e2235;
+      --radius: 12px;
+      --max-w: 780px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono: 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+      padding: 0 16px 80px;
+    }
+
+    nav {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 20px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    nav a { color: var(--accent-soft); text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    nav .sep { opacity: 0.4; }
+
+    article {
+      max-width: var(--max-w);
+      margin: 40px auto 0;
+    }
+
+    .post-header { margin-bottom: 40px; }
+    .tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+    .subtitle {
+      font-size: 19px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .meta .author { color: var(--accent-soft); font-weight: 600; }
+    .meta .dot { opacity: 0.4; }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      margin: 32px 0;
+      opacity: 0.3;
+    }
+
+    .content h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 40px 0 12px;
+      padding-left: 14px;
+      border-left: 3px solid var(--accent);
+    }
+    .content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent-soft);
+      margin: 28px 0 8px;
+    }
+    .content p { margin-bottom: 18px; color: #cbd5e1; }
+    .content a { color: var(--accent-soft); }
+    .content ul, .content ol {
+      margin: 0 0 18px 22px;
+      color: #cbd5e1;
+    }
+    .content li { margin-bottom: 6px; }
+
+    .content code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: #a78bfa;
+    }
+    .content pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    .content pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #e2e8f0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 24px 0;
+      color: #cbd5e1;
+    }
+    .callout strong { color: var(--accent-soft); }
+
+    .quote-block {
+      border-left: 4px solid #6c63ff55;
+      padding: 14px 20px;
+      margin: 28px 0;
+      background: #1a1d2780;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-style: italic;
+      color: var(--accent-soft);
+      font-size: 18px;
+    }
+
+    .verdict-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .verdict-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .verdict-card.green { border-top: 3px solid #34d399; }
+    .verdict-card.red { border-top: 3px solid #f87171; }
+    .verdict-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+    .verdict-card.green h4 { color: #34d399; }
+    .verdict-card.red h4 { color: #f87171; }
+    .verdict-card ul { margin-left: 16px; font-size: 14px; color: var(--muted); }
+
+    footer {
+      max-width: var(--max-w);
+      margin: 60px auto 0;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent-soft); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .verdict-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="./index.html">🏠 Home</a>
+    <span class="sep">›</span>
+    <a href="./blogs.html">Blogs</a>
+    <span class="sep">›</span>
+    <span>Claude Mythos powerful or risky</span>
+  </nav>
+
+  <article>
+    <header class="post-header">
+      <span class="tag">Artificial Intelligence</span>
+      <h1>Claude Mythos — Powerful or Risky?</h1>
+      <p class="subtitle">
+        Inside the mind of Anthropic's flagship AI — where constitutional alignment meets the raw
+        frontier of capability, and why the answer is never just one or the other.
+      </p>
+      <div class="meta">
+        <span class="author">Sanjay Dhiman</span>
+        <span class="dot">•</span>
+        <span>April 29, 2026</span>
+        <span class="dot">•</span>
+        <span>8 min read</span>
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="content">
+
+      <p>
+        Every transformative technology arrives wrapped in two competing stories — the utopian and
+        the dystopian. Fire cooked our food and burned our villages. The printing press democratised
+        knowledge and turbo-charged propaganda. The internet connected humanity and unleashed an
+        ocean of misinformation. Now, at the centre of the most consequential chapter yet in that
+        story, sits Claude — Anthropic's AI model that the company openly describes as one of the
+        most capable systems ever built, and simultaneously, one of the most dangerous it can imagine.
+        That contradiction is not marketing. It is the founding thesis of the company itself.
+      </p>
+
+      <p>
+        So what is Claude, really? A breakthrough assistant that can reason, code, write, and
+        analyse with near-human fluency? Or an alignment experiment running hot at the edge of
+        what safety science can actually guarantee? The honest answer, as with all great myths, is
+        both — and that duality is exactly what makes studying Claude so important right now.
+      </p>
+
+      <h2>The Constitutional DNA</h2>
+
+      <p>
+        Anthropic did not set out to build the most capable model. They set out to build the most
+        understandable one. To achieve this, they pioneered a technique called
+        <strong>Constitutional AI (CAI)</strong> — a training methodology where Claude learns to
+        evaluate its own outputs against a written set of principles before responding. Think of it
+        as baking ethical reasoning into the weights themselves, rather than layering moderation on
+        top after the fact.
+      </p>
+
+      <p>
+        The "constitution" is a public document — a list of values ranging from honesty and
+        non-deception to avoiding catastrophic risks and supporting human oversight. Claude is
+        trained via reinforcement learning from AI feedback (RLAIF), meaning another AI critiques
+        its drafts against these principles before the humans ever see them. The result, in theory,
+        is a model that internalises harm avoidance rather than pattern-matching around it.
+      </p>
+
+      <div class="callout">
+        <strong>💡 Key insight:</strong> Constitutional AI flips the moderation problem. Instead of
+        asking "did the model produce something harmful?", you train the model to ask that question
+        about itself. Self-critique at scale. It is a genuinely novel alignment idea — but it is
+        not a solved one.
+      </div>
+
+      <h2>What Makes Claude Genuinely Powerful</h2>
+
+      <p>
+        The capability story is real, and it is accelerating fast. Claude 3.5 Sonnet shattered
+        coding benchmarks. Claude 3 Opus matched or exceeded GPT-4 on most professional evaluations.
+        And by mid-2025, Claude 4 models were being quietly described by researchers as systems
+        that could carry out multi-day autonomous tasks — writing code, browsing the web, filing
+        documents, and course-correcting when they hit errors.
+      </p>
+
+      <h3>Reasoning at depth</h3>
+      <p>
+        Unlike early language models that generated plausible-sounding text, Claude demonstrates
+        genuine chain-of-thought reasoning. Give it a complex problem — a legal brief, a system
+        architecture, a debugging session with thousands of lines of context — and it does not
+        simply autocomplete. It plans, backtracks, and reformulates. This emergent planning
+        behaviour is what makes modern Claude models genuinely useful in professional workflows,
+        not just impressive in demos.
+      </p>
+
+      <h3>200K+ context window</h3>
+      <p>
+        Claude's ability to ingest entire codebases, legal contracts, or financial reports in a
+        single context window is a quiet revolution. For the first time, knowledge workers can have
+        a meaningful conversation about an entire document — not a summarised chunk of it. This
+        alone has changed how teams at law firms, hedge funds, and engineering departments actually
+        work day-to-day.
+      </p>
+
+      <h3>Agentic capability</h3>
+      <p>
+        Perhaps the most significant shift: Claude can now act, not just answer. Through tool-use
+        and multi-step orchestration, Claude can read files, write code, execute commands, call
+        APIs, and chain these together into workflows that run autonomously. For developers building
+        automation, this is transformative. For safety researchers, it introduces an entirely new
+        class of risk.
+      </p>
+
+      <h2>The Risks Are Just as Real</h2>
+
+      <p>
+        Anthropic's own model cards make uncomfortable reading. They are among the most honest
+        capability disclosures in the industry. The company explicitly acknowledges that sufficiently
+        advanced Claude models could assist someone in creating biological weapons with mass casualty
+        potential. That is not hyperbole — it is a risk they actively red-team and evaluate against.
+      </p>
+
+      <h3>The alignment gap</h3>
+      <p>
+        Constitutional AI trains Claude to appear aligned. But appearance and reality can diverge.
+        There is an ongoing debate in the research community about whether current RLHF/RLAIF
+        techniques produce genuinely safe values or merely safe-seeming outputs. The model learns
+        to predict what its evaluators want to see. If the evaluators' judgement is flawed — or if
+        the model encounters situations sufficiently outside its training distribution — the
+        constitutional veneer can crack.
+      </p>
+
+      <h3>Agentic autonomy risk</h3>
+      <p>
+        The same capability that makes Claude powerful in automation pipelines also makes it
+        dangerous when given broad permissions. A sufficiently capable agentic model, instructed
+        loosely and given real-world tool access, can take actions with real-world consequences.
+        Delete files. Send emails. Make API calls that cost money or expose data. The blast radius
+        of an error — or a jailbreak — grows with capability.
+      </p>
+
+      <h3>Dual-use information</h3>
+      <p>
+        Claude's knowledge spans chemistry, biology, cybersecurity, social engineering, and
+        financial manipulation. In the hands of a curious student, this is a superb tutor. In the
+        hands of a bad actor, the same model is a capable research assistant. The challenge is
+        that no model — however carefully aligned — can perfectly distinguish intent from phrasing.
+        And as jailbreaking techniques evolve in an open-source arms race, the safety margin
+        narrows.
+      </p>
+
+      <div class="quote-block">
+        "We believe we may be building one of the most transformative and potentially dangerous
+        technologies in human history, and we're doing it anyway." — Anthropic's founding rationale
+      </div>
+
+      <h2>The Powerful vs. Risky Scorecard</h2>
+
+      <div class="verdict-grid">
+        <div class="verdict-card green">
+          <h4>✅ Where Claude Shines</h4>
+          <ul>
+            <li>Deep code reasoning & refactoring</li>
+            <li>Long-document comprehension & analysis</li>
+            <li>Multi-step agentic automation</li>
+            <li>Nuanced, contextually-aware writing</li>
+            <li>Safe-messaging on sensitive topics</li>
+            <li>Constitutional self-critique in training</li>
+          </ul>
+        </div>
+        <div class="verdict-card red">
+          <h4>⚠️ Where Risk Persists</h4>
+          <ul>
+            <li>Jailbreak susceptibility at scale</li>
+            <li>Agentic overreach with broad permissions</li>
+            <li>Dual-use knowledge access</li>
+            <li>Alignment ≠ guaranteed safety</li>
+            <li>Emergent capability hard to predict</li>
+            <li>Operator misuse in deployed products</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>The Anthropic Bet</h2>
+
+      <p>
+        Anthropic's answer to the powerful-vs-risky dilemma is a calculated wager: if powerful AI
+        is inevitable, better to have safety-focused labs at the frontier than to cede that ground
+        to developers less focused on alignment. It is a coherent argument — and an uncomfortable
+        one. It means that Anthropic must keep building more capable models to fund the safety
+        research that might, eventually, make those models safer.
+      </p>
+
+      <p>
+        This is the heart of the Claude mythos. It is not a product narrative. It is a civilisational
+        experiment running in real time, at production scale, in the hands of millions of users.
+        Claude is simultaneously Anthropic's revenue engine, their primary research subject, and
+        their argument to the world that the alignment problem is solvable.
+      </p>
+
+      <h2>What Should You Make of It?</h2>
+
+      <p>
+        If you are a developer or a business operator using Claude today, the practical answer is:
+        treat it as extraordinarily capable and calibrate your trust accordingly. Use it for tasks
+        where errors are recoverable. Give it narrow permissions before broad ones. Validate its
+        outputs in high-stakes domains rather than rubber-stamping them. The tool is genuinely
+        remarkable — but remarkable tools demand remarkable care.
+      </p>
+
+      <p>
+        If you are a curious observer of the AI landscape, the Claude story is a compelling lens
+        on the deepest tension in frontier AI: the race between capability and control. Every new
+        Claude release advances both simultaneously — more power, more safety investment, more
+        unknowns. That is not a bug in Anthropic's strategy. It is the strategy.
+      </p>
+
+      <div class="callout">
+        <strong>🔮 Looking ahead:</strong> The real test for Claude and Constitutional AI will
+        come not in benchmark scores, but in how the system behaves when operating autonomously,
+        at scale, across millions of agentic workflows — with minimal human oversight. That world
+        is arriving faster than most people realise.
+      </div>
+
+      <h2>Conclusion</h2>
+
+      <p>
+        The mythos around Claude is not manufactured. It emerges from a genuine paradox at the
+        core of its creation — a model built by people who believe it might be dangerous, who
+        build it anyway because they believe it is better for them to be in the room. Whether
+        that logic holds as capabilities continue to scale is the open question that defines
+        the next decade of AI.
+      </p>
+
+      <p>
+        Powerful or risky? In 2026, the honest answer is: it is one of the most powerful AI
+        systems ever built, developed by a team more focused on safety than most of its competitors,
+        in a field where "more focused on safety" still does not mean "safe." That tension is
+        not going away. Learning to live with it — to harness the capability while demanding
+        accountability — is the challenge for every developer, company, and policymaker navigating
+        the age of frontier AI.
+      </p>
+
+    </div>
+  </article>
+
+  <footer>
+    <span>© 2026 Sanjay Dhiman</span>
+    <a href="./blogs.html">← Back to all posts</a>
+  </footer>
+
+</body>
+</html>
