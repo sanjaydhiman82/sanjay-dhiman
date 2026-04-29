@@ -1,5 +1,14 @@
 [
   {
+    "title": "7 days trip to Singapore",
+    "subtitle": "Seven days in the Lion City — gardens that glow, hawker stalls that humble you, and a skyline so audacious it feels like the future arrived early.",
+    "slug": "Vacation",
+    "file": "Vacation.html",
+    "category": "Travel",
+    "date": "2026-04-29",
+    "readTime": 9
+  },
+  {
     "title": "Artificial Intelligence",
     "subtitle": "Inside the mind of Anthropic's flagship AI — where constitutional alignment meets the raw frontier of capability, and why the answer is never just one or the other.",
     "slug": "Claude-Mythos-powerful-or-risky",

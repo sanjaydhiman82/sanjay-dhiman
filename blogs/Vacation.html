@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7 days trip to Singapore | Sanjay Dhiman</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #6c63ff;
+      --accent-soft: #a89cff;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --code-bg: #12151f;
+      --tag-bg: #1e2235;
+      --radius: 12px;
+      --max-w: 780px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono: 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+      padding: 0 16px 80px;
+    }
+
+    nav {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 20px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    nav a { color: var(--accent-soft); text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    nav .sep { opacity: 0.4; }
+
+    article {
+      max-width: var(--max-w);
+      margin: 40px auto 0;
+    }
+
+    .post-header { margin-bottom: 40px; }
+    .tag {
+      display: inline-block;
+      background: var(--tag-bg);
+      color: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+    .subtitle {
+      font-size: 19px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .meta .author { color: var(--accent-soft); font-weight: 600; }
+    .meta .dot { opacity: 0.4; }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      margin: 32px 0;
+      opacity: 0.3;
+    }
+
+    .content h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 40px 0 12px;
+      padding-left: 14px;
+      border-left: 3px solid var(--accent);
+    }
+    .content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent-soft);
+      margin: 28px 0 8px;
+    }
+    .content p { margin-bottom: 18px; color: #cbd5e1; }
+    .content a { color: var(--accent-soft); }
+    .content ul, .content ol {
+      margin: 0 0 18px 22px;
+      color: #cbd5e1;
+    }
+    .content li { margin-bottom: 6px; }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 24px 0;
+      color: #cbd5e1;
+    }
+    .callout strong { color: var(--accent-soft); }
+
+    .day-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 28px 0;
+      position: relative;
+    }
+    .day-card::before {
+      content: attr(data-day);
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 12px;
+      border-radius: 20px;
+    }
+    .day-card h3 {
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 10px;
+    }
+    .day-card p { margin-bottom: 10px; color: #94a3b8; font-size: 15px; }
+    .day-card ul { margin-left: 18px; color: #94a3b8; font-size: 15px; }
+    .day-card li { margin-bottom: 4px; }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 24px 0;
+    }
+    .tip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .tip-card .icon { font-size: 22px; margin-bottom: 8px; }
+    .tip-card h4 { font-size: 14px; font-weight: 700; color: var(--accent-soft); margin-bottom: 6px; }
+    .tip-card p { font-size: 13px; color: var(--muted); margin: 0; }
+
+    .quote-block {
+      border-left: 4px solid #6c63ff55;
+      padding: 14px 20px;
+      margin: 28px 0;
+      background: #1a1d2780;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-style: italic;
+      color: var(--accent-soft);
+      font-size: 18px;
+    }
+
+    footer {
+      max-width: var(--max-w);
+      margin: 60px auto 0;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent-soft); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .tips-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="./index.html">🏠 Home</a>
+    <span class="sep">›</span>
+    <a href="./blogs.html">Blogs</a>
+    <span class="sep">›</span>
+    <span>Vacation</span>
+  </nav>
+
+  <article>
+    <header class="post-header">
+      <span class="tag">Travel</span>
+      <h1>Vacation</h1>
+      <p class="subtitle">
+        Seven days in the Lion City — gardens that glow, hawker stalls that humble you,
+        and a skyline so audacious it feels like the future arrived early.
+      </p>
+      <div class="meta">
+        <span class="author">Sanjay Dhiman</span>
+        <span class="dot">•</span>
+        <span>April 29, 2026</span>
+        <span class="dot">•</span>
+        <span>9 min read</span>
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="content">
+
+      <p>
+        Singapore was never on my bucket list the way Bali or Tokyo was. It felt too polished,
+        too planned — a city-state that ran like a Swiss watch and left little room for the
+        delightful chaos I usually chase when I travel. I was wrong. Completely, embarrassingly,
+        wonderfully wrong. Seven days in Singapore changed how I think about what a city can be,
+        what food can mean, and how a tiny island the size of a large Indian district can hold
+        enough experiences to fill a lifetime of stories.
+      </p>
+
+      <p>
+        This is that story — day by day, bite by bite, skyline by skyline.
+      </p>
+
+      <div class="callout">
+        <strong>✈️ Getting there:</strong> Direct flights from Bengaluru (Kempegowda International)
+        to Changi Airport run daily with Singapore Airlines and IndiGo. Flight time is roughly
+        4.5 hours. Changi itself is worth arriving early for — it consistently ranks as the world's
+        best airport, and the Jewel waterfall alone is worth the terminal walk.
+      </div>
+
+      <h2>Day by Day — The Full Itinerary</h2>
+
+      <div class="day-card" data-day="Day 1">
+        <h3>🛬 Arrival & Marina Bay — Getting Your Bearings</h3>
+        <p>
+          Land at Changi, spend an hour wandering the Jewel — the indoor waterfall cascading
+          through a glass dome is genuinely jaw-dropping and a perfect first impression. Take
+          the MRT to your hotel. Check in, freshen up, then head to the Marina Bay Sands
+          skypark at golden hour. The 57th-floor observation deck gives you the full Singapore
+          panorama — the financial district gleaming, the Gardens by the Bay stretching below,
+          the strait connecting you to Indonesia.
+        </p>
+        <ul>
+          <li>🌊 Jewel Changi waterfall (free to walk through)</li>
+          <li>🏨 Check in — Bugis or Clarke Quay areas are great bases</li>
+          <li>🌆 MBS SkyPark observation deck at sunset (~SGD 32)</li>
+          <li>🍜 Dinner at Lau Pa Sat hawker centre — try the satay stalls</li>
+        </ul>
+      </div>
+
+      <div class="day-card" data-day="Day 2">
+        <h3>🌿 Gardens by the Bay & Chinatown</h3>
+        <p>
+          Start early at Gardens by the Bay before the heat kicks in. The Supertree Grove is
+          best experienced at opening time when the crowds are thin. Walk the OCBC Skyway
+          between the trees for views back toward the skyline. Then hop a cab to Chinatown —
+          the Sri Mariamman Temple tucked among shophouses is a vivid cultural contrast, and
+          the Maxwell Food Centre nearby serves some of the best chicken rice in the world.
+        </p>
+        <ul>
+          <li>🌳 Supertree Grove & Cloud Forest dome</li>
+          <li>🌉 OCBC Skyway aerial walkway (~SGD 14)</li>
+          <li>🛕 Sri Mariamman Temple — Singapore's oldest Hindu temple</li>
+          <li>🍚 Maxwell Food Centre: Tian Tian Chicken Rice (queue worth it)</li>
+          <li>🌙 Return for Supertree light show at 7:45 PM (free)</li>
+        </ul>
+      </div>
+
+      <div class="day-card" data-day="Day 3">
+        <h3>🦁 Sentosa Island — Beaches & Universal Studios</h3>
+        <p>
+          Dedicate a full day to Sentosa. Take the Sentosa Express from VivoCity. If you are
+          an amusement park person, Universal Studios Singapore is genuinely excellent — the
+          Battlestar Galactica duelling coasters alone are worth it. If you prefer to chill,
+          Siloso Beach has good vibes and cheap cocktails. Watch the Wings of Time light and
+          water show in the evening — it is cheesy in the best possible way.
+        </p>
+        <ul>
+          <li>🎢 Universal Studios Singapore (book ahead, ~SGD 83)</li>
+          <li>🏖️ Siloso or Palawan Beach for afternoon downtime</li>
+          <li>🌊 Wings of Time show at sunset (~SGD 18)</li>
+          <li>🍹 Dinner at VivoCity — good seafood options on the rooftop</li>
+        </ul>
+      </div>
+
+      <div class="day-card" data-day="Day 4">
+        <h3>🕌 Little India, Arab Street & the Colonial Core</h3>
+        <p>
+          This day is pure neighbourhood culture. Start in Little India — the colours, smells,
+          and sounds of Serangoon Road will feel oddly familiar if you are Indian, yet entirely
+          distinct. The Sri Veeramakaliamman Temple is spectacular. Walk to Kampong Glam and
+          the Sultan Mosque, then browse the fabric shops on Arab Street. End the afternoon at
+          the Raffles Hotel for a Singapore Sling — touristy, yes, but the Long Bar is a
+          piece of history and the drink was invented here.
+        </p>
+        <ul>
+          <li>🌺 Serangoon Road flower stalls & Mustafa Centre</li>
+          <li>🕌 Sultan Mosque & Haji Lane boutique shopping</li>
+          <li>🏛️ Raffles Hotel Long Bar — Singapore Sling (~SGD 37)</li>
+          <li>🍛 Dinner at Komala Vilas — legendary South Indian vegetarian</li>
+        </ul>
+      </div>
+
+      <div class="day-card" data-day="Day 5">
+        <h3>🌏 Singapore Zoo & Night Safari</h3>
+        <p>
+          Singapore's zoo is consistently rated among the best in the world — and once you
+          visit, you understand why. The open-concept enclosures feel nothing like a traditional
+          zoo. Spend the morning here, have lunch on-site, and then stay for the Night Safari
+          in the evening. Tram rides through the nocturnal animal habitats are genuinely
+          magical — white rhinos, fishing cats, and clouded leopards lit by nothing but
+          carefully placed amber light.
+        </p>
+        <ul>
+          <li>🦏 Singapore Zoo morning visit (~SGD 49)</li>
+          <li>🌙 Night Safari tram experience (~SGD 55)</li>
+          <li>🍽️ Bongo Burgers inside the zoo — surprisingly good</li>
+          <li>🐆 Creatures of the Night show at 7:30 PM (included)</li>
+        </ul>
+      </div>
+
+      <div class="day-card" data-day="Day 6">
+        <h3>🏙️ Orchard Road, Clarke Quay & Rooftop Bars</h3>
+        <p>
+          Day six is indulgence and nightlife. Spend the morning on Orchard Road — Singapore's
+          luxury shopping boulevard — even if you are not buying anything, people-watching here
+          is exceptional. Afternoon: head to Haw Par Villa if you are curious about something
+          genuinely surreal (giant statues depicting Chinese mythology and hell). Evening:
+          Clarke Quay comes alive after dark — rooftop bars like 1-Altitude give you the full
+          city-at-night experience.
+        </p>
+        <ul>
+          <li>🛍️ Orchard Road window shopping & ION mall food court</li>
+          <li>🎭 Haw Par Villa — free, bizarre, unforgettable</li>
+          <li>🌃 Clarke Quay riverside bars from 7 PM</li>
+          <li>🍸 1-Altitude rooftop bar — best city night view</li>
+        </ul>
+      </div>
+
+      <div class="day-card" data-day="Day 7">
+        <h3>☀️ Last Morning, Hawker Hunt & Departure</h3>
+        <p>
+          Save the last morning for one final hawker breakfast — head to Old Airport Road Food
+          Centre, one of the oldest and most authentic hawker centres in the city. Order
+          chee cheong fun, kaya toast with soft-boiled eggs and kopi, and maybe a bowl of
+          laksa for good measure. Do your last souvenir shopping at Bugis Street market, then
+          head to Changi for your flight. Give yourself extra time — you will want to wander
+          the airport one more time.
+        </p>
+        <ul>
+          <li>🍳 Kaya toast & kopi breakfast — Ya Kun or Toast Box</li>
+          <li>🍜 Old Airport Road Food Centre — laksa, chee cheong fun</li>
+          <li>🛍️ Bugis Street for last-minute souvenirs</li>
+          <li>✈️ Changi Airport — early arrival recommended, enjoy the Jewel again</li>
+        </ul>
+      </div>
+
+      <h2>Practical Tips for Indian Travellers</h2>
+
+      <div class="tips-grid">
+        <div class="tip-card">
+          <div class="icon">💳</div>
+          <h4>Money & Budget</h4>
+          <p>Singapore is expensive but manageable. Hawker meals cost SGD 4–8. Budget SGD 150–200/day total including accommodation if you plan well.</p>
+        </div>
+        <div class="tip-card">
+          <div class="icon">🚇</div>
+          <h4>Getting Around</h4>
+          <p>The MRT is exceptional — fast, clean, and covers everything. Get an EZ-Link card at the airport. Grab (ride-hailing) fills the gaps.</p>
+        </div>
+        <div class="tip-card">
+          <div class="icon">🌡️</div>
+          <h4>Weather</h4>
+          <p>Hot and humid year-round (~30°C). Carry a compact umbrella — afternoon showers are frequent. Light cotton clothes only.</p>
+        </div>
+        <div class="tip-card">
+          <div class="icon">🍽️</div>
+          <h4>Food Strategy</h4>
+          <p>Eat at hawker centres for authentic, cheap, incredible food. Skip hotel restaurants. Vegetarian options are plentiful — just ask.</p>
+        </div>
+        <div class="tip-card">
+          <div class="icon">📱</div>
+          <h4>SIM Card</h4>
+          <p>Pick up a Singtel or StarHub tourist SIM at Changi — 7-day unlimited data plans run around SGD 15–20. Google Maps works flawlessly.</p>
+        </div>
+        <div class="tip-card">
+          <div class="icon">🪪</div>
+          <h4>Visa for Indians</h4>
+          <p>Indian passport holders need a visa. Apply online through the ICA website. Approval is typically quick (1–3 working days) for tourism.</p>
+        </div>
+      </div>
+
+      <h2>What Nobody Tells You About Singapore</h2>
+
+      <p>
+        The thing that surprised me most was not the cleanliness or the efficiency — I had
+        expected both. It was the <em>depth</em>. Beneath the glass towers and manicured
+        gardens is a genuinely multicultural city that has somehow found a way to let Malay,
+        Chinese, Indian, and colonial heritage coexist not just peacefully but beautifully.
+        You hear four official languages in a single taxi ride. You eat Tamil food for
+        breakfast, Hokkien mee for lunch, and Malay satay for dinner, and none of it feels
+        forced or touristic — it just is what Singapore is.
+      </p>
+
+      <p>
+        The hawker culture hit me hardest. I had eaten at Michelin-starred restaurants and
+        street-food stalls across Asia, but a SGD 5 plate of char kway teow from a 70-year-old
+        wok master at Newton Food Centre stopped me mid-bite. That is real cooking — generational
+        knowledge in a single dish, cooked for you in under three minutes at a folding table
+        under a corrugated roof. Singapore has the good sense to protect this as national heritage.
+      </p>
+
+      <div class="quote-block">
+        "Singapore makes you reconsider what a city can aspire to — not just as infrastructure,
+        but as a lived experience."
+      </div>
+
+      <h2>Would I Go Back?</h2>
+
+      <p>
+        Without hesitation. Seven days felt both plenty and not nearly enough. I left with a
+        list of hawker stalls I did not get to, neighbourhoods I only glimpsed from a cab
+        window, and a promise to myself to do the cable car over to Mount Faber next time. There
+        is always a next time with Singapore — the city earns it.
+      </p>
+
+      <p>
+        If you are weighing your next international trip and Singapore is on the shortlist, move
+        it to the top. It is the most livable, most visitable, most surprising place I have been
+        in years. The Lion City bites — in the best possible way.
+      </p>
+
+      <div class="callout">
+        <strong>🦁 Final tip:</strong> Book the Gardens by the Bay Cloud Forest and Flower Dome
+        tickets online in advance — they sell out, especially on weekends. The Cloud Forest dome
+        is a genuinely otherworldly experience: a 35-metre indoor waterfall surrounded by tropical
+        plants from misty mountain climates. Do not skip it.
+      </div>
+
+    </div>
+  </article>
+
+  <footer>
+    <span>© 2026 Sanjay Dhiman</span>
+    <a href="./blogs.html">← Back to all posts</a>
+  </footer>
+
+</body>
+</html>
